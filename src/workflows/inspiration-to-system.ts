@@ -1,5 +1,11 @@
 // src/workflows/inspiration-to-system.ts
-import { DesignTokens, DesignPrinciples } from '../types/index.js';
+import { DesignTokens, DesignInsight } from '../types/index.js';
+import { AIDesignAnalyzer, InspirationInput } from '../ai/design-analyzer.js';
+import { TokenGenerator, W3CDesignTokens } from '../generators/tokens.js';
+import { generatePrinciples, writePrinciplesToFiles, PrinciplesOutput } from '../generators/principles.js';
+import { ComponentFactory } from '../generators/components/factory.js';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 
 export interface UserInspiration {
   // Visual inspiration
@@ -18,163 +24,298 @@ export interface UserInspiration {
   accessibility?: 'basic' | 'enhanced' | 'enterprise';
 }
 
+export interface GeneratedDesignSystem {
+  tokens: W3CDesignTokens;
+  legacyTokens: DesignTokens;
+  principles: PrinciplesOutput;
+  insights: DesignInsight;
+  metadata: {
+    timestamp: string;
+    version: string;
+    source: InspirationInput;
+  };
+}
+
 export class InspirationToSystemWorkflow {
+  private analyzer: AIDesignAnalyzer;
+  private tokenGenerator: TokenGenerator;
+  
+  constructor() {
+    this.analyzer = new AIDesignAnalyzer();
+    this.tokenGenerator = new TokenGenerator();
+  }
   
   /**
    * Main entry point: Turn user inspiration into complete design system
    */
-  async generateDesignSystem(inspiration: UserInspiration, projectPath: string): Promise<{
-    tokens: DesignTokens;
-    principles: DesignPrinciples;
-    componentPlan: ComponentPlan;
-    implementationGuide: string;
-  }> {
+  async generateDesignSystem(inspiration: UserInspiration, outputDir: string): Promise<GeneratedDesignSystem> {
+    console.log('🚀 Starting inspiration-to-system workflow...');
     
-    // Step 1: AI analysis of inspiration
-    const analysis = await this.analyzeInspiration(inspiration);
+    // Step 1: AI analysis of inspiration using AIDesignAnalyzer
+    const inspirationInput = this.convertToInspirationInput(inspiration);
+    const analysisResult = await this.analyzer.analyzeInspiration(inspirationInput);
     
-    // Step 2: Generate comprehensive design tokens
-    const tokens = await this.generateTokens(analysis, inspiration);
+    // Step 2: Generate W3C tokens and Tailwind config using TokenGenerator
+    const w3cTokens = this.tokenGenerator.generateTokens(analysisResult.insights);
+    const legacyTokens = this.tokenGenerator.convertToLegacyFormat(w3cTokens);
     
-    // Step 3: Infer design principles
-    const principles = await this.inferPrinciples(analysis, inspiration);
+    // Step 3: Generate design principles from insights
+    const principlesOutput = await generatePrinciples(analysisResult.insights);
+    await writePrinciplesToFiles(principlesOutput);
     
-    // Step 4: Plan component library
-    const componentPlan = await this.planComponents(tokens, principles);
+    // Step 4: Generate components using ComponentFactory
+    const componentFactory = new ComponentFactory({
+      outputDir: join(outputDir, 'src', 'components'),
+      generateTests: true,
+      generateStories: true,
+      includeTailwind: true
+    });
+    await componentFactory.generate(w3cTokens);
     
-    // Step 5: Create implementation roadmap
-    const implementationGuide = await this.createImplementationGuide(
-      tokens, 
-      principles, 
-      componentPlan
+    // Step 5: Write artifacts to disk
+    await this.writeArtifacts(outputDir, w3cTokens, legacyTokens, principlesOutput, analysisResult.insights, inspirationInput);
+    
+    const result: GeneratedDesignSystem = {
+      tokens: w3cTokens,
+      legacyTokens,
+      principles: principlesOutput,
+      insights: analysisResult.insights,
+      metadata: {
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        source: inspirationInput
+      }
+    };
+    
+    console.log('✅ Design system generation complete!');
+    return result;
+  }
+
+  private convertToInspirationInput(inspiration: UserInspiration): InspirationInput {
+    // Determine the primary source type and value
+    if (inspiration.imageUrl) {
+      return {
+        type: 'image',
+        source: inspiration.imageUrl,
+        context: this.buildContext(inspiration)
+      };
+    } else if (inspiration.websiteUrl) {
+      return {
+        type: 'url',
+        source: inspiration.websiteUrl,
+        context: this.buildContext(inspiration)
+      };
+    } else {
+      return {
+        type: 'text',
+        source: inspiration.description || 'Modern design system',
+        context: this.buildContext(inspiration)
+      };
+    }
+  }
+
+  private buildContext(inspiration: UserInspiration): string {
+    const contextParts = [];
+    
+    if (inspiration.brandKeywords?.length) {
+      contextParts.push(`Brand keywords: ${inspiration.brandKeywords.join(', ')}`);
+    }
+    
+    if (inspiration.industryType) {
+      contextParts.push(`Industry: ${inspiration.industryType}`);
+    }
+    
+    if (inspiration.targetUsers) {
+      contextParts.push(`Target users: ${inspiration.targetUsers}`);
+    }
+    
+    if (inspiration.colorPreferences?.length) {
+      contextParts.push(`Color preferences: ${inspiration.colorPreferences.join(', ')}`);
+    }
+    
+    if (inspiration.stylePreferences?.length) {
+      contextParts.push(`Style preferences: ${inspiration.stylePreferences.join(', ')}`);
+    }
+    
+    if (inspiration.accessibility) {
+      contextParts.push(`Accessibility level: ${inspiration.accessibility}`);
+    }
+    
+    return contextParts.join('\n');
+  }
+
+  private async writeArtifacts(
+    outputDir: string,
+    w3cTokens: W3CDesignTokens,
+    legacyTokens: DesignTokens,
+    principlesOutput: PrinciplesOutput,
+    insights: DesignInsight,
+    source: InspirationInput
+  ): Promise<void> {
+    // Ensure output directory exists
+    await fs.mkdir(outputDir, { recursive: true });
+    
+    // Write W3C design tokens
+    const tokensDir = join(outputDir, 'tokens');
+    await fs.mkdir(tokensDir, { recursive: true });
+    await fs.writeFile(
+      join(tokensDir, 'design-tokens.json'),
+      JSON.stringify(w3cTokens, null, 2),
+      'utf8'
     );
     
-    return { tokens, principles, componentPlan, implementationGuide };
+    // Generate and write Tailwind config
+    const tailwindConfig = this.generateTailwindConfig(w3cTokens);
+    await fs.writeFile(
+      join(outputDir, 'tailwind.config.ts'),
+      tailwindConfig,
+      'utf8'
+    );
+    
+    // Write metadata
+    const metadataDir = join(outputDir, '.supercomponents');
+    await fs.mkdir(metadataDir, { recursive: true });
+    const metadata = {
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      source,
+      insights,
+      generatedFiles: [
+        'design/PRINCIPLES.md',
+        'tokens/design-tokens.json',
+        'tailwind.config.ts',
+        'src/components/Button/',
+        'src/components/Input/',
+        'src/components/Card/',
+        'src/components/Modal/',
+        'src/stories/Principles.stories.mdx'
+      ]
+    };
+    await fs.writeFile(
+      join(metadataDir, 'metadata.json'),
+      JSON.stringify(metadata, null, 2),
+      'utf8'
+    );
+    
+    console.log('📝 Artifacts written to disk');
   }
 
-  private async analyzeInspiration(inspiration: UserInspiration): Promise<string> {
-    const prompt = `Analyze this inspiration for design system creation:
+  private generateTailwindConfig(tokens: W3CDesignTokens): string {
+    const config = `import type { Config } from 'tailwindcss';
 
-VISUAL INSPIRATION:
-${inspiration.imageUrl ? `Image: ${inspiration.imageUrl}` : ''}
-${inspiration.websiteUrl ? `Website: ${inspiration.websiteUrl}` : ''}
+const config: Config = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    './stories/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          ${this.extractColorScale(tokens.color?.primary)}
+        },
+        secondary: {
+          ${this.extractColorScale(tokens.color?.secondary)}
+        },
+        neutral: {
+          ${this.extractColorScale(tokens.color?.neutral)}
+        },
+        semantic: {
+          ${this.extractSemanticColors(tokens.color?.semantic)}
+        }
+      },
+      fontFamily: {
+        ${this.extractFontFamily(tokens.typography?.fontFamily)}
+      },
+      fontSize: {
+        ${this.extractFontSize(tokens.typography?.fontSize)}
+      },
+      spacing: {
+        ${this.extractSpacing(tokens.spacing)}
+      },
+      borderRadius: {
+        ${this.extractBorderRadius(tokens.borderRadius)}
+      },
+      boxShadow: {
+        ${this.extractShadows(tokens.shadow)}
+      }
+    }
+  },
+  plugins: [],
+};
 
-DESCRIPTION:
-${inspiration.description || 'No description provided'}
-
-CONTEXT:
-- Industry: ${inspiration.industryType || 'General'}
-- Target Users: ${inspiration.targetUsers || 'General audience'}
-- Brand Keywords: ${inspiration.brandKeywords?.join(', ') || 'None specified'}
-- Style Preferences: ${inspiration.stylePreferences?.join(', ') || 'None specified'}
-- Color Preferences: ${inspiration.colorPreferences?.join(', ') || 'None specified'}
-- Accessibility Level: ${inspiration.accessibility || 'basic'}
-
-Extract design DNA and provide comprehensive analysis.`;
-
-    // Call your LLM service
-    return await this.callLLM(prompt);
+export default config;
+`;
+    return config;
   }
 
-  private async generateTokens(analysis: string, inspiration: UserInspiration): Promise<DesignTokens> {
-    const prompt = `Based on this design analysis, generate precise design tokens:
-
-${analysis}
-
-Requirements:
-- Generate 8-12 semantic colors with proper contrast ratios
-- Include accessibility-compliant color combinations
-- Create a harmonious typography scale (6-8 sizes)
-- Design a consistent spacing system (8pt grid or similar)
-- Include appropriate shadows and border radius values
-- Ensure tokens work well together as a cohesive system
-
-Output as valid DesignTokens JSON.`;
-
-    const response = await this.callLLM(prompt);
-    return JSON.parse(response);
+  private extractColorScale(colorObject: any): string {
+    if (!colorObject || typeof colorObject !== 'object') return '';
+    
+    const entries = Object.entries(colorObject)
+      .filter(([, value]) => value && typeof value === 'object' && '$value' in value)
+      .map(([key, value]: [string, any]) => `          ${key}: '${value.$value}'`);
+    
+    return entries.join(',\n');
   }
 
-  private async inferPrinciples(analysis: string, inspiration: UserInspiration): Promise<DesignPrinciples> {
-    const prompt = `Based on this analysis, infer design principles:
-
-${analysis}
-
-Create design principles that:
-- Reflect the brand personality from the inspiration
-- Guide component design decisions
-- Are actionable and specific
-- Align with the target audience needs
-- Support the stated accessibility requirements
-
-Output as valid DesignPrinciples JSON.`;
-
-    const response = await this.callLLM(prompt);
-    return JSON.parse(response);
+  private extractSemanticColors(semanticObject: any): string {
+    if (!semanticObject || typeof semanticObject !== 'object') return '';
+    
+    const entries = Object.entries(semanticObject)
+      .filter(([, value]) => value && typeof value === 'object' && '$value' in value)
+      .map(([key, value]: [string, any]) => `          ${key}: '${value.$value}'`);
+    
+    return entries.join(',\n');
   }
 
-  private async planComponents(tokens: DesignTokens, principles: DesignPrinciples): Promise<ComponentPlan> {
-    const prompt = `Given these design tokens and principles, plan a component library:
-
-TOKENS: ${JSON.stringify(tokens, null, 2)}
-PRINCIPLES: ${JSON.stringify(principles, null, 2)}
-
-Create a development plan that:
-- Prioritizes essential components first
-- Groups components by complexity (atoms → molecules → organisms)
-- Considers the brand personality in component behavior
-- Ensures accessibility compliance
-- Maps components to design tokens appropriately
-
-Output as structured ComponentPlan JSON.`;
-
-    const response = await this.callLLM(prompt);
-    return JSON.parse(response);
+  private extractFontFamily(fontObject: any): string {
+    if (!fontObject || typeof fontObject !== 'object') return '';
+    
+    const entries = Object.entries(fontObject)
+      .filter(([, value]) => value && typeof value === 'object' && '$value' in value)
+      .map(([key, value]: [string, any]) => `        '${key}': ${JSON.stringify(value.$value)}`);
+    
+    return entries.join(',\n');
   }
 
-  private async createImplementationGuide(
-    tokens: DesignTokens, 
-    principles: DesignPrinciples, 
-    plan: ComponentPlan
-  ): Promise<string> {
-    return `# Implementation Guide
-
-## Quick Start
-1. Run the generated Storybook: \`npm run storybook\`
-2. Review the style showcase to understand your design tokens
-3. Begin with Phase 1 components (atoms)
-4. Use the generated component prompts for implementation
-
-## Design System Overview
-Your design system embodies: ${principles.coreValues.join(', ')}
-
-## Component Priority
-${plan.phases.map((phase, i) => 
-  `**Phase ${i + 1}:** ${phase.components.join(', ')}`
-).join('\n')}
-
-## Token Usage Guidelines
-- Primary actions: Use primary-500, primary-600 for hover
-- Text hierarchy: Use gray-900 for headings, gray-700 for body
-- Spacing: Follow the ${Object.keys(tokens.spacing).length}-step spacing scale
-
-## Next Steps
-Use the MCP tools to generate specific component implementation prompts!`;
+  private extractFontSize(fontObject: any): string {
+    if (!fontObject || typeof fontObject !== 'object') return '';
+    
+    const entries = Object.entries(fontObject)
+      .filter(([, value]) => value && typeof value === 'object' && '$value' in value)
+      .map(([key, value]: [string, any]) => `        '${key}': '${value.$value}'`);
+    
+    return entries.join(',\n');
   }
 
-  private async callLLM(prompt: string): Promise<string> {
-    // Your LLM integration here
-    throw new Error('LLM service not configured');
+  private extractSpacing(spacingObject: any): string {
+    if (!spacingObject || typeof spacingObject !== 'object') return '';
+    
+    const entries = Object.entries(spacingObject)
+      .filter(([, value]) => value && typeof value === 'object' && '$value' in value)
+      .map(([key, value]: [string, any]) => `        '${key}': '${value.$value}'`);
+    
+    return entries.join(',\n');
   }
-}
 
-interface ComponentPlan {
-  phases: Array<{
-    name: string;
-    duration: string;
-    components: string[];
-    priority: 'high' | 'medium' | 'low';
-  }>;
-  totalComponents: number;
-  estimatedDuration: string;
+  private extractBorderRadius(borderObject: any): string {
+    if (!borderObject || typeof borderObject !== 'object') return '';
+    
+    const entries = Object.entries(borderObject)
+      .filter(([, value]) => value && typeof value === 'object' && '$value' in value)
+      .map(([key, value]: [string, any]) => `        '${key}': '${value.$value}'`);
+    
+    return entries.join(',\n');
+  }
+
+  private extractShadows(shadowObject: any): string {
+    if (!shadowObject || typeof shadowObject !== 'object') return '';
+    
+    const entries = Object.entries(shadowObject)
+      .filter(([, value]) => value && typeof value === 'object' && '$value' in value)
+      .map(([key, value]: [string, any]) => `        '${key}': '${value.$value}'`);
+    
+    return entries.join(',\n');
+  }
 }
