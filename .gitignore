@@ -89,3 +89,22 @@ pids
 *.temp
 .tmp/
 .temp/
+
+*storybook.log
+storybook-static
+
+# Storybook
+stories/
+.storybook/
+.storybook-static/
+vitest.config.ts
+vitest.shims.d.ts
+
+
+# SuperComponents
+supercomponents/
+.supercomponents/
+
+#tailwind
+postcss.config.cjs
+tailwind.config.cjs

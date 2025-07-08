@@ -1,37 +1,84 @@
 {
-  "name": "supercomponents-server",
+  "name": "supercomponents-mcp",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/server.js",
+  "bin": {
+    "supercomponents-mcp": "dist/server.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "INSTALLATION_GUIDE.md",
+    "MCP_USAGE_GUIDE.md",
+    "API_KEYS_AND_MODELS.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "nodemon --exec 'node --loader ts-node/esm' src/server.ts",
-    "start": "node build/server.js",
+    "start": "node dist/server.js",
+    "mcp": "node dist/server.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "clean": "rm -rf build",
-    "typecheck": "tsc --noEmit"
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run clean && npm run build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "ai",
     "components",
-    "design-system"
+    "design-system",
+    "design-tokens",
+    "storybook",
+    "tailwind",
+    "claude",
+    "openai",
+    "cursor"
   ],
   "license": "MIT",
-  "description": "MCP server for AI-powered component generation",
+  "description": "AI-powered MCP server for generating design tokens and analyzing component structures from text descriptions or images",
+  "author": "SuperComponents",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supercomponents/supercomponents-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/supercomponents/supercomponents-mcp/issues"
+  },
+  "homepage": "https://github.com/supercomponents/supercomponents-mcp#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
+    "@chromatic-com/storybook": "^4.0.1",
+    "@storybook/addon-a11y": "^9.0.15",
+    "@storybook/addon-docs": "^9.0.15",
+    "@storybook/addon-onboarding": "^9.0.15",
+    "@storybook/addon-vitest": "^9.0.15",
+    "@storybook/react-vite": "^9.0.15",
     "@types/jest": "^30.0.0",
     "@types/nock": "^10.0.3",
     "@types/node": "^24.0.10",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.6",
     "jest": "^30.0.4",
     "nock": "^14.0.5",
     "nodemon": "^3.1.10",
+    "playwright": "^1.53.2",
+    "postcss": "^8.5.6",
+    "storybook": "^9.0.15",
+    "tailwindcss": "^4.1.11",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.56.0",

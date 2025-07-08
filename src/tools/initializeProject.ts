@@ -1,14 +1,17 @@
 // src/tools/initializeProject.ts
 import { z } from "zod";
 import { execSync } from "child_process";
-import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { Tool } from "../types.js";
 import { zodToJsonSchema } from "../utils/validation.js";
+import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { promises as fs } from 'fs';
+import { getLogger } from '../utils/logger.js';
 
 const inputSchema = z.object({
-  path: z.string().describe("Project path where Storybook and Tailwind should be initialized"),
-  projectName: z.string().optional().describe("Name of the project (optional)"),
+  path: z.string().optional().default("./").describe("Project path where Storybook and Tailwind should be initialized (defaults to current directory)"),
+  projectName: z.string().optional().default("SuperComponents Project").describe("Name of the project"),
   skipStorybook: z.boolean().optional().default(false).describe("Skip Storybook initialization"),
   skipTailwind: z.boolean().optional().default(false).describe("Skip Tailwind configuration"),
   skipSuperComponents: z.boolean().optional().default(false).describe("Skip SuperComponents directory creation")
@@ -243,142 +246,344 @@ export const Disabled: Story = {
 };
 `;
 
+/**
+ * Check if Node.js version meets minimum requirements
+ */
+function checkNodeVersion(): void {
+  const nodeVersion = process.version;
+  const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
+  
+  if (majorVersion < 20) {
+    throw new McpError(
+      ErrorCode.InvalidRequest,
+      `Node.js 20 or higher is required for Storybook. Current version: ${nodeVersion}. Please upgrade Node.js and try again.`
+    );
+  }
+}
+
 export const initializeProjectTool: Tool = {
   definition: {
-    name: "initialize.project",
-    description: "Initialize a new SuperComponents project with Storybook, Tailwind CSS, and directory structure",
+    name: "initializeProject",
+    description: "Initialize a new SuperComponents project with Storybook, Tailwind CSS, and directory structure. Run this tool first before using other SuperComponents tools.",
     inputSchema: zodToJsonSchema(inputSchema)
   },
   handler: async (args) => {
-    const input = inputSchema.parse(args);
-    const { path, projectName = "SuperComponents Project", skipStorybook, skipTailwind, skipSuperComponents } = input;
-
+    const logger = getLogger();
+    
     try {
-      // Validate that the path exists
-      if (!existsSync(path)) {
-        throw new Error(`Project path does not exist: ${path}`);
-      }
-
-      const results = [];
+      logger.info('Starting SuperComponents project initialization...');
       
-      // Initialize Storybook
-      if (!skipStorybook) {
-        console.log("📚 Initializing Storybook...");
-        
-        try {
-          // Install Storybook
-          execSync(`npx storybook@latest init --builder vite --yes`, { 
-            cwd: path, 
-            stdio: 'inherit' 
-          });
-          
-          // Create custom Storybook configuration
-          const storybookPath = join(path, '.storybook');
-          if (existsSync(storybookPath)) {
-            writeFileSync(join(storybookPath, 'main.ts'), STORYBOOK_MAIN_CONFIG);
-            writeFileSync(join(storybookPath, 'preview.ts'), STORYBOOK_PREVIEW_CONFIG);
-          }
-          
-          results.push("✅ Storybook initialized successfully");
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`Failed to initialize Storybook: ${errorMessage}`);
-        }
-      }
+      // Check Node.js version first
+      checkNodeVersion();
+    
+    // Handle different input formats
+    let parsedInput;
+    if (!args || (typeof args === 'object' && Object.keys(args).length === 0)) {
+      // Use defaults if no input provided
+      parsedInput = {};
+    } else {
+      parsedInput = args;
+    }
+    
+    console.log("Parsed input:", JSON.stringify(parsedInput, null, 2));
+    
+    const input = inputSchema.parse(parsedInput);
+    const { path, projectName, skipStorybook, skipTailwind, skipSuperComponents } = input;
+    
+    console.log(`🚀 Initializing SuperComponents project at: ${path}`);
+    console.log(`📦 Project name: ${projectName}`);
 
-      // Configure Tailwind CSS
-      if (!skipTailwind) {
-        console.log("🎨 Configuring Tailwind CSS...");
-        
-        try {
-          // Install Tailwind CSS dependencies
-          execSync(`npm install -D tailwindcss postcss autoprefixer`, { 
-            cwd: path, 
-            stdio: 'inherit' 
-          });
-          
-          // Create Tailwind config
-          writeFileSync(join(path, 'tailwind.config.cjs'), TAILWIND_CONFIG_TEMPLATE);
-          
-          // Create PostCSS config
-          const postCSSConfig = `module.exports = {
+    // Create project directory if it doesn't exist
+    if (!existsSync(path)) {
+      mkdirSync(path, { recursive: true });
+      console.log(`✅ Created project directory: ${path}`);
+    }
+
+    const results = [];
+    
+    // Initialize package.json and React dependencies for Storybook
+    const packageJsonPath = join(path, 'package.json');
+    let packageJsonExists = existsSync(packageJsonPath);
+    
+    if (!packageJsonExists) {
+      console.log("📦 Creating package.json with React dependencies...");
+      
+      const packageJson = {
+        name: projectName.toLowerCase().replace(/\s+/g, '-'),
+        version: "1.0.0",
+        type: "module",
+        scripts: {
+          dev: "vite",
+          build: "tsc && vite build",
+          preview: "vite preview",
+          storybook: "storybook dev -p 6006",
+          "build-storybook": "storybook build"
+        },
+        dependencies: {
+          react: "^18.2.0",
+          "react-dom": "^18.2.0"
+        },
+        devDependencies: {
+          "@types/react": "^18.2.43",
+          "@types/react-dom": "^18.2.17",
+          "@vitejs/plugin-react": "^4.2.1",
+          typescript: "^5.2.2",
+          vite: "^5.0.8"
+        }
+      };
+      
+                  writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+      results.push("✅ Package.json created with React dependencies");
+      
+      // Create basic Vite configuration
+      const viteConfig = `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  css: {
+    postcss: './postcss.config.cjs',
+  },
+});
+`;
+      writeFileSync(join(path, 'vite.config.ts'), viteConfig);
+      results.push("✅ Vite configuration created");
+      
+      // Create basic TypeScript configuration
+      const tsConfig = {
+        compilerOptions: {
+          target: "ES2020",
+          useDefineForClassFields: true,
+          lib: ["ES2020", "DOM", "DOM.Iterable"],
+          module: "ESNext",
+          skipLibCheck: true,
+          moduleResolution: "bundler",
+          allowImportingTsExtensions: true,
+          resolveJsonModule: true,
+          isolatedModules: true,
+          noEmit: true,
+          jsx: "react-jsx",
+          strict: true,
+          noUnusedLocals: true,
+          noUnusedParameters: true,
+          noFallthroughCasesInSwitch: true
+        },
+        include: ["src", "supercomponents"],
+        references: [{ path: "./tsconfig.node.json" }]
+      };
+      
+      writeFileSync(join(path, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
+      results.push("✅ TypeScript configuration created");
+      
+      // Create tsconfig.node.json
+      const tsConfigNode = {
+        compilerOptions: {
+          composite: true,
+          skipLibCheck: true,
+          module: "ESNext",
+          moduleResolution: "bundler",
+          allowSyntheticDefaultImports: true
+        },
+        include: ["vite.config.ts"]
+      };
+      
+      writeFileSync(join(path, 'tsconfig.node.json'), JSON.stringify(tsConfigNode, null, 2));
+      
+      // Create basic index.html
+      const indexHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${projectName}</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`;
+      writeFileSync(join(path, 'index.html'), indexHtml);
+      results.push("✅ Basic project files created");
+    }
+
+    // Install React dependencies if we created package.json
+    if (!packageJsonExists) {
+    console.log("📦 Installing React dependencies...");
+    
+    try {
+      execSync(`npm install`, { 
+        cwd: path, 
+        stdio: 'inherit' 
+      });
+      
+      results.push("✅ React dependencies installed");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to install React dependencies: ${errorMessage}`);
+    }
+  }
+
+  // Initialize Storybook
+  if (!skipStorybook) {
+    console.log("📚 Initializing Storybook...");
+    
+    try {
+      // Install Storybook (let it auto-detect the React framework)
+      execSync(`npx storybook@latest init --yes`, { 
+        cwd: path, 
+        stdio: 'inherit' 
+      });
+      
+      // Create custom Storybook configuration
+      const storybookPath = join(path, '.storybook');
+      if (existsSync(storybookPath)) {
+        writeFileSync(join(storybookPath, 'main.ts'), STORYBOOK_MAIN_CONFIG);
+        writeFileSync(join(storybookPath, 'preview.ts'), STORYBOOK_PREVIEW_CONFIG);
+      }
+      
+      results.push("✅ Storybook initialized successfully");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to initialize Storybook: ${errorMessage}`);
+    }
+  }
+
+  // Configure Tailwind CSS
+  if (!skipTailwind) {
+    console.log("🎨 Configuring Tailwind CSS...");
+    
+    try {
+      // Install Tailwind CSS dependencies
+      execSync(`npm install -D tailwindcss postcss autoprefixer`, { 
+        cwd: path, 
+        stdio: 'inherit' 
+      });
+      
+      // Create Tailwind config
+      writeFileSync(join(path, 'tailwind.config.cjs'), TAILWIND_CONFIG_TEMPLATE);
+      
+      // Create PostCSS config
+      const postCSSConfig = `module.exports = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
   },
 };`;
-          writeFileSync(join(path, 'postcss.config.cjs'), postCSSConfig);
-          
-          // Create CSS file structure
-          const srcPath = join(path, 'src');
-          if (!existsSync(srcPath)) {
-            mkdirSync(srcPath, { recursive: true });
-          }
-          
-          writeFileSync(join(srcPath, 'index.css'), TAILWIND_CSS_TEMPLATE);
-          
-          results.push("✅ Tailwind CSS configured successfully");
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`Failed to configure Tailwind CSS: ${errorMessage}`);
-        }
+      writeFileSync(join(path, 'postcss.config.cjs'), postCSSConfig);
+      
+      // Create CSS file structure
+      const srcPath = join(path, 'src');
+      if (!existsSync(srcPath)) {
+        mkdirSync(srcPath, { recursive: true });
       }
+      
+      writeFileSync(join(srcPath, 'index.css'), TAILWIND_CSS_TEMPLATE);
+      
+      // Create main.tsx if it doesn't exist (for new projects)
+      const mainTsxPath = join(srcPath, 'main.tsx');
+      if (!existsSync(mainTsxPath)) {
+        const mainTsxContent = `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import { Button } from '../supercomponents';
 
-      // Create SuperComponents directory structure
-      if (!skipSuperComponents) {
-        console.log("🏗️  Creating SuperComponents directory structure...");
-        
-        try {
-          const superComponentsPath = join(path, 'supercomponents');
-          
-          // Create main directories
-          const directories = [
-            'components',
-            'components/Button',
-            'tokens',
-            'utils',
-            'stories',
-            'types'
-          ];
-          
-          directories.forEach(dir => {
-            const dirPath = join(superComponentsPath, dir);
-            if (!existsSync(dirPath)) {
-              mkdirSync(dirPath, { recursive: true });
-            }
-          });
-          
-          // Create example component
-          writeFileSync(
-            join(superComponentsPath, 'components', 'Button', 'Button.tsx'),
-            EXAMPLE_COMPONENT_TEMPLATE
-          );
-          
-          // Create example story
-          writeFileSync(
-            join(superComponentsPath, 'components', 'Button', 'Button.stories.ts'),
-            EXAMPLE_STORY_TEMPLATE
-          );
-          
-          // Create component CSS
-          const buttonCSS = `.sc-button {
+function App() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">
+          SuperComponents
+        </h1>
+        <p className="text-xl text-gray-600 mb-8">
+          AI-powered component library
+        </p>
+        <div className="space-x-4">
+          <Button variant="primary" size="medium">
+            Primary Button
+          </Button>
+          <Button variant="secondary" size="medium">
+            Secondary Button
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+`;
+        writeFileSync(mainTsxPath, mainTsxContent);
+        results.push("✅ Main React app created");
+      }
+      
+      results.push("✅ Tailwind CSS configured successfully");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to configure Tailwind CSS: ${errorMessage}`);
+    }
+  }
+
+  // Create SuperComponents directory structure
+  if (!skipSuperComponents) {
+    console.log("🏗️  Creating SuperComponents directory structure...");
+    
+    try {
+      const superComponentsPath = join(path, 'supercomponents');
+      
+      // Create main directories
+      const directories = [
+        'components',
+        'components/Button',
+        'tokens',
+        'utils',
+        'stories',
+        'types'
+      ];
+      
+      directories.forEach(dir => {
+        const dirPath = join(superComponentsPath, dir);
+        if (!existsSync(dirPath)) {
+          mkdirSync(dirPath, { recursive: true });
+        }
+      });
+      
+      // Create example component
+      writeFileSync(
+        join(superComponentsPath, 'components', 'Button', 'Button.tsx'),
+        EXAMPLE_COMPONENT_TEMPLATE
+      );
+      
+      // Create example story
+      writeFileSync(
+        join(superComponentsPath, 'components', 'Button', 'Button.stories.ts'),
+        EXAMPLE_STORY_TEMPLATE
+      );
+      
+      // Create component CSS
+      const buttonCSS = `.sc-button {
   /* Button styles will be handled by Tailwind classes */
 }`;
-          writeFileSync(
-            join(superComponentsPath, 'components', 'Button', 'Button.css'),
-            buttonCSS
-          );
-          
-          // Create index file
-          const indexContent = `export { Button } from './components/Button/Button';
+      writeFileSync(
+        join(superComponentsPath, 'components', 'Button', 'Button.css'),
+        buttonCSS
+      );
+      
+      // Create index file
+      const indexContent = `export { Button } from './components/Button/Button';
 
 // Export types
 export type { ButtonProps } from './components/Button/Button';
 `;
-          writeFileSync(join(superComponentsPath, 'index.ts'), indexContent);
-          
-          // Create README
-          const readmeContent = `# SuperComponents
+      writeFileSync(join(superComponentsPath, 'index.ts'), indexContent);
+      
+      // Create README
+      const readmeContent = `# SuperComponents
 
 This directory contains your component library generated by SuperComponents.
 
@@ -412,70 +617,58 @@ Run Storybook to see your components:
 npm run storybook
 \`\`\`
 `;
-          writeFileSync(join(superComponentsPath, 'README.md'), readmeContent);
-          
-          results.push("✅ SuperComponents directory structure created successfully");
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`Failed to create SuperComponents directory: ${errorMessage}`);
-        }
-      }
-
-      // Create package.json scripts if they don't exist
-      try {
-        const packageJsonPath = join(path, 'package.json');
-        if (existsSync(packageJsonPath)) {
-          const packageJson = JSON.parse(require('fs').readFileSync(packageJsonPath, 'utf8'));
-          
-          // Add Storybook scripts if not present
-          if (!packageJson.scripts) {
-            packageJson.scripts = {};
-          }
-          
-          if (!packageJson.scripts.storybook) {
-            packageJson.scripts.storybook = 'storybook dev -p 6006';
-          }
-          
-          if (!packageJson.scripts['build-storybook']) {
-            packageJson.scripts['build-storybook'] = 'storybook build';
-          }
-          
-          writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-          results.push("✅ Package.json scripts updated");
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.warn(`Warning: Could not update package.json scripts: ${errorMessage}`);
-      }
-
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify({
-            status: "ok",
-            message: `Project "${projectName}" initialized successfully`,
-            results: results,
-            next_steps: [
-              "Run 'npm run storybook' to start Storybook",
-              "Check the SuperComponents directory for example components",
-              "Customize the Tailwind config as needed",
-              "Start building your component library!"
-            ]
-          }, null, 2)
-        }]
-      };
+      writeFileSync(join(superComponentsPath, 'README.md'), readmeContent);
+      
+      results.push("✅ SuperComponents directory structure created successfully");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify({
-            status: "error",
-            message: errorMessage,
-            error: error instanceof Error ? error.stack : String(error)
-          }, null, 2)
-        }]
-      };
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to create SuperComponents directory: ${errorMessage}`);
     }
+  }
+
+  // Update package.json scripts if they don't exist (for existing package.json)
+  if (packageJsonExists) {
+    try {
+      const packageJson = JSON.parse(require('fs').readFileSync(packageJsonPath, 'utf8'));
+      
+      // Add Storybook scripts if not present
+      if (!packageJson.scripts) {
+        packageJson.scripts = {};
+      }
+      
+      if (!packageJson.scripts.storybook) {
+        packageJson.scripts.storybook = 'storybook dev -p 6006';
+      }
+      
+      if (!packageJson.scripts['build-storybook']) {
+        packageJson.scripts['build-storybook'] = 'storybook build';
+      }
+      
+      writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+      results.push("✅ Package.json scripts updated");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`Warning: Could not update package.json scripts: ${errorMessage}`);
+    }
+  }
+
+  return {
+    success: true,
+    message: `✅ Project "${projectName}" initialized successfully`,
+    results: results,
+    next_steps: [
+      "Run 'npm run storybook' to start Storybook",
+      "Check the SuperComponents directory for example components",
+      "Customize the Tailwind config as needed",
+      "Start building your component library!"
+    ]
+  };
+} catch (error) {
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+  return {
+    success: false,
+    message: `❌ Failed to initialize project: ${errorMessage}`
+  };
+}
   }
 }; 

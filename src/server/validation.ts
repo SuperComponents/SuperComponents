@@ -282,15 +282,15 @@ export class ResponseValidator implements Validator {
         result.errors = error.errors.map(err => 
           new ValidationError(
             `Response validation failed: ${err.message} at path: ${err.path.join('.')}`,
-            MCPErrorCode.INTERNAL_ERROR,
-            { path: err.path, received: err.received }
+            MCPErrorCode.InternalError,
+            { path: err.path }
           )
         );
       } else {
         result.isValid = false;
         result.errors = [new ValidationError(
           `Unexpected response validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          MCPErrorCode.INTERNAL_ERROR
+          MCPErrorCode.InternalError
         )];
       }
     }
@@ -388,7 +388,7 @@ export class ValidationPipeline {
         aggregatedResult.isValid = false;
         aggregatedResult.errors.push(new ValidationError(
           `Validator ${validatorName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          MCPErrorCode.INTERNAL_ERROR
+          MCPErrorCode.InternalError
         ));
       }
     }
@@ -481,8 +481,8 @@ export function createValidationMiddleware(
     // Handle validation errors
     if (!result.isValid) {
       const criticalErrors = result.errors.filter(err => 
-        err.code === MCPErrorCode.INVALID_REQUEST ||
-        err.code === MCPErrorCode.INVALID_PARAMS
+        err.code === MCPErrorCode.InvalidRequest ||
+        err.code === MCPErrorCode.InvalidParams
       );
 
       if (criticalErrors.length > 0 || !options.continueOnNonCriticalErrors) {
@@ -501,10 +501,10 @@ export const defaultValidationPipeline = new ValidationPipeline();
 // Export utility functions
 export function createValidationError(
   message: string,
-  code: MCPErrorCode = MCPErrorCode.INVALID_PARAMS,
+  code: MCPErrorCode = MCPErrorCode.InvalidParams,
   data?: unknown
 ): ValidationError {
-  return new ValidationError(message, code, data);
+  return new ValidationError(message, data || {});
 }
 
 export function isValidationError(error: unknown): error is ValidationError {

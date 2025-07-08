@@ -1,243 +1,215 @@
-// src/server.ts
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+#!/usr/bin/env node
 
-import { 
-  initializeServer, 
-  setupShutdownHandlers, 
-  performHealthChecks, 
-  createServerState,
-  type ServerState 
-} from './server/initialization.js';
-import { getLogger } from './utils/logger.js';
-import type { ServerConfig } from './config/server.js';
-import { ToolRegistry, type ToolRegistrationOptions } from './server/tools.js';
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 
-export class SuperComponentsServer {
-  private mcpServer: McpServer;
-  private serverState: ServerState;
-  private config: ServerConfig;
-  private toolRegistry: ToolRegistry;
+// Initialize logger first to prevent initialization errors
+import { initializeLogger } from './utils/logger.js';
+initializeLogger({ logLevel: 'info', nodeEnv: 'production' });
 
-  constructor(config: ServerConfig) {
-    this.config = config;
-    this.serverState = createServerState();
-    this.toolRegistry = new ToolRegistry();
-    
-    // Initialize MCP server
-    this.mcpServer = new McpServer({
-      name: config.name,
-      version: config.version,
+/**
+ * Create and configure the MCP server
+ */
+function createServer(): Server {
+  const server = new Server(
+    {
+      name: "supercomponents-server",
+      version: "1.0.0",
+    },
+    {
       capabilities: {
         tools: {},
       },
-    });
-    
-    this.setupMcpHandlers();
-  }
-
-  /**
-   * Setup MCP protocol handlers - placeholder for now
-   * TODO: Implement proper MCP protocol handling once we determine the correct SDK API
-   */
-  private setupMcpHandlers(): void {
-    const logger = getLogger();
-    
-    // For now, we'll set up the tool registration internally
-    // The actual MCP protocol handling will be added in subsequent subtasks
-    
-    logger.debug('🔧 MCP protocol handlers setup (placeholder)');
-  }
-
-  /**
-   * Register a tool with the new registration system
-   */
-  public registerTool(options: ToolRegistrationOptions): void;
-  public registerTool(name: string, handler: (args: any) => Promise<any>): void;
-  public registerTool(
-    nameOrOptions: string | ToolRegistrationOptions, 
-    handler?: (args: any) => Promise<any>
-  ): void {
-    const logger = getLogger();
-    
-    if (typeof nameOrOptions === 'string' && handler) {
-      // Legacy API - convert to new format
-      const options: ToolRegistrationOptions = {
-        name: nameOrOptions,
-        description: `Tool: ${nameOrOptions}`,
-        inputSchema: { type: "object", additionalProperties: true },
-        handler,
-        category: 'legacy'
-      };
-      this.toolRegistry.register(options);
-    } else if (typeof nameOrOptions === 'object') {
-      // New API
-      this.toolRegistry.register(nameOrOptions);
-    } else {
-      throw new Error('Invalid tool registration arguments');
     }
-    
-    logger.logToolRegistered(
-      typeof nameOrOptions === 'string' ? nameOrOptions : nameOrOptions.name, 
-      this.toolRegistry.getAllTools().length
-    );
-  }
+  );
 
-  /**
-   * Start the server
-   */
-  public async start(): Promise<void> {
-    const logger = getLogger();
-    
-    try {
-      this.serverState.setStatus('starting');
-      
-      // Perform health checks
-      await performHealthChecks(this.config);
-      
-      // Setup shutdown handlers
-      setupShutdownHandlers(async (signal) => {
-        await this.shutdown(signal);
-      });
-      
-      // TODO: Connect to MCP transport once we implement proper protocol handling
-      // For now, we'll just mark the server as running
-      
-      this.serverState.setStatus('running');
-      logger.logServerReady(this.config.transport);
-      
-      // Keep the process alive
-      process.stdin.resume();
-      
-    } catch (error) {
-      this.serverState.setStatus('stopped');
-      const errorMessage = error instanceof Error ? error.message : 'Unknown startup error';
-      logger.error('❌ Failed to start server', {}, error instanceof Error ? error : new Error(errorMessage));
-      throw error;
-    }
-  }
-
-  /**
-   * Shutdown the server gracefully
-   */
-  public async shutdown(reason: string = 'Manual shutdown'): Promise<void> {
-    const logger = getLogger();
-    
-    this.serverState.setStatus('stopping');
-    logger.logServerShutdown(reason);
-    
-    try {
-      // TODO: Close MCP server connection when SDK provides the method
-      // await this.mcpServer.close();
-      
-      // Log final statistics
-      const stats = this.serverState.getStats();
-      logger.info('📊 Final server statistics', stats);
-      
-      this.serverState.setStatus('stopped');
-      
-    } catch (error) {
-      logger.error('❌ Error during shutdown', {}, error instanceof Error ? error : new Error(String(error)));
-      throw error;
-    }
-  }
-
-  /**
-   * Get server statistics
-   */
-  public getStats() {
-    const baseStats = this.serverState.getStats();
-    const toolStats = this.toolRegistry.getStatistics();
+  // Lazy load tool implementations to ensure logger is initialized first
+  const loadTools = async () => {
+    const { parseDesignAndGenerateTokensTool } = await import('./tools/parseDesignAndGenerateTokens.js');
+    const { initializeProjectTool } = await import('./tools/initializeProject.js');
+    const { createTokenStoriesTool } = await import('./tools/createTokenStories.js');
+    const { analyzeComponentsTool } = await import('./tools/analyzeComponents.js');
     
     return {
-      ...baseStats,
-      tools: toolStats
+      parseDesignAndGenerateTokensTool,
+      initializeProjectTool,
+      createTokenStoriesTool,
+      analyzeComponentsTool,
     };
-  }
+  };
 
-  /**
-   * Get server status
-   */
-  public getStatus() {
-    return this.serverState.status;
-  }
+  // Set up tool handlers with lazy loading
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    const tools = await loadTools();
+    return {
+      tools: [
+        {
+          name: tools.parseDesignAndGenerateTokensTool.definition.name,
+          description: "Parse design input (text description, file content, or image description) and generate design tokens with Tailwind config and CSS variables. IMPORTANT: Provide design description in the 'input' parameter as a string.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              input: {
+                type: "string",
+                description: "REQUIRED: Design description, file content, or image analysis text. Example: 'Create a modern dashboard with blue primary colors and card layout'"
+              },
+              outputDir: {
+                type: "string",
+                description: "Output directory for generated files (default: ./supercomponents)",
+                default: "./supercomponents"
+              },
+              includeCSS: {
+                type: "boolean", 
+                description: "Generate CSS variables file",
+                default: true
+              },
+              includeTailwind: {
+                type: "boolean",
+                description: "Generate Tailwind config file", 
+                default: true
+              }
+            },
+            required: ["input"]
+          }
+        },
+        {
+          name: tools.initializeProjectTool.definition.name,
+          description: "Initialize SuperComponents project with Storybook and Tailwind. RUN THIS FIRST before using other tools to set up the project structure.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: {
+                type: "string",
+                description: "Project directory path (default: current directory)",
+                default: "./"
+              },
+              projectName: {
+                type: "string", 
+                description: "Project name",
+                default: "SuperComponents Project"
+              },
+              skipStorybook: {
+                type: "boolean",
+                description: "Skip Storybook setup",
+                default: false
+              },
+              skipTailwind: {
+                type: "boolean",
+                description: "Skip Tailwind CSS setup", 
+                default: false
+              },
+              skipSuperComponents: {
+                type: "boolean",
+                description: "Skip SuperComponents directory creation",
+                default: false
+              }
+            },
+            required: []
+          }
+        },
+        {
+          name: tools.createTokenStoriesTool.definition.name,
+          description: tools.createTokenStoriesTool.definition.description,
+          inputSchema: tools.createTokenStoriesTool.definition.inputSchema,
+        },
+        {
+          name: tools.analyzeComponentsTool.definition.name,
+          description: tools.analyzeComponentsTool.definition.description,
+          inputSchema: tools.analyzeComponentsTool.definition.inputSchema,
+        },
+      ],
+    };
+  });
 
-  /**
-   * Get the tool registry instance
-   */
-  public getToolRegistry(): ToolRegistry {
-    return this.toolRegistry;
-  }
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+    const tools = await loadTools();
 
-  /**
-   * Get all registered tools
-   */
-  public getTools() {
-    return this.toolRegistry.getAllTools();
-  }
+    try {
+      // Add debugging for parameter passing
+      console.log(`[MCP] Tool called: ${name}`);
+      console.log(`[MCP] Raw arguments:`, JSON.stringify(args, null, 2));
+      
+      let result;
+      
+      switch (name) {
+        case tools.parseDesignAndGenerateTokensTool.definition.name:
+          // Special handling for this tool if no parameters are provided
+          if (!args || (typeof args === 'object' && Object.keys(args).length === 0)) {
+            result = {
+              success: false,
+              error: "No parameters provided",
+              message: `❌ No input provided for parseDesignAndGenerateTokens tool.\n\n🔧 How to use:\n  - Provide a design description like: "Create a modern dashboard with blue primary colors"\n  - Or provide a file path like: "./test-samples/sample-design.md"\n  - Or describe your design vision and components\n\n💡 Example:\n  Input: "Design a card-based layout with rounded corners, blue primary colors, and modern typography"`
+            };
+          } else {
+            result = await tools.parseDesignAndGenerateTokensTool.handler(args);
+          }
+          break;
+        
+        case tools.initializeProjectTool.definition.name:
+          result = await tools.initializeProjectTool.handler(args);
+          break;
+        
+        case tools.createTokenStoriesTool.definition.name:
+          result = await tools.createTokenStoriesTool.handler(args);
+          break;
+        
+        case tools.analyzeComponentsTool.definition.name:
+          result = await tools.analyzeComponentsTool.handler(args);
+          break;
+        
+        default:
+          throw new Error(`Unknown tool: ${name}`);
+      }
 
-  /**
-   * Get tool capabilities for MCP discovery
-   */
-  public getCapabilities() {
-    return this.toolRegistry.getCapabilities();
-  }
+      console.log(`[MCP] Tool result:`, result);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: typeof result === 'string' ? result : JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      console.error(`[MCP] Error in tool ${name}:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  });
+
+  return server;
 }
 
 /**
- * Main server entry point
+ * Main function to start the server
  */
-async function main(): Promise<void> {
-  try {
-    // Initialize configuration and logging
-    const { config } = await initializeServer();
-    
-    // Create and configure server
-    const server = new SuperComponentsServer(config);
-    
-    // Register placeholder tools (will be replaced with real implementations)
-    server.registerTool('parse.design', async (args) => {
-      return {
-        content: [{
-          type: 'text',
-          text: 'Design parsing not yet implemented',
-        }],
-      };
-    });
-    
-    server.registerTool('analyze.components', async (args) => {
-      return {
-        content: [{
-          type: 'text',
-          text: 'Component analysis not yet implemented',
-        }],
-      };
-    });
-    
-    server.registerTool('generate.instruction', async (args) => {
-      return {
-        content: [{
-          type: 'text',
-          text: 'Instruction generation not yet implemented',
-        }],
-      };
-    });
-    
-    // Start the server
-    await server.start();
-    
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`❌ Server failed to start: ${errorMessage}`);
-    process.exit(1);
-  }
+async function main() {
+  const server = createServer();
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("SuperComponents MCP server running on stdio");
 }
 
-// Start the server if this file is run directly
-if (process.argv[1] && process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.js')) {
+// Run the server
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    console.error('❌ Unhandled error in main:', error);
+    console.error("Server error:", error);
     process.exit(1);
   });
 }
 
-export { main }; 
+export { createServer, main }; 

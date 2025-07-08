@@ -2,16 +2,16 @@
   "compilerOptions": {
     /* Language and Environment */
     "target": "ES2022",                                  /* Node 22 supports ES2022 */
-    "lib": ["ES2022"],                                   /* Include ES2022 library features */
+    "lib": ["ES2022", "DOM"],                           /* Include ES2022 and DOM library features */
 
     /* Modules */
     "module": "ESNext",                                  /* Latest ECMAScript module syntax */
-    "moduleResolution": "bundler",                       /* Modern resolution (works with Node 22) */
+    "moduleResolution": "node",                          /* Node.js module resolution */
     "rootDir": "./src",                                  /* Source files location */
     "resolveJsonModule": true,                           /* Enable importing .json files */
 
     /* Emit */
-    "outDir": "./build",                                 /* Output directory */
+    "outDir": "./dist",                                 /* Output directory */
     "sourceMap": true,                                   /* Create source map files */
 
     /* Interop Constraints */
