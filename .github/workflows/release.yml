@@ -34,7 +34,16 @@ jobs:
       - name: Verify build outputs
         run: |
           ls -la build/
-          node -e "console.log('Build verification:', require('./build/index.js') ? 'Success' : 'Failed')"
+          echo "Verifying ES module can be imported..."
+          node --input-type=module -e "
+            try {
+              await import('./build/index.js');
+              console.log('✅ Build verification: Success - ES module loads correctly');
+            } catch (err) {
+              console.error('❌ Build verification: Failed -', err.message);
+              process.exit(1);
+            }
+          "
 
       # Add a status check for PRs
       - name: PR Success Comment
