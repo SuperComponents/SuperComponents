@@ -1,0 +1,130 @@
+<context>
+# Overview  
+SuperComponents Server is an MCP (Model Context Protocol) server that provides AI-powered component generation capabilities. It enables developers to parse design inputs, analyze component libraries, and generate implementation instructions through a standardized protocol interface. The server acts as a bridge between design systems and AI-powered development workflows, automating the process of converting designs into reusable components.
+
+# Core Features  
+## 1. Design Parsing
+- **What it does**: Converts design inputs (images, descriptions, code) into structured JSON representations
+- **Why it's important**: Enables AI to understand and process design information systematically
+- **How it works**: Uses LLM integration to parse various design formats and validate against structured schemas
+
+## 2. Library Analysis
+- **What it does**: Analyzes existing component library structures and identifies patterns
+- **Why it's important**: Ensures new components align with existing design system conventions
+- **How it works**: Scans component libraries to extract patterns, naming conventions, and architectural decisions
+
+## 3. Instruction Generation
+- **What it does**: Generates detailed implementation instructions for component development
+- **Why it's important**: Bridges the gap between design and development with actionable guidance
+- **How it works**: Combines parsed design data with library analysis to create contextual implementation steps
+
+# User Experience  
+## User Personas
+- **Frontend Developers**: Need to quickly implement components from designs
+- **Design System Maintainers**: Want to ensure consistency across component libraries
+- **AI Tool Developers**: Integrate component generation into their workflows
+
+## Key User Flows
+1. **Design-to-Component Flow**: Upload design → Parse structure → Generate implementation
+2. **Library Analysis Flow**: Analyze existing components → Identify patterns → Guide new development
+3. **Instruction Generation Flow**: Combine design + library context → Generate actionable steps
+
+## UI/UX Considerations
+- Server operates headlessly via MCP protocol
+- Integration through compatible AI tools and IDEs
+- Structured JSON responses for programmatic consumption
+</context>
+<PRD>
+# Technical Architecture  
+## System Components
+- **MCP Server Core**: Built on @modelcontextprotocol/sdk with stdio transport
+- **Tool Handlers**: Modular tools for parse, analyze, and generate operations
+- **Schema Validation**: Zod-based input/output validation
+- **LLM Integration**: AI model communication for processing tasks
+
+## Data Models
+- **Design Schema**: Structured representation of design components and tokens
+- **Library Schema**: Component library metadata and patterns
+- **Instruction Schema**: Implementation guidance and code generation templates
+
+## APIs and Integrations
+- **MCP Protocol**: Standard interface for AI tool communication
+- **LLM Providers**: Integration with various AI models for processing
+- **File System**: Design asset and library file access
+
+## Infrastructure Requirements
+- Node.js runtime environment
+- TypeScript compilation pipeline
+- Zod for runtime validation
+- MCP SDK for protocol implementation
+
+# Development Roadmap  
+## Phase 1: MVP Foundation
+- Complete MCP server setup with proper handler registration
+- Implement basic design parsing functionality
+- Create foundational schemas for design and library data
+- Establish LLM integration patterns
+
+## Phase 2: Core Tool Implementation
+- Fully implement parseDesigns tool with multi-format support
+- Build analyzeLibrary tool for component pattern detection
+- Develop generateInstruction tool for implementation guidance
+- Add comprehensive error handling and validation
+
+## Phase 3: Advanced Features
+- Multi-format design input support (Figma, Sketch, images)
+- Advanced library analysis with dependency mapping
+- Context-aware instruction generation
+- Performance optimization and caching
+
+## Phase 4: Integration & Polish
+- Plugin ecosystem for extended functionality
+- Documentation and examples
+- Testing infrastructure
+- Production deployment capabilities
+
+# Logical Dependency Chain
+## Foundation First
+1. **MCP Server Infrastructure**: Core server setup enables all other functionality
+2. **Schema Definitions**: Data models must be established before tool implementation
+3. **LLM Integration**: AI communication layer required for processing logic
+
+## Progressive Feature Building
+1. **Basic Design Parsing**: Start with simple text/description parsing
+2. **Library Analysis**: Build on parsing to understand existing patterns
+3. **Instruction Generation**: Combine parsing + analysis for comprehensive output
+4. **Advanced Input Support**: Extend to complex design formats
+
+## Atomic Development Approach
+- Each tool can be developed independently after foundation
+- Schema evolution supports incremental feature addition
+- Modular architecture allows parallel development streams
+
+# Risks and Mitigations  
+## Technical Challenges
+- **MCP SDK Integration**: Current code shows incomplete handler registration
+- **Mitigation**: Study MCP SDK documentation and implement proper request handlers
+
+## MVP Scoping
+- **Risk**: Feature scope too broad for initial release
+- **Mitigation**: Focus on single design input type and basic library analysis
+
+## Resource Constraints
+- **Risk**: LLM API costs for processing
+- **Mitigation**: Implement caching and efficient prompt engineering
+
+## Performance Considerations
+- **Risk**: Large design files causing processing delays
+- **Mitigation**: Streaming responses and chunked processing
+
+# Appendix  
+## Research Findings
+- MCP protocol provides standardized AI tool communication
+- Design parsing requires multi-modal AI model capabilities
+- Component library analysis benefits from AST parsing techniques
+
+## Technical Specifications
+- Node.js 18+ for MCP SDK compatibility
+- TypeScript for type safety and developer experience
+- Zod for runtime validation and schema management
+- Stdio transport for cross-platform compatibility 

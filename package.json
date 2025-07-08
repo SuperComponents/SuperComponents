@@ -1,0 +1,23 @@
+{
+  "name": "supercomponents-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node build/index.js",
+    "test": "jest"
+  },
+  "keywords": ["mcp", "ai", "components", "design-system"],
+  "license": "MIT",
+  "description": "MCP server for AI-powered component generation",
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.15.0",
+    "zod": "^3.25.75"
+  }
+}

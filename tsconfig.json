@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2022",                                  /* Node 22 supports ES2022 */
+    "lib": ["ES2022"],                                   /* Include ES2022 library features */
+
+    /* Modules */
+    "module": "ESNext",                                  /* Latest ECMAScript module syntax */
+    "moduleResolution": "bundler",                       /* Modern resolution (works with Node 22) */
+    "rootDir": "./src",                                  /* Source files location */
+    "resolveJsonModule": true,                           /* Enable importing .json files */
+
+    /* Emit */
+    "outDir": "./build",                                 /* Output directory */
+    "sourceMap": true,                                   /* Create source map files */
+
+    /* Interop Constraints */
+    "esModuleInterop": true,                             /* CommonJS interop */
+    "forceConsistentCasingInFileNames": true,            /* Ensure consistent casing */
+
+    /* Type Checking */
+    "strict": true,                                      /* Enable strict type checking */
+    "skipLibCheck": true                                 /* Skip type checking of .d.ts files */
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "build"]
+}
