@@ -78,7 +78,7 @@ function createServer(): Server {
         },
         {
           name: tools.initializeProjectTool.definition.name,
-          description: "Initialize a new SuperComponents project by fetching scaffolding from the SuperComponents repository. RUN THIS FIRST before using other tools.",
+          description: "Initialize a new SuperComponents project by fetching scaffolding from the SuperComponents repository then running the supercomponents-setup script. RUN THIS FIRST before using other tools.",
           inputSchema: {
             type: "object",
             properties: {
