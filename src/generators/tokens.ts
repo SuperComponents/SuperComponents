@@ -11,6 +11,44 @@ export interface W3CDesignTokens {
   [key: string]: W3CDesignToken | W3CDesignTokens;
 }
 
+// Type-safe interfaces for specific token structures
+export interface ColorTokens extends W3CDesignTokens {
+  primary?: { [key: number]: W3CDesignToken };
+  secondary?: { [key: number]: W3CDesignToken };
+  neutral?: { [key: number]: W3CDesignToken };
+  semantic?: {
+    success?: W3CDesignToken;
+    warning?: W3CDesignToken;
+    error?: W3CDesignToken;
+    info?: W3CDesignToken;
+  };
+}
+
+export interface TypographyTokens extends W3CDesignTokens {
+  fontFamily?: {
+    primary?: W3CDesignToken;
+    secondary?: W3CDesignToken;
+  };
+  fontSize?: {
+    [key: string]: W3CDesignToken;
+  };
+  fontWeight?: {
+    [key: string]: W3CDesignToken;
+  };
+  lineHeight?: {
+    [key: string]: W3CDesignToken;
+  };
+}
+
+export interface TransitionTokens extends W3CDesignTokens {
+  duration?: {
+    [key: string]: W3CDesignToken;
+  };
+  timingFunction?: {
+    [key: string]: W3CDesignToken;
+  };
+}
+
 export interface ContrastResult {
   ratio: number;
   passes: boolean;
@@ -55,8 +93,8 @@ export class TokenGenerator {
   /**
    * Generate color tokens with semantic naming
    */
-  private generateColorTokens(insight: DesignInsight): W3CDesignTokens {
-    const colors: W3CDesignTokens = {};
+  private generateColorTokens(insight: DesignInsight): ColorTokens {
+    const colors: ColorTokens = {};
     const palette = insight.imageryPalette;
 
     // Generate primary palette
@@ -127,14 +165,14 @@ export class TokenGenerator {
   /**
    * Generate typography tokens
    */
-  private generateTypographyTokens(insight: DesignInsight): W3CDesignTokens {
-    const typography: W3CDesignTokens = {};
+  private generateTypographyTokens(insight: DesignInsight): TypographyTokens {
+    const typography: TypographyTokens = {};
 
     // Font families
     typography.fontFamily = {};
     insight.typographyFamilies.forEach((font: string, index: number) => {
       const key = index === 0 ? 'primary' : index === 1 ? 'secondary' : `family${index + 1}`;
-      (typography.fontFamily as W3CDesignTokens)[key] = {
+      (typography.fontFamily as any)[key] = {
         $type: 'fontFamily',
         $value: [font, 'sans-serif']
       };
@@ -144,7 +182,7 @@ export class TokenGenerator {
     const sizeScale = this.getFontSizeScale(insight.uiDensity);
     typography.fontSize = {};
     Object.entries(sizeScale).forEach(([key, value]: [string, string]) => {
-      (typography.fontSize as W3CDesignTokens)[key] = {
+      (typography.fontSize as any)[key] = {
         $type: 'fontSize',
         $value: value
       };
@@ -275,8 +313,8 @@ export class TokenGenerator {
   /**
    * Generate transition tokens
    */
-  private generateTransitionTokens(insight: DesignInsight): W3CDesignTokens {
-    const transition: W3CDesignTokens = {};
+  private generateTransitionTokens(insight: DesignInsight): TransitionTokens {
+    const transition: TransitionTokens = {};
 
     transition.duration = {
       fast: { $type: 'duration', $value: '150ms' },

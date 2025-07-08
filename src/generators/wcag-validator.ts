@@ -263,7 +263,7 @@ export class WCAGValidator {
             <p>Generated color swatches with WCAG accessibility validation</p>
         </div>
         
-        <div class="swatch-grid">
+        <div class="swatch-grid" aria-label="Color swatches grid">
 `;
 
     // Generate swatch cards
@@ -325,7 +325,7 @@ export class WCAGValidator {
                 <h2>WCAG Contrast Validation</h2>
                 <p>Common color combinations tested against WCAG 2.1 guidelines</p>
             </div>
-            <div class="validation-grid">
+            <div class="validation-grid" aria-label="WCAG validation results">
 `;
 
     combinations.forEach(combo => {
@@ -423,14 +423,15 @@ export class WCAGValidator {
     
     // Common UI combinations
     const testCombos = [
-      { fg: 'primary-500', bg: 'neutral-50', name: 'Primary Button', usage: 'Primary button background' },
-      { fg: 'neutral-50', bg: 'primary-500', name: 'Primary Button Text', usage: 'Primary button text' },
-      { fg: 'neutral-900', bg: 'neutral-50', name: 'Body Text', usage: 'Main body text' },
-      { fg: 'neutral-600', bg: 'neutral-50', name: 'Secondary Text', usage: 'Secondary text content' },
-      { fg: 'semantic-error', bg: 'neutral-50', name: 'Error Text', usage: 'Error messages' },
-      { fg: 'semantic-success', bg: 'neutral-50', name: 'Success Text', usage: 'Success messages' },
-      { fg: 'semantic-warning', bg: 'neutral-50', name: 'Warning Text', usage: 'Warning messages' },
-      { fg: 'neutral-50', bg: 'semantic-error', name: 'Error Background', usage: 'Error alert background' }
+      { fg: 'color-primary-500', bg: 'color-neutral-50', name: 'Primary Button', usage: 'Primary button background' },
+      { fg: 'color-neutral-50', bg: 'color-primary-500', name: 'Primary Button Text', usage: 'Primary button text' },
+      { fg: 'color-neutral-900', bg: 'color-neutral-50', name: 'Body Text', usage: 'Main body text' },
+      { fg: 'color-neutral-600', bg: 'color-neutral-50', name: 'Secondary Text', usage: 'Secondary text content' },
+      { fg: 'color-semantic-error', bg: 'color-neutral-50', name: 'Error Text', usage: 'Error messages' },
+      { fg: 'color-semantic-success', bg: 'color-neutral-50', name: 'Success Text', usage: 'Success messages' },
+      { fg: 'color-semantic-warning', bg: 'color-neutral-50', name: 'Warning Text', usage: 'Warning messages' },
+      { fg: 'color-neutral-50', bg: 'color-semantic-error', name: 'Error Background', usage: 'Error alert background' },
+      { fg: 'color-neutral-400', bg: 'color-neutral-300', name: 'Poor Contrast', usage: 'Low contrast example' }
     ];
     
     testCombos.forEach(combo => {

@@ -31,7 +31,7 @@ describe('TokenGenerator', () => {
     });
 
     it('should include $type and $value properties', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       // Check color tokens
       const primaryColor = tokens.color?.primary?.[500];
