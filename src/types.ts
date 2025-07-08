@@ -6,12 +6,12 @@ import {
   DesignSchema,
   ComponentSchema,
   InstructionSchema 
-} from './schemas';
+} from './schemas/index.js';
 import type { 
   Design, 
   Component, 
   Instruction
-} from './schemas';
+} from './schemas/index.js';
 
 // =====================
 // Utility Types for Schema Operations

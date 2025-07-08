@@ -10,13 +10,13 @@ export {
   // Legacy exports for backward compatibility
   designSchema,
   designJsonSchema,
-} from './design';
+} from './design.js';
 
 export type {
   Token,
   DesignComponent,
   Design,
-} from './design';
+} from './design.js';
 
 // Component schemas and types
 export {
@@ -26,13 +26,13 @@ export {
   // Legacy exports for backward compatibility
   componentSchema,
   componentAnalysisSchema,
-} from './component';
+} from './component.js';
 
 export type {
   Prop,
   Component,
   ComponentAnalysis,
-} from './component';
+} from './component.js';
 
 // Instruction schemas and types
 export {
@@ -40,19 +40,19 @@ export {
   FileContentSchema,
   InstructionSchema,
   InstructionContextSchema,
-} from './instruction';
+} from './instruction.js';
 
 export type {
   Step,
   FileContent,
   Instruction,
   InstructionContext,
-} from './instruction';
+} from './instruction.js';
 
 // Type inference examples for TypeScript usage (using z.infer)
-import { DesignSchema } from './design';
-import { ComponentSchema } from './component';
-import { InstructionSchema } from './instruction';
+import { DesignSchema } from './design.js';
+import { ComponentSchema } from './component.js';
+import { InstructionSchema } from './instruction.js';
 
 export type DesignType = z.infer<typeof DesignSchema>;
 export type ComponentType = z.infer<typeof ComponentSchema>;

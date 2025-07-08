@@ -11,14 +11,7 @@ export const TokenSchema = z.object({
 });
 
 // Individual component within a design - recursive type
-export const DesignComponentSchema: z.ZodType<{
-  id: string;
-  name: string;
-  type: string;
-  props: Record<string, any>;
-  children?: DesignComponent[];
-  tokens?: string[];
-}> = z.object({
+export const DesignComponentSchema = z.object({
   id: z.string(),
   name: z.string(),
   type: z.string(),
@@ -26,6 +19,8 @@ export const DesignComponentSchema: z.ZodType<{
   children: z.array(z.lazy(() => DesignComponentSchema)).optional(),
   tokens: z.array(z.string()).optional(), // Token references used by this component
 });
+
+export type DesignComponent = z.infer<typeof DesignComponentSchema>;
 
 // Main Design schema as specified in the task
 export const DesignSchema = z.object({
@@ -43,7 +38,6 @@ export const DesignSchema = z.object({
 
 // Export inferred TypeScript types
 export type Token = z.infer<typeof TokenSchema>;
-export type DesignComponent = z.infer<typeof DesignComponentSchema>;
 export type Design = z.infer<typeof DesignSchema>;
 
 // Legacy schemas for backward compatibility (can be removed later)

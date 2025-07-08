@@ -32,7 +32,7 @@ import { ToolRegistry, type ToolRegistrationOptions } from './server/tools.js';
 export class DesignSystemMCPServer {
   private server: Server;
   private serverState: ServerState;
-  private toolRegistry: ToolRegistry;
+  protected toolRegistry: ToolRegistry;
 
   constructor() {
     this.server = new Server(
