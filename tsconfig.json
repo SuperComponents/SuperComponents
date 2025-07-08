@@ -2,12 +2,13 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "Node16",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": false,
     "noImplicitAny": false,
 
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -17,8 +18,16 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "@types/react", "@types/react-dom"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "**/__tests__/**", "**/*.test.ts"]
+  "exclude": [
+    "node_modules", 
+    "dist", 
+    "tests", 
+    "**/__tests__/**", 
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.stories.tsx"
+  ]
 }
