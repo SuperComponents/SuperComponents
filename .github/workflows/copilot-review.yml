@@ -38,24 +38,24 @@ jobs:
                 issue_number: prNumber,
                 body: `## 🤖 GitHub Copilot Code Review Setup
                 
-**Note:** GitHub Copilot cannot be requested as a reviewer programmatically. To enable automatic Copilot reviews for this repository:
+            **Note:** GitHub Copilot cannot be requested as a reviewer programmatically. To enable automatic Copilot reviews for this repository:
 
-### Option 1: Configure Repository Rules (Recommended)
-1. Go to **Settings** → **Rules** → **Rulesets**
-2. Create a new branch ruleset
-3. Under "Branch rules," select **Require a pull request before merging**
-4. Enable **Request pull request review from Copilot**
+            ### Option 1: Configure Repository Rules (Recommended)
+            1. Go to **Settings** → **Rules** → **Rulesets**
+            2. Create a new branch ruleset
+            3. Under "Branch rules," select **Require a pull request before merging**
+            4. Enable **Request pull request review from Copilot**
 
-### Option 2: Manual Review Request
-- Click the **Reviewers** section in this PR
-- Select **Copilot** from the dropdown menu
+            ### Option 2: Manual Review Request
+            - Click the **Reviewers** section in this PR
+            - Select **Copilot** from the dropdown menu
 
-### Requirements
-- Copilot Pro or Copilot Pro+ subscription for individual repos
-- Repository or organization owner access for configuration
+            ### Requirements
+            - Copilot Pro or Copilot Pro+ subscription for individual repos
+            - Repository or organization owner access for configuration
 
-Once configured, Copilot will automatically review all new PRs (not drafts).
+            Once configured, Copilot will automatically review all new PRs (not drafts).
 
-[Learn more about Copilot code review](https://docs.github.com/en/copilot/using-github-copilot/code-review/configuring-automatic-code-review-by-copilot)`
+            [Learn more about Copilot code review](https://docs.github.com/en/copilot/using-github-copilot/code-review/configuring-automatic-code-review-by-copilot)`
               });
             }
