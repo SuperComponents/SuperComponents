@@ -14,8 +14,13 @@ Let me reanalyze the repo with this understanding:
 - **Comprehensive prompts** - The component generation prompts are detailed and actionable
 
 ### Major Gap: AI-Powered Token Extraction
-The current mock implementation needs to become the core AI engine:## 🎨 **Enhanced Workflow for Non-Designers**## 🛠 **Recommended Implementation Strategy**
+The current mock implementation needs to become the core AI engine:
+- /home/duff/SuperComponents/src/ai/design-analyzer.ts
 
+## 🎨 **Enhanced Workflow for Non-Designers**
+- /home/duff/SuperComponents/src/workflows/inspiration-to-system.ts
+
+## 🛠 **Recommended Implementation Strategy**
 ### 1. **Enhanced MCP Tools for AI Integration**
 
 ```typescript
@@ -38,7 +43,10 @@ The current mock implementation needs to become the core AI engine:## 🎨 **Enh
 ```
 
 ### 2. **Comprehensive AI Prompts**
-Your prompts should be **highly specific** and **design-educated** to generate quality output:## 🎯 **Key Strategic Insights**
+Your prompts should be **highly specific** and **design-educated** to generate quality 
+- /home/duff/SuperComponents/src/prompts/ai-design-prompts.ts
+
+## 🎯 **Key Strategic Insights**
 
 ### 1. **This is Actually Brilliant**
 You're solving a real problem: **democratizing design system creation**. Most developers struggle with design, and most designers struggle with implementation. Your MCP server bridges this gap.
