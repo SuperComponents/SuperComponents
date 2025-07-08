@@ -1,4 +1,4 @@
-import { TokenGenerator } from '../tokens.js';
+import { TokenGenerator, W3CDesignTokens } from '../tokens.js';
 import { DesignInsight } from '../../types/index.js';
 
 describe('TokenGenerator', () => {
@@ -34,31 +34,31 @@ describe('TokenGenerator', () => {
       const tokens = generator.generateTokens(mockInsight);
       
       // Check color tokens
-      const primaryColor = tokens.color?.primary?.[500];
+      const primaryColor = (tokens.color as any)?.primary?.[500];
       expect(primaryColor).toHaveProperty('$type', 'color');
       expect(primaryColor).toHaveProperty('$value');
       
       // Check typography tokens
-      const fontSize = tokens.typography?.fontSize?.base;
+      const fontSize = (tokens.typography as any)?.fontSize?.base;
       expect(fontSize).toHaveProperty('$type', 'fontSize');
       expect(fontSize).toHaveProperty('$value');
       
       // Check spacing tokens
-      const spacing = tokens.spacing?.md;
+      const spacing = (tokens.spacing as any)?.md;
       expect(spacing).toHaveProperty('$type', 'spacing');
       expect(spacing).toHaveProperty('$value');
     });
 
     it('should generate primary color palette from first imagery color', () => {
       const tokens = generator.generateTokens(mockInsight);
-      const primaryColor = tokens.color?.primary?.[500];
+      const primaryColor = (tokens.color as any)?.primary?.[500];
       
       expect(primaryColor?.$value).toBe('#3b82f6');
     });
 
     it('should generate secondary color palette from second imagery color', () => {
       const tokens = generator.generateTokens(mockInsight);
-      const secondaryColor = tokens.color?.secondary?.[500];
+      const secondaryColor = (tokens.color as any)?.secondary?.[500];
       
       expect(secondaryColor?.$value).toBe('#10b981');
     });
@@ -66,19 +66,19 @@ describe('TokenGenerator', () => {
     it('should include semantic colors', () => {
       const tokens = generator.generateTokens(mockInsight);
       
-      expect(tokens.color?.semantic?.success).toHaveProperty('$type', 'color');
-      expect(tokens.color?.semantic?.warning).toHaveProperty('$type', 'color');
-      expect(tokens.color?.semantic?.error).toHaveProperty('$type', 'color');
-      expect(tokens.color?.semantic?.info).toHaveProperty('$type', 'color');
+      expect((tokens.color as any)?.semantic?.success).toHaveProperty('$type', 'color');
+      expect((tokens.color as any)?.semantic?.warning).toHaveProperty('$type', 'color');
+      expect((tokens.color as any)?.semantic?.error).toHaveProperty('$type', 'color');
+      expect((tokens.color as any)?.semantic?.info).toHaveProperty('$type', 'color');
     });
 
     it('should generate font family tokens from typography families', () => {
       const tokens = generator.generateTokens(mockInsight);
       
-      const primaryFont = tokens.typography?.fontFamily?.primary;
+      const primaryFont = (tokens.typography as any)?.fontFamily?.primary;
       expect(primaryFont?.$value).toEqual(['Inter', 'sans-serif']);
       
-      const secondaryFont = tokens.typography?.fontFamily?.secondary;
+      const secondaryFont = (tokens.typography as any)?.fontFamily?.secondary;
       expect(secondaryFont?.$value).toEqual(['Monaco', 'sans-serif']);
     });
 
@@ -94,9 +94,9 @@ describe('TokenGenerator', () => {
       const spaciousTokens = spaciousGenerator.generateTokens(spaciousInsight);
       
       // Extract spacing values
-      const regularSpacing = regularTokens.spacing?.md?.$value;
-      const compactSpacing = compactTokens.spacing?.md?.$value;
-      const spaciousSpacing = spaciousTokens.spacing?.md?.$value;
+      const regularSpacing = (regularTokens.spacing as any)?.md?.$value;
+      const compactSpacing = (compactTokens.spacing as any)?.md?.$value;
+      const spaciousSpacing = (spaciousTokens.spacing as any)?.md?.$value;
       
       expect(regularSpacing).toBe('16px');
       expect(compactSpacing).toBe('14px'); // 16 * 0.875
@@ -111,9 +111,9 @@ describe('TokenGenerator', () => {
       const compactTokens = generator.generateTokens(compactInsight);
       const spaciousTokens = generator.generateTokens(spaciousInsight);
       
-      const regularRadius = regularTokens.borderRadius?.md?.$value;
-      const compactRadius = compactTokens.borderRadius?.md?.$value;
-      const spaciousRadius = spaciousTokens.borderRadius?.md?.$value;
+      const regularRadius = (regularTokens.borderRadius as any)?.md?.$value;
+      const compactRadius = (compactTokens.borderRadius as any)?.md?.$value;
+      const spaciousRadius = (spaciousTokens.borderRadius as any)?.md?.$value;
       
       expect(regularRadius).toBe('4px');
       expect(compactRadius).toBe('2px');
@@ -123,18 +123,18 @@ describe('TokenGenerator', () => {
     it('should generate shadow tokens', () => {
       const tokens = generator.generateTokens(mockInsight);
       
-      expect(tokens.shadow?.sm).toHaveProperty('$type', 'shadow');
-      expect(tokens.shadow?.md).toHaveProperty('$type', 'shadow');
-      expect(tokens.shadow?.lg).toHaveProperty('$type', 'shadow');
-      expect(tokens.shadow?.inner).toHaveProperty('$type', 'shadow');
+      expect((tokens.shadow as any)?.sm).toHaveProperty('$type', 'shadow');
+      expect((tokens.shadow as any)?.md).toHaveProperty('$type', 'shadow');
+      expect((tokens.shadow as any)?.lg).toHaveProperty('$type', 'shadow');
+      expect((tokens.shadow as any)?.inner).toHaveProperty('$type', 'shadow');
     });
 
     it('should generate transition tokens', () => {
       const tokens = generator.generateTokens(mockInsight);
       
-      expect(tokens.transition?.duration?.fast).toHaveProperty('$type', 'duration');
-      expect(tokens.transition?.duration?.normal).toHaveProperty('$type', 'duration');
-      expect(tokens.transition?.timingFunction?.ease).toHaveProperty('$type', 'cubicBezier');
+      expect((tokens.transition as any)?.duration?.fast).toHaveProperty('$type', 'duration');
+      expect((tokens.transition as any)?.duration?.normal).toHaveProperty('$type', 'duration');
+      expect((tokens.transition as any)?.timingFunction?.ease).toHaveProperty('$type', 'cubicBezier');
     });
   });
 
@@ -204,8 +204,8 @@ describe('TokenGenerator', () => {
       const tokens = wcagGenerator.generateTokens(mockInsight);
       
       // Check that semantic colors meet contrast requirements
-      const successColor = tokens.color?.semantic?.success?.$value;
-      const errorColor = tokens.color?.semantic?.error?.$value;
+      const successColor = (tokens.color as any)?.semantic?.success?.$value;
+      const errorColor = (tokens.color as any)?.semantic?.error?.$value;
       
       if (successColor) {
         const successContrast = wcagGenerator.validateContrast(successColor, '#ffffff');

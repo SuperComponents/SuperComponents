@@ -274,7 +274,7 @@ export class WCAGValidator {
       
       html += `
             <div class="swatch-card">
-                <div class="swatch-color" style="background-color: ${swatch.value}; color: ${textColor};">
+                <div class="swatch-color" style="background-color: ${swatch.value}; color: ${textColor};" aria-label="Color swatch for ${swatch.name}">
                     ${swatch.name}
                 </div>
                 <div class="swatch-info">

@@ -1,15 +1,7 @@
-import { DesignInsight, DesignTokens } from '../types/index.js';
+import { DesignInsight, DesignTokens, W3CDesignToken, W3CDesignTokens } from '../types/index.js';
 
-// W3C Design Tokens v1 schema interfaces
-export interface W3CDesignToken {
-  $type: string;
-  $value: any;
-  $description?: string;
-}
-
-export interface W3CDesignTokens {
-  [key: string]: W3CDesignToken | W3CDesignTokens;
-}
+// Re-export for backwards compatibility
+export { W3CDesignToken, W3CDesignTokens };
 
 export interface ContrastResult {
   ratio: number;
@@ -40,13 +32,13 @@ export class TokenGenerator {
    */
   generateTokens(insight: DesignInsight): W3CDesignTokens {
     const tokens: W3CDesignTokens = {
-      color: this.generateColorTokens(insight),
-      typography: this.generateTypographyTokens(insight),
-      spacing: this.generateSpacingTokens(insight),
-      sizing: this.generateSizingTokens(insight),
-      borderRadius: this.generateBorderRadiusTokens(insight),
-      shadow: this.generateShadowTokens(insight),
-      transition: this.generateTransitionTokens(insight)
+      color: this.generateColorTokens(insight) as W3CDesignTokens['color'],
+      typography: this.generateTypographyTokens(insight) as W3CDesignTokens['typography'],
+      spacing: this.generateSpacingTokens(insight) as W3CDesignTokens['spacing'],
+      sizing: this.generateSizingTokens(insight) as W3CDesignTokens['sizing'],
+      borderRadius: this.generateBorderRadiusTokens(insight) as W3CDesignTokens['borderRadius'],
+      shadow: this.generateShadowTokens(insight) as W3CDesignTokens['shadow'],
+      transition: this.generateTransitionTokens(insight) as W3CDesignTokens['transition']
     };
 
     return tokens;

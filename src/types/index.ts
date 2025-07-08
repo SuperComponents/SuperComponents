@@ -27,6 +27,42 @@ export interface DesignTokens {
   };
 }
 
+// W3C Design Tokens v1 schema interfaces
+export interface W3CDesignToken {
+  $type: string;
+  $value: any;
+  $description?: string;
+}
+
+export interface W3CDesignTokens {
+  [key: string]: W3CDesignToken | W3CDesignTokens;
+  color?: {
+    primary?: { [key: string]: W3CDesignToken };
+    secondary?: { [key: string]: W3CDesignToken };
+    neutral?: { [key: string]: W3CDesignToken };
+    semantic?: {
+      success?: W3CDesignToken;
+      warning?: W3CDesignToken;
+      error?: W3CDesignToken;
+      info?: W3CDesignToken;
+    };
+  };
+  typography?: {
+    fontFamily?: { [key: string]: W3CDesignToken };
+    fontSize?: { [key: string]: W3CDesignToken };
+    fontWeight?: { [key: string]: W3CDesignToken };
+    lineHeight?: { [key: string]: W3CDesignToken };
+  };
+  spacing?: { [key: string]: W3CDesignToken };
+  sizing?: { [key: string]: W3CDesignToken };
+  borderRadius?: { [key: string]: W3CDesignToken };
+  shadow?: { [key: string]: W3CDesignToken };
+  transition?: {
+    duration?: { [key: string]: W3CDesignToken };
+    timingFunction?: { [key: string]: W3CDesignToken };
+  };
+}
+
 export interface DesignInsight {
   imageryPalette: string[];      // hex colors, length ≤ 8
   typographyFamilies: string[];  // font names
