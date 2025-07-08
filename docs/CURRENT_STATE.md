@@ -2,7 +2,7 @@
 PROMPT FOR CODING AGENTS
 ──────────────────────────────────────
 Project: SuperComponents – AI-powered design-system generator  
-Primary Repo Root: `github.com/SuperComponents/SuperComponents`
+Primary Repo Root: `github.com/SuperComponents/Super Components`
 
 You are Agent-Team Alpha. Your mission is to take the partially-completed codebase and deliver an MVP that satisfies **all** acceptance criteria in `docs/INSTRUCTIONS.md` (§3).
 

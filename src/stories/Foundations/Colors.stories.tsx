@@ -1,56 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-// import { WCAGValidator } from '../../generators/wcag-validator.js';
-
-// Mock token data based on the existing CSS tokens
-const mockTokens = {
-  color: {
-    primary: {
-      50: { $value: '#f5f9ff' },
-      100: { $value: '#ebf3fe' },
-      200: { $value: '#d8e6fd' },
-      300: { $value: '#b1cdfb' },
-      400: { $value: '#89b4fa' },
-      500: { $value: '#3b82f6' },
-      600: { $value: '#2f68c5' },
-      700: { $value: '#234e94' },
-      800: { $value: '#183462' },
-      900: { $value: '#0c1a31' },
-      950: { $value: '#060d19' }
-    },
-    secondary: {
-      50: { $value: '#f3fcf9' },
-      100: { $value: '#e7f8f2' },
-      200: { $value: '#cff1e6' },
-      300: { $value: '#9fe3cd' },
-      400: { $value: '#70d5b3' },
-      500: { $value: '#10b981' },
-      600: { $value: '#0d9467' },
-      700: { $value: '#0a6f4d' },
-      800: { $value: '#064a34' },
-      900: { $value: '#03251a' },
-      950: { $value: '#02120d' }
-    },
-    neutral: {
-      50: { $value: '#fafafa' },
-      100: { $value: '#f5f5f5' },
-      200: { $value: '#e5e5e5' },
-      300: { $value: '#d4d4d4' },
-      400: { $value: '#a3a3a3' },
-      500: { $value: '#737373' },
-      600: { $value: '#525252' },
-      700: { $value: '#404040' },
-      800: { $value: '#262626' },
-      900: { $value: '#171717' },
-      950: { $value: '#0a0a0a' }
-    },
-    semantic: {
-      success: { $value: '#12823b' },
-      warning: { $value: '#ae5f05' },
-      error: { $value: '#dc2626' },
-      info: { $value: '#2563eb' }
-    }
-  }
-};
+import { useEffect, useState } from 'react';
 
 const meta: Meta = {
   title: 'Foundations/Colors',
@@ -58,7 +7,7 @@ const meta: Meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Complete color palette with WCAG accessibility validation',
+        component: 'Complete color palette with WCAG accessibility validation using dynamic CSS variables',
       },
     },
   },
@@ -67,85 +16,173 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const ColorSwatches = () => {
-  // For now, create a simple inline swatch display
-  const renderColorSwatch = (name: string, value: string) => (
-    <div key={name} style={{
-      background: 'white',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-      marginBottom: '16px'
-    }}>
-      <div style={{
-        height: '120px',
-        background: value,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: value === '#ffffff' || value === '#fafafa' || value === '#f5f5f5' ? 'black' : 'white',
-        fontWeight: 600,
-        fontSize: '14px',
-        textShadow: '0 1px 2px rgba(0,0,0,0.1)'
-      }}>
-        {name}
-      </div>
-      <div style={{ padding: '16px' }}>
-        <div style={{ fontWeight: 600, fontSize: '16px', marginBottom: '8px' }}>
-          {name}
-        </div>
-        <div style={{ 
-          fontFamily: 'Monaco, Consolas, monospace',
-          fontSize: '12px',
-          color: '#666',
-          marginBottom: '4px'
-        }}>
-          {value}
-        </div>
-      </div>
-    </div>
-  );
+interface ColorToken {
+  name: string;
+  value: string;
+  contrast?: string;
+  category: string;
+}
 
-  const renderColorGroup = (groupName: string, colors: any) => (
-    <div key={groupName} style={{ marginBottom: '32px' }}>
-      <h3 style={{ marginBottom: '16px', color: '#333' }}>{groupName}</h3>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-        gap: '16px'
-      }}>
-        {Object.entries(colors).map(([shade, token]: [string, any]) => 
-          renderColorSwatch(`${groupName}-${shade}`, token.$value)
-        )}
-      </div>
-    </div>
-  );
+const ColorSwatches = () => {
+  const [colorTokens, setColorTokens] = useState<ColorToken[]>([]);
   
+  useEffect(() => {
+    // Extract color tokens from CSS variables
+    const extractColorTokens = () => {
+      const tokens: ColorToken[] = [];
+      const styles = getComputedStyle(document.documentElement);
+      
+      // Get all CSS custom properties from the document
+      const allProps = Array.from(document.styleSheets)
+        .flatMap(sheet => {
+          try {
+            return Array.from(sheet.cssRules);
+          } catch (e) {
+            return [];
+          }
+        })
+        .flatMap(rule => {
+          if (rule.type === CSSRule.STYLE_RULE) {
+            const styleRule = rule as CSSStyleRule;
+            if (styleRule.selectorText === ':root') {
+              return Array.from(styleRule.style);
+            }
+          }
+          return [];
+        })
+        .filter(prop => prop.startsWith('--color-'));
+
+      allProps.forEach(prop => {
+        const value = styles.getPropertyValue(prop).trim();
+        if (value && value.startsWith('#')) {
+          const name = prop.replace('--color-', '');
+          const parts = name.split('-');
+          const category = parts[0];
+          
+          tokens.push({
+            name: prop,
+            value,
+            category,
+            contrast: getContrastRatio(value)
+          });
+        }
+      });
+
+      return tokens;
+    };
+
+    const getContrastRatio = (color: string): string => {
+      // Simple contrast calculation with white background
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      const contrast = luminance > 0.5 ? 'Dark text' : 'Light text';
+      const ratio = luminance > 0.5 ? (1.0 / (luminance + 0.05)) : ((luminance + 0.05) / 1.0);
+      
+      return `${contrast} (${ratio.toFixed(2)}:1)`;
+    };
+
+    const tokens = extractColorTokens();
+    setColorTokens(tokens);
+  }, []);
+
+  const groupedTokens = colorTokens.reduce((acc, token) => {
+    const category = token.category;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(token);
+    return acc;
+  }, {} as Record<string, ColorToken[]>);
+
   return (
     <div style={{ 
-      width: '100%', 
-      padding: '20px',
-      background: '#f5f5f5',
+      padding: '2rem',
+      fontFamily: 'var(--typography-font-family-primary, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)',
+      background: 'var(--color-neutral-50, #fafafa)',
       minHeight: '100vh'
     }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '8px',
-          marginBottom: '20px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <h1 style={{ margin: '0 0 8px 0' }}>Design Token Colors</h1>
-          <p style={{ margin: 0, color: '#666' }}>
-            Complete color palette with accessibility considerations
-          </p>
+      <h1 style={{ 
+        marginBottom: '2rem',
+        color: 'var(--color-neutral-900, #171717)',
+        fontSize: '2.5rem',
+        fontWeight: '700'
+      }}>
+        Color Palette
+      </h1>
+      
+      <p style={{ 
+        marginBottom: '3rem',
+        color: 'var(--color-neutral-700, #404040)',
+        fontSize: '1.125rem',
+        lineHeight: '1.7'
+      }}>
+        Dynamic color swatches generated from CSS variables. All colors include WCAG accessibility information.
+      </p>
+
+      {Object.entries(groupedTokens).map(([category, tokens]) => (
+        <div key={category} style={{ marginBottom: '3rem' }}>
+          <h2 style={{ 
+            marginBottom: '1.5rem',
+            color: 'var(--color-neutral-800, #262626)',
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            textTransform: 'capitalize'
+          }}>
+            {category.replace(/([A-Z])/g, ' $1').trim()}
+          </h2>
+          
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '1rem'
+          }}>
+            {tokens.map((token) => (
+              <div key={token.name} style={{ 
+                border: '1px solid var(--color-neutral-200, #e5e5e5)',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                backgroundColor: 'white',
+                boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+              }}>
+                <div style={{ 
+                  height: '80px',
+                  backgroundColor: `var(${token.name})`,
+                  borderTopLeftRadius: '8px',
+                  borderTopRightRadius: '8px'
+                }} />
+                <div style={{ padding: '1rem' }}>
+                  <div style={{ 
+                    fontWeight: '500',
+                    color: 'var(--color-neutral-900, #171717)',
+                    marginBottom: '0.5rem',
+                    fontFamily: 'var(--typography-font-family-secondary, monospace)',
+                    fontSize: '0.875rem'
+                  }}>
+                    {token.name}
+                  </div>
+                  <div style={{ 
+                    color: 'var(--color-neutral-600, #525252)',
+                    fontSize: '0.875rem',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {token.value}
+                  </div>
+                  <div style={{ 
+                    color: 'var(--color-neutral-500, #737373)',
+                    fontSize: '0.75rem'
+                  }}>
+                    {token.contrast}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        
-        {Object.entries(mockTokens.color).map(([groupName, colors]) => 
-          renderColorGroup(groupName, colors)
-        )}
-      </div>
+      ))}
     </div>
   );
 };
@@ -155,7 +192,7 @@ export const Swatches: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Interactive color swatches showing all design tokens with WCAG contrast ratios and accessibility validation.',
+        story: 'Interactive color swatches showing all design tokens with WCAG contrast ratios and accessibility validation using dynamic CSS variables.',
       },
     },
   },

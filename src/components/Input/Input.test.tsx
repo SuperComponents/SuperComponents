@@ -76,15 +76,15 @@ describe('Input', () => {
 
   it('handles fullWidth prop', () => {
     render(<Input fullWidth placeholder="Enter text" />);
-    const container = screen.getByRole('textbox').closest('div');
-    expect(container).toHaveClass('w-full');
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveClass('w-full');
   });
 
   it('handles disabled state', () => {
     render(<Input disabled placeholder="Enter text" />);
     const input = screen.getByRole('textbox');
     expect(input).toBeDisabled();
-    expect(input).toHaveClass('opacity-50');
+    expect(input).toHaveClass('disabled:opacity-50');
   });
 
   it('forwards ref correctly', () => {

@@ -1,0 +1,10 @@
+{
+  "imageUrl": "fixtures/inspiration/modern-dashboard.png",
+  "description": "Dashboard interface with data visualization and cards",
+  "brandKeywords": ["data", "analytics", "dashboard"],
+  "industryType": "technology",
+  "targetUsers": "Data analysts and business users",
+  "colorPreferences": ["blue", "gray", "white"],
+  "stylePreferences": ["modern", "professional"],
+  "accessibility": "enhanced"
+}

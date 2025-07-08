@@ -65,8 +65,8 @@ describe('Modal', () => {
       </Modal>
     );
 
-    const overlay = screen.getByRole('dialog').parentElement;
-    fireEvent.click(overlay!);
+    const overlay = screen.getByRole('dialog');
+    fireEvent.click(overlay);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
@@ -77,8 +77,8 @@ describe('Modal', () => {
       </Modal>
     );
 
-    const overlay = screen.getByRole('dialog').parentElement;
-    fireEvent.click(overlay!);
+    const overlay = screen.getByRole('dialog');
+    fireEvent.click(overlay);
     expect(mockOnClose).not.toHaveBeenCalled();
   });
 
@@ -121,7 +121,9 @@ describe('Modal', () => {
       </Modal>
     );
 
-    expect(screen.getByRole('dialog')).toHaveClass('max-w-sm');
+    // The size classes are applied to the modal content div, not the overlay
+    const modalContent = screen.getByRole('dialog').querySelector('div');
+    expect(modalContent).toHaveClass('max-w-sm');
 
     rerender(
       <Modal isOpen={true} onClose={mockOnClose} size="md">
@@ -129,7 +131,7 @@ describe('Modal', () => {
       </Modal>
     );
 
-    expect(screen.getByRole('dialog')).toHaveClass('max-w-md');
+    expect(modalContent).toHaveClass('max-w-md');
 
     rerender(
       <Modal isOpen={true} onClose={mockOnClose} size="lg">
@@ -137,7 +139,7 @@ describe('Modal', () => {
       </Modal>
     );
 
-    expect(screen.getByRole('dialog')).toHaveClass('max-w-lg');
+    expect(modalContent).toHaveClass('max-w-lg');
   });
 
   it('renders with different variants', () => {
@@ -147,7 +149,8 @@ describe('Modal', () => {
       </Modal>
     );
 
-    expect(screen.getByRole('dialog').parentElement).toHaveClass('items-center');
+    // The variant classes are applied to the overlay element (which has role="dialog")
+    expect(screen.getByRole('dialog')).toHaveClass('items-center');
 
     rerender(
       <Modal isOpen={true} onClose={mockOnClose} variant="top">
@@ -155,7 +158,7 @@ describe('Modal', () => {
       </Modal>
     );
 
-    expect(screen.getByRole('dialog').parentElement).toHaveClass('items-start', 'pt-20');
+    expect(screen.getByRole('dialog')).toHaveClass('items-start', 'pt-20');
   });
 
   it('applies custom className', () => {
@@ -165,7 +168,9 @@ describe('Modal', () => {
       </Modal>
     );
 
-    expect(screen.getByRole('dialog')).toHaveClass('custom-modal');
+    // The className is applied to the modal content div
+    const modalContent = screen.getByRole('dialog').querySelector('div');
+    expect(modalContent).toHaveClass('custom-modal');
   });
 });
 

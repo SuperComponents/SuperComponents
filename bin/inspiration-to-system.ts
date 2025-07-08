@@ -17,6 +17,7 @@ interface CLIOptions {
   colorPreferences?: string;
   stylePreferences?: string;
   accessibility?: 'basic' | 'enhanced' | 'enterprise';
+  skipStorybook?: boolean;
 }
 
 const program = new Command();
@@ -38,6 +39,7 @@ program
   .option('--color-preferences <colors>', 'Comma-separated color preferences (e.g., "blue,green,neutral")')
   .option('--style-preferences <styles>', 'Comma-separated style preferences (modern,classic,playful,professional,minimalist)')
   .option('--accessibility <level>', 'Accessibility level (basic,enhanced,enterprise)', 'basic')
+  .option('--skip-storybook', 'Skip Storybook scaffold generation')
   .action(async (options: CLIOptions) => {
     const startTime = Date.now();
     
@@ -85,7 +87,7 @@ program
       console.log('');
 
       // Generate design system
-      const result = await workflow.generateDesignSystem(inspiration, outputDir);
+      const result = await workflow.generateDesignSystem(inspiration, outputDir, { skipStorybook: options.skipStorybook });
 
       const endTime = Date.now();
       const duration = (endTime - startTime) / 1000;
@@ -98,20 +100,36 @@ program
       console.log('📁 Generated files:');
       console.log(`   └── ${outputDir}/`);
       console.log(`       ├── design/PRINCIPLES.md`);
-      console.log(`       ├── tokens/design-tokens.json`);
+      console.log(`       ├── tokens/`);
+      console.log(`       │   ├── design-tokens.json`);
+      console.log(`       │   └── design-tokens.css`);
       console.log(`       ├── tailwind.config.ts`);
+      console.log(`       ├── wcag-results.json`);
+      console.log(`       ├── accessibility-report.md`);
+      console.log(`       ├── color-swatches.html`);
       console.log(`       ├── src/components/`);
       console.log(`       │   ├── Button/`);
       console.log(`       │   ├── Input/`);
       console.log(`       │   ├── Card/`);
       console.log(`       │   └── Modal/`);
       console.log(`       ├── src/stories/Principles.stories.mdx`);
+      if (!options.skipStorybook) {
+        console.log(`       ├── .storybook/`);
+        console.log(`       │   ├── main.ts`);
+        console.log(`       │   └── preview.ts`);
+        console.log(`       ├── package.json`);
+      }
       console.log(`       └── .supercomponents/metadata.json`);
       console.log('');
       console.log('🚀 Next steps:');
       console.log(`   1. cd ${outputDir}`);
-      console.log(`   2. npm install`);
-      console.log(`   3. npm run storybook`);
+      if (!options.skipStorybook) {
+        console.log(`   2. npm install`);
+        console.log(`   3. npm run storybook`);
+      } else {
+        console.log(`   2. Review generated tokens in tokens/design-tokens.css`);
+        console.log(`   3. Check accessibility report in accessibility-report.md`);
+      }
       console.log('');
 
       if (options.verbose) {
@@ -123,6 +141,7 @@ program
         console.log(`   UI density: ${result.insights.uiDensity}`);
         console.log(`   Color palette: ${result.insights.imageryPalette.length} colors`);
         console.log(`   Typography families: ${result.insights.typographyFamilies.length} fonts`);
+        console.log(`   WCAG validation: ${result.wcagResults.filter(r => r.passes).length}/${result.wcagResults.length} passed`);
         console.log('');
       }
 

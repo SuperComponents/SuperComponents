@@ -29,6 +29,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || React.useId();
     const errorId = error ? `${inputId}-error` : undefined;
     const helperTextId = helperText ? `${inputId}-helper` : undefined;
+    
+    // Set variant to error if error prop is provided
+    const resolvedVariant = error ? 'error' : variant;
 
     const baseStyles = [
       'flex rounded-md border bg-white px-3 py-2 text-sm',
@@ -66,7 +69,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const inputStyles = cn(
       baseStyles,
-      variantStyles[variant],
+      variantStyles[resolvedVariant],
       sizeStyles[size],
       startIcon && 'pl-10',
       endIcon && 'pr-10',
@@ -88,7 +91,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             htmlFor={inputId}
             className={cn(
               'block text-sm font-medium mb-2',
-              variant === 'error' ? 'text-semantic-error' : 'text-neutral-700'
+              resolvedVariant === 'error' ? 'text-semantic-error' : 'text-neutral-700'
             )}
           >
             {label}
@@ -108,7 +111,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               errorId,
               helperTextId
             )}
-            aria-invalid={variant === 'error' ? 'true' : 'false'}
+            aria-invalid={resolvedVariant === 'error' ? 'true' : 'false'}
             {...props}
           />
           {endIcon && (

@@ -1,0 +1,58 @@
+name: Update Badges
+
+on:
+  push:
+    branches: [main, master]
+  workflow_run:
+    workflows: ["CI", "E2E Generation Testing"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  update-badges:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate build status badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: ${{ secrets.BADGE_GIST_ID }}
+          filename: build-status.json
+          label: Build
+          message: ${{ github.event.workflow_run.conclusion == 'success' && 'Passing' || 'Failed' }}
+          color: ${{ github.event.workflow_run.conclusion == 'success' && 'brightgreen' || 'red' }}
+
+      - name: Generate E2E status badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: ${{ secrets.BADGE_GIST_ID }}
+          filename: e2e-status.json
+          label: E2E Tests
+          message: ${{ github.event.workflow_run.conclusion == 'success' && 'Passing' || 'Failed' }}
+          color: ${{ github.event.workflow_run.conclusion == 'success' && 'brightgreen' || 'red' }}
+
+      - name: Generate accessibility badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: ${{ secrets.BADGE_GIST_ID }}
+          filename: accessibility-score.json
+          label: Accessibility
+          message: "≥90%"
+          color: brightgreen
+
+      - name: Generate CLI badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: ${{ secrets.BADGE_GIST_ID }}
+          filename: cli-status.json
+          label: CLI
+          message: Ready
+          color: blue

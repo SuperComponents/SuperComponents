@@ -78,25 +78,18 @@ Modal dialog component with overlay, focus management, and accessibility feature
 - `showCloseButton`: boolean (default: true)
 - `children`: React.ReactNode
 
-**Subcomponents:**
-- `Modal.Header`: Header section with optional close button
-- `Modal.Content`: Main content area
-- `Modal.Footer`: Footer section for actions
-
 **Example:**
 ```tsx
-import { Modal } from '@/components';
+import { Modal, Button } from '@/components';
 
 <Modal isOpen={isOpen} onClose={handleClose} size="md">
-  <Modal.Header onClose={handleClose}>
-    <h3>Modal Title</h3>
-  </Modal.Header>
-  <Modal.Content>
+  <div className="space-y-4">
+    <h3 className="text-lg font-semibold">Modal Title</h3>
     <p>Modal content...</p>
-  </Modal.Content>
-  <Modal.Footer>
-    <Button onClick={handleClose}>Close</Button>
-  </Modal.Footer>
+    <div className="flex gap-2 justify-end">
+      <Button onClick={handleClose}>Close</Button>
+    </div>
+  </div>
 </Modal>
 ```
 

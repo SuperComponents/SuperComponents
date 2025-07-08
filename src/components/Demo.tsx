@@ -89,18 +89,14 @@ export const ComponentDemo: React.FC = () => {
           onClose={() => setIsModalOpen(false)}
           size="md"
         >
-          <Modal.Header onClose={() => setIsModalOpen(false)}>
+          <div className="space-y-4">
             <h3 className="text-lg font-semibold">Modal Title</h3>
-          </Modal.Header>
-          <Modal.Content>
-            <p className="mb-4">
+            <p>
               This is a modal dialog. It demonstrates the modal component with proper
               focus management and accessibility features.
             </p>
             <Input placeholder="Type something..." />
-          </Modal.Content>
-          <Modal.Footer>
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-2 justify-end mt-4">
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>
                 Cancel
               </Button>
@@ -108,7 +104,7 @@ export const ComponentDemo: React.FC = () => {
                 Confirm
               </Button>
             </div>
-          </Modal.Footer>
+          </div>
         </Modal>
       </Card>
     </div>

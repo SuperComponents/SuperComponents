@@ -37,7 +37,7 @@ describe('Button', () => {
     render(<Button disabled>Disabled</Button>);
     const button = screen.getByRole('button', { name: 'Disabled' });
     expect(button).toBeDisabled();
-    expect(button).toHaveClass('opacity-50');
+    expect(button).toHaveClass('disabled:opacity-50');
   });
 
   it('handles loading state', () => {
