@@ -78,34 +78,13 @@ function createServer(): Server {
         },
         {
           name: tools.initializeProjectTool.definition.name,
-          description: "Initialize SuperComponents project with Storybook and Tailwind. RUN THIS FIRST before using other tools to set up the project structure.",
+          description: "Initialize a new SuperComponents project by fetching scaffolding from the SuperComponents repository. RUN THIS FIRST before using other tools.",
           inputSchema: {
             type: "object",
             properties: {
               path: {
                 type: "string",
-                description: "Project directory path (default: current directory)",
-                default: "./"
-              },
-              projectName: {
-                type: "string", 
-                description: "Project name",
-                default: "SuperComponents Project"
-              },
-              skipStorybook: {
-                type: "boolean",
-                description: "Skip Storybook setup",
-                default: false
-              },
-              skipTailwind: {
-                type: "boolean",
-                description: "Skip Tailwind CSS setup", 
-                default: false
-              },
-              skipSuperComponents: {
-                type: "boolean",
-                description: "Skip SuperComponents directory creation",
-                default: false
+                description: "Project directory path (default: caller's current directory)"
               }
             },
             required: []
