@@ -45,7 +45,7 @@ async function demonstrateLLMIntegration() {
     console.log('--- Example 4: Provider-Specific Models ---');
     if (currentProvider.name === 'anthropic') {
       const anthropicResponse = await complete('What is component composition?', {
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 100
       });
       console.log(`Anthropic Response: ${anthropicResponse}\n`);

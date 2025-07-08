@@ -1,8 +1,8 @@
 {
-  "name": "supercomponents-server",
+  "name": "supercomponents-mcp",
   "version": "1.0.0",
   "description": "AI-powered design system generator that transforms inspiration into complete, production-ready component libraries",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "type": "module",
   "homepage": "https://github.com/SuperComponents/SuperComponents",
   "repository": {
@@ -12,26 +12,38 @@
   "bugs": {
     "url": "https://github.com/SuperComponents/SuperComponents/issues"
   },
+  "bin": {
+    "supercomponents-mcp": "dist/server.js",
+    "supercomponents-server": "./bin/inspiration-to-system.ts"
+  },
+  "files": [
+    "dist/**/*",
+    "bin/**/*",
+    "README.md",
+    "INSTALLATION_GUIDE.md",
+    "MCP_USAGE_GUIDE.md",
+    "API_KEYS_AND_MODELS.md"
+  ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/server.js",
+    "mcp": "node dist/server.js",
     "test": "jest",
     "test:cli": "bash scripts/test-cli.sh",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "clean": "rm -rf build",
+    "clean": "rm -rf dist",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run clean && npm run build",
     "inspiration-to-system": "tsx bin/inspiration-to-system.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
-  "bin": {
-    "supercomponents-server": "./bin/inspiration-to-system.ts"
-  },
   "keywords": [
     "mcp",
+    "mcp-server",
     "ai",
     "components",
     "design-system",
@@ -48,7 +60,6 @@
     "w3c-tokens",
     "component-library",
     "ui-kit",
-    "design-tokens",
     "inspiration",
     "automated-design"
   ],

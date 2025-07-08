@@ -1,0 +1,580 @@
+{
+  "id": "design-1751956918885",
+  "tokens": [
+    {
+      "name": "spacing-0",
+      "value": 0,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-1",
+      "value": 4,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-2",
+      "value": 8,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-3",
+      "value": 12,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-4",
+      "value": 16,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-5",
+      "value": 24,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-6",
+      "value": 32,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-xs",
+      "value": 4,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-sm",
+      "value": 8,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-md",
+      "value": 16,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-lg",
+      "value": 24,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-xl",
+      "value": 32,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "spacing-2xl",
+      "value": 48,
+      "type": "spacing",
+      "category": "spacing"
+    },
+    {
+      "name": "color-brand",
+      "value": "#2563eb",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-brandAccent",
+      "value": "#1d4ed8",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-surface",
+      "value": "#ffffff",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-surfaceAlt",
+      "value": "#f8fafc",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-overlay",
+      "value": "rgba(0, 0, 0, 0.8)",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-success",
+      "value": "#22c55e",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-danger",
+      "value": "#ef4444",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-warning",
+      "value": "#f59e0b",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-textPrimary",
+      "value": "#0f172a",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-textSecondary",
+      "value": "#64748b",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-textInverse",
+      "value": "#ffffff",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-white",
+      "value": "#FFFFFF",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-50",
+      "value": "#eff6ff",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-100",
+      "value": "#dbeafe",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-200",
+      "value": "#bfdbfe",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-300",
+      "value": "#93c5fd",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-400",
+      "value": "#60a5fa",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-500",
+      "value": "#3b82f6",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-600",
+      "value": "#2563eb",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-700",
+      "value": "#1d4ed8",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-800",
+      "value": "#1e40af",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-primary-900",
+      "value": "#1e3a8a",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-50",
+      "value": "#f8fafc",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-100",
+      "value": "#f1f5f9",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-200",
+      "value": "#e2e8f0",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-300",
+      "value": "#cbd5e1",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-400",
+      "value": "#94a3b8",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-500",
+      "value": "#64748b",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-600",
+      "value": "#475569",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-700",
+      "value": "#334155",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-800",
+      "value": "#1e293b",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "color-neutral-900",
+      "value": "#0f172a",
+      "type": "color",
+      "category": "colors"
+    },
+    {
+      "name": "typography-sizes-xs",
+      "value": 12,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-sizes-sm",
+      "value": 14,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-sizes-md",
+      "value": 16,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-sizes-lg",
+      "value": 18,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-sizes-xl",
+      "value": 24,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-sizes-2xl",
+      "value": 32,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-weights-regular",
+      "value": "400",
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-weights-medium",
+      "value": "500",
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-weights-bold",
+      "value": "700",
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-lineHeights-xs",
+      "value": 16,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-lineHeights-sm",
+      "value": 20,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-lineHeights-md",
+      "value": 24,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-lineHeights-lg",
+      "value": 28,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-lineHeights-xl",
+      "value": 32,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "typography-lineHeights-2xl",
+      "value": 40,
+      "type": "typography",
+      "category": "typography"
+    },
+    {
+      "name": "radius-none",
+      "value": 0,
+      "type": "radius",
+      "category": "radius"
+    },
+    {
+      "name": "radius-sm",
+      "value": 2,
+      "type": "radius",
+      "category": "radius"
+    },
+    {
+      "name": "radius-md",
+      "value": 4,
+      "type": "radius",
+      "category": "radius"
+    },
+    {
+      "name": "radius-lg",
+      "value": 8,
+      "type": "radius",
+      "category": "radius"
+    },
+    {
+      "name": "radius-full",
+      "value": 9999,
+      "type": "radius",
+      "category": "radius"
+    },
+    {
+      "name": "elevation-none",
+      "value": {},
+      "type": "elevation",
+      "category": "elevation"
+    },
+    {
+      "name": "elevation-xs",
+      "value": {},
+      "type": "elevation",
+      "category": "elevation"
+    },
+    {
+      "name": "elevation-sm",
+      "value": {},
+      "type": "elevation",
+      "category": "elevation"
+    },
+    {
+      "name": "elevation-md",
+      "value": {},
+      "type": "elevation",
+      "category": "elevation"
+    },
+    {
+      "name": "elevation-lg",
+      "value": {},
+      "type": "elevation",
+      "category": "elevation"
+    },
+    {
+      "name": "opacity-0",
+      "value": 0,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-10",
+      "value": 0.1,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-20",
+      "value": 0.2,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-30",
+      "value": 0.3,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-40",
+      "value": 0.4,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-50",
+      "value": 0.5,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-60",
+      "value": 0.6,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-70",
+      "value": 0.7,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-80",
+      "value": 0.8,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-90",
+      "value": 0.9,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "opacity-100",
+      "value": 1,
+      "type": "opacity",
+      "category": "opacity"
+    },
+    {
+      "name": "durations-fast",
+      "value": 150,
+      "type": "durations",
+      "category": "durations"
+    },
+    {
+      "name": "durations-normal",
+      "value": 300,
+      "type": "durations",
+      "category": "durations"
+    },
+    {
+      "name": "durations-slow",
+      "value": 500,
+      "type": "durations",
+      "category": "durations"
+    },
+    {
+      "name": "zIndex-base",
+      "value": 0,
+      "type": "zIndex",
+      "category": "zIndex"
+    },
+    {
+      "name": "zIndex-overlay",
+      "value": 100,
+      "type": "zIndex",
+      "category": "zIndex"
+    },
+    {
+      "name": "zIndex-modal",
+      "value": 200,
+      "type": "zIndex",
+      "category": "zIndex"
+    },
+    {
+      "name": "zIndex-toast",
+      "value": 300,
+      "type": "zIndex",
+      "category": "zIndex"
+    },
+    {
+      "name": "zIndex-tooltip",
+      "value": 400,
+      "type": "zIndex",
+      "category": "zIndex"
+    },
+    {
+      "name": "easing-default",
+      "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "type": "easing",
+      "category": "easing"
+    }
+  ],
+  "components": [
+    {
+      "id": "comp-0",
+      "name": "Card",
+      "type": "card",
+      "props": {},
+      "tokens": []
+    },
+    {
+      "id": "comp-1",
+      "name": "Button",
+      "type": "button",
+      "props": {},
+      "tokens": []
+    },
+    {
+      "id": "comp-2",
+      "name": "Typography",
+      "type": "typography",
+      "props": {},
+      "tokens": []
+    },
+    {
+      "id": "comp-3",
+      "name": "Separator",
+      "type": "separator",
+      "props": {},
+      "tokens": []
+    }
+  ],
+  "metadata": {
+    "description": "A modern, clean card-based interface design system optimized for readability and hierarchy. The design emphasizes clear typography, subtle shadows, and comfortable spacing. The card component features rounded corners, a subtle elevation shadow, and clear content hierarchy with distinct title and body text treatments. Interactive elements like buttons use state changes for hover/focus. The layout maintains consistent padding and spacing relationships. Accessibility considerations include sufficient color contrast, clear focus indicators, and semantic HTML structure. Implementation should maintain consistent spacing tokens and ensure interactive elements have proper ARIA attributes.",
+    "version": "1.0.0",
+    "createdAt": "2025-07-08T06:41:58.885Z"
+  }
+}

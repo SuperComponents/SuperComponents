@@ -11,7 +11,7 @@ export type Provider = 'openai' | 'anthropic';
 
 // Provider interface
 interface LLMProvider {
-  complete(prompt: string, opts: any): Promise<string>;
+  complete(prompt: string | any[], opts: any): Promise<string>;
   streamComplete(prompt: string, opts: any): AsyncGenerator<string, void, unknown>;
 }
 
@@ -25,10 +25,20 @@ class OpenAIProvider implements LLMProvider {
     });
   }
 
-  async complete(prompt: string, opts: any = {}): Promise<string> {
+  async complete(prompt: string | any[], opts: any = {}): Promise<string> {
+    // Handle both string prompts and multi-modal content
+    let messages;
+    if (typeof prompt === 'string') {
+      messages = [{ role: 'user', content: prompt }];
+    } else {
+      // Assume prompt is already formatted for multi-modal content
+      messages = [{ role: 'user', content: prompt }];
+    }
+
     const response = await this.client.chat.completions.create({
       model: opts.model || 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
+      messages,
+      max_tokens: opts.max_tokens || 4000, // Increased for image analysis
       ...opts
     });
     
@@ -62,11 +72,20 @@ class AnthropicProvider implements LLMProvider {
     });
   }
 
-  async complete(prompt: string, opts: any = {}): Promise<string> {
+  async complete(prompt: string | any[], opts: any = {}): Promise<string> {
+    // Handle both string prompts and multi-modal content
+    let messages;
+    if (typeof prompt === 'string') {
+      messages = [{ role: 'user', content: prompt }];
+    } else {
+      // Assume prompt is already formatted for multi-modal content
+      messages = [{ role: 'user', content: prompt }];
+    }
+
     const response = await this.client.messages.create({
       model: opts.model || 'claude-3-5-sonnet-20241022',
-      max_tokens: opts.max_tokens || 1024,
-      messages: [{ role: 'user', content: prompt }],
+      max_tokens: opts.max_tokens || 4000, // Increased for image analysis
+      messages,
       ...opts
     });
     
@@ -157,12 +176,12 @@ function generateCacheKey(prompt: string, opts: any, providerName: Provider): st
 }
 
 // Main completion function with caching and rate limiting
-export async function complete(prompt: string, opts: any = {}): Promise<string> {
+export async function complete(prompt: string | any[], opts: any = {}): Promise<string> {
   const { provider, name } = getProvider();
-  const cacheKey = generateCacheKey(prompt, opts, name);
+  const cacheKey = generateCacheKey(typeof prompt === 'string' ? prompt : JSON.stringify(prompt), opts, name);
   
-  // Check cache first
-  if (cache.has(cacheKey)) {
+  // Check cache first (only cache text prompts for now)
+  if (typeof prompt === 'string' && cache.has(cacheKey)) {
     return cache.get(cacheKey)!;
   }
   
@@ -172,8 +191,10 @@ export async function complete(prompt: string, opts: any = {}): Promise<string> 
   try {
     const content = await provider.complete(prompt, opts);
     
-    // Cache the response
-    cache.set(cacheKey, content);
+    // Cache the response (only cache text prompts for now)
+    if (typeof prompt === 'string') {
+      cache.set(cacheKey, content);
+    }
     
     return content;
   } catch (error) {

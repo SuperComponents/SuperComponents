@@ -5,3 +5,81 @@ dist
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# IDE-specific (Cursor)
+.cursor/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Output of 'npm pack'
+*.tgz
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Taskmaster user-specific files
+.taskmaster/state.json
+.taskmaster/logs/
+.taskmaster/temp/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+*storybook.log
+storybook-static
+
+# Storybook
+stories/
+.storybook/
+.storybook-static/
+vitest.config.ts
+vitest.shims.d.ts
+
+# SuperComponents
+supercomponents/
+.supercomponents/
+
+#tailwind
+postcss.config.cjs
+tailwind.config.cjs

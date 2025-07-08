@@ -4,8 +4,25 @@ import { z } from "zod";
 // Design token schema for capturing design system tokens
 export const TokenSchema = z.object({
   name: z.string(),
-  value: z.union([z.string(), z.number()]),
-  type: z.enum(['color', 'spacing', 'typography', 'shadow', 'border', 'other']),
+  value: z.union([z.string(), z.number(), z.object({})]), // Allow objects for complex values like box-shadows
+  type: z.enum([
+    'color', 
+    'spacing', 
+    'typography', 
+    'shadow', 
+    'border', 
+    'radius',
+    'elevation',
+    'opacity',
+    'durations',
+    'zIndex',
+    'easing',
+    'size',
+    'breakpoint',
+    'animation',
+    'transition',
+    'other'
+  ]),
   category: z.string().optional(),
   description: z.string().optional(),
 });
