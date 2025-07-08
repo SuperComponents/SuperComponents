@@ -1,31 +1,31 @@
-# SuperComponents Deployment Guide
+# SuperComponents Manual Deployment Guide
 
-This guide explains how to set up automated NPM publishing using GitHub Actions for the SuperComponents project.
+This guide explains how to manually publish the SuperComponents package to NPM using local scripts and optional GitHub Actions.
 
 ## Overview
 
 The deployment system uses:
-- **GitHub Actions** for CI/CD automation
-- **Semantic Release** for automatic version management
-- **Conventional Commits** for version determination
-- **NPM** for package publishing
+- **Manual Publishing**: Local or GitHub Actions-based manual publishing
+- **Manual Versioning**: Explicit version control using npm version commands
+- **GitHub Actions**: Automated testing and optional manual publishing
+- **NPM**: Package publishing
 
 ## Prerequisites
 
 1. **NPM Account**: You need an NPM account with publishing permissions
-2. **GitHub Repository**: The project must be hosted on GitHub
-3. **Admin Access**: You need admin access to the GitHub repository
+2. **GitHub Repository**: The project must be hosted on GitHub  
+3. **Node.js**: Version 18+ installed locally for manual publishing
 
 ## Setup Steps
 
 ### 1. Repository Configuration
 
-First, update the repository URLs in `package.json`:
+The repository URLs are already configured in `package.json`:
 
 ```json
 {
   "repository": {
-    "type": "git",
+    "type": "git", 
     "url": "https://github.com/SuperComponents/SuperComponents.git"
   },
   "homepage": "https://github.com/SuperComponents/SuperComponents#readme",
@@ -35,13 +35,24 @@ First, update the repository URLs in `package.json`:
 }
 ```
 
-Replace `YOUR_USERNAME` with your actual GitHub username or organization name.
+### 2. NPM Authentication
 
-### 2. NPM Token Setup
+For local publishing, you need to authenticate with NPM:
+
+```bash
+# Login to NPM
+npm login
+
+# Verify you're logged in
+npm whoami
+```
+
+### 3. GitHub Secrets (Optional - for GitHub Actions publishing)
+
+If you want to use the optional GitHub Actions manual publishing workflow:
 
 1. **Generate NPM Token**:
    ```bash
-   npm login
    npm token create --read-only=false
    ```
    
@@ -52,176 +63,109 @@ Replace `YOUR_USERNAME` with your actual GitHub username or organization name.
    - Name: `NPM_TOKEN`
    - Value: Your NPM token (starts with `npm_`)
 
-### 3. GitHub Token (Already Available)
+## Publishing Workflow
 
-The `GITHUB_TOKEN` is automatically provided by GitHub Actions - no setup needed.
+### Method 1: Local Manual Publishing (Recommended)
 
-### 4. Branch Protection (Highly Recommended for Team Workflow)
-
-Since you're using feature branches and PRs, set up branch protection to enforce this workflow:
-
-1. Go to **Settings** → **Branches**
-2. Click **Add rule**
-3. Branch name pattern: `master`
-4. Enable:
-   - ✅ Require pull request reviews before merging
-   - ✅ Require status checks to pass before merging
-   - ✅ Require up-to-date branches before merging
-   - ✅ Restrict pushes that create files
-   - ✅ Do not allow bypassing the above settings
-
-This prevents direct pushes to master and ensures all changes go through the PR process.
-
-## How It Works
-
-### Feature Branch Workflow
-
-The deployment system is optimized for a professional feature branch workflow:
-
-1. **Feature Development**: Work happens on feature branches
-2. **Pull Request**: Create PR to master (triggers tests only)
-3. **Code Review**: Team reviews changes before merge
-4. **Merge to Master**: Triggers automatic release
-
-### Automatic Publishing
-
-The system automatically publishes a new version when:
-1. A Pull Request is merged into the `master` branch
-2. The commit messages follow conventional commit format
-3. All tests pass and build succeeds
-
-### Commit Message Format
-
-Use these prefixes in your commit messages:
+This is the primary method for publishing new versions:
 
 ```bash
-feat: add new feature          # → Minor version bump (1.0.0 → 1.1.0)
-fix: resolve bug               # → Patch version bump (1.0.0 → 1.0.1)
-docs: update documentation     # → Patch version bump
-style: formatting changes      # → Patch version bump
-refactor: code improvements    # → Patch version bump
-test: add tests               # → Patch version bump
-build: build system changes   # → Patch version bump
-ci: CI/CD changes             # → Patch version bump
-chore: maintenance tasks      # → Patch version bump
+# 1. Ensure you're on master branch and up to date
+git checkout master
+git pull origin master
 
-# For breaking changes (major version):
-feat!: breaking change        # → Major version bump (1.0.0 → 2.0.0)
-# OR
-feat: new feature
+# 2. Update version (choose one):
+npm run version:patch   # 1.0.0 → 1.0.1 (bug fixes)
+npm run version:minor   # 1.0.0 → 1.1.0 (new features)  
+npm run version:major   # 1.0.0 → 2.0.0 (breaking changes)
 
-BREAKING CHANGE: This change breaks the API
+# 3. Push version changes
+git push origin master --tags
+
+# 4. Build and publish
+npm run publish:manual
 ```
 
-### Workflow Overview
+### Method 2: GitHub Actions Manual Publishing (Optional)
 
-The GitHub Actions workflow consists of 3 jobs optimized for feature branch workflow:
+You can also publish using GitHub Actions:
 
-1. **Test Job** (runs on all PRs and feature branch pushes):
-   - Installs dependencies
-   - Runs tests (currently optional since tests aren't implemented)
-   - Builds the project
-   - Verifies build output
-   - ✅ Shows status check on PR
+1. Go to your repository on GitHub
+2. Click the **Actions** tab
+3. Select **Test and Build** workflow
+4. Click **Run workflow**
+5. Select **master** branch  
+6. Click **Run workflow**
+7. The workflow will run tests, then require manual approval for publishing
+8. Approve the deployment in the **Environments** section when ready
 
-2. **Release Job** (runs ONLY when PRs are merged to master):
-   - Analyzes ALL commit messages from the merged PR
-   - Automatically updates version in package.json
-   - Generates changelog
-   - Creates GitHub release
-   - Publishes to NPM
+### Version Management
 
-3. **Manual Publish Job** (can be triggered manually):
-   - Builds and publishes without version changes
-   - Use for emergency releases
+Use semantic versioning to indicate the type of changes:
 
-### What Triggers What
-
-- **Push to feature branch**: Nothing (develop freely)
-- **Create PR to master**: Test job only (safe to test)
-- **Merge PR to master**: Release job (automatic publish)
-- **Direct push to master**: Release job (if branch protection disabled)
-
-### Important: PR Merge Strategy
-
-The system works with any merge strategy, but be aware:
-
-- **Merge Commit**: Preserves all individual commit messages (recommended)
-- **Squash and Merge**: Combines commits into one (use descriptive squash message)
-- **Rebase and Merge**: Preserves individual commits in linear history
-
-For best results, use **merge commits** or ensure your **squash commit messages** follow conventional format.
-
-## Usage Examples
-
-### Development Workflow (Feature Branch Approach)
+- **Patch** (`1.0.0 → 1.0.1`): Bug fixes, documentation updates
+- **Minor** (`1.0.0 → 1.1.0`): New features, backwards compatible
+- **Major** (`1.0.0 → 2.0.0`): Breaking changes
 
 ```bash
-# Create feature branch
+# Examples:
+npm run version:patch   # Fixed a bug
+npm run version:minor   # Added new MCP tool
+npm run version:major   # Changed API interface
+```
+
+## Development Workflow
+
+### Feature Development
+
+```bash
+# 1. Create feature branch
 git checkout -b feature/new-tool
 
-# Make changes and commit using conventional format
-git commit -m "feat: add new design parsing tool"
+# 2. Make changes and commit
+git add .
+git commit -m "Add new design parsing tool"
 
-# Push feature branch (triggers test job only)
+# 3. Push and create PR
 git push origin feature/new-tool
+# Create PR on GitHub → triggers automated tests
 
-# Create Pull Request on GitHub
-# → Test job runs automatically
-# → Build verification occurs
-# → Ready for review
-
-# After PR is approved and merged to master:
-# → Automatic version bump to 1.1.0
-# → Automatic NPM publish
-# → GitHub release created
+# 4. After PR approval and merge:
+# → No automatic publishing
+# → Manual publishing when ready
 ```
 
-### Bug Fix Workflow
+### Testing
+
+The GitHub Actions workflow automatically runs tests on:
+- All pull requests
+- Pushes to master branch  
+- Manual workflow triggers
+
+Tests include:
+- Dependency installation
+- TypeScript compilation
+- Build verification
+- ES module loading test
+
+## Manual Publishing Scripts
+
+The following scripts are available in `package.json`:
 
 ```bash
-# Create fix branch
-git checkout -b fix/validation-error
+# Version management
+npm run version:patch   # Increment patch version
+npm run version:minor   # Increment minor version  
+npm run version:major   # Increment major version
 
-# Fix the issue and commit
-git commit -m "fix: resolve validation error in design schema"
+# Publishing
+npm run publish:manual  # Build and publish to NPM
 
-# After merge to master:
-# → Automatic version bump to 1.0.1
-# → Automatic NPM publish
+# Development
+npm run build          # Compile TypeScript
+npm run dev            # Watch mode compilation
+npm run test           # Run tests
 ```
-
-### Breaking Change Workflow
-
-```bash
-# Make breaking change
-git commit -m "feat!: change API interface for better type safety
-
-BREAKING CHANGE: The parseDesign function now returns a Promise instead of synchronous result"
-
-# After merge to master:
-# → Automatic version bump to 2.0.0
-# → Automatic NPM publish
-```
-
-## Manual Publishing
-
-If you need to publish manually:
-
-```bash
-# Build the project
-npm run build
-
-# Publish to NPM
-npm publish
-```
-
-Or trigger the manual workflow in GitHub Actions:
-1. Go to **Actions** tab
-2. Select **Release and Publish** workflow
-3. Click **Run workflow**
-4. Select **master** branch
-5. Click **Run workflow**
 
 ## Package Contents
 
@@ -234,14 +178,49 @@ The published NPM package includes:
 - ❌ Source TypeScript files (excluded via .npmignore)
 - ❌ Tests and development files (excluded)
 
+## Publishing Checklist
+
+Before publishing a new version:
+
+- [ ] All changes merged to master branch
+- [ ] Tests passing locally: `npm test`
+- [ ] Build successful: `npm run build`
+- [ ] Version updated: `npm run version:*`
+- [ ] Changes documented in commit messages
+- [ ] No sensitive data in build output
+
 ## Troubleshooting
 
 ### Common Issues
 
-1. **NPM publish fails**: Check that your NPM_TOKEN is valid and has publish permissions
-2. **GitHub release fails**: Ensure GITHUB_TOKEN has proper permissions
-3. **Version not bumping**: Check that commit messages follow conventional format
-4. **Build fails**: Run `npm run build` locally to test
+1. **NPM publish fails**: 
+   ```bash
+   # Check authentication
+   npm whoami
+   
+   # Re-login if needed
+   npm login
+   ```
+
+2. **Version already exists**:
+   ```bash
+   # Check current published version
+   npm view supercomponents-server version
+   
+   # Update version before publishing
+   npm run version:patch
+   ```
+
+3. **Build fails**:
+   ```bash
+   # Clean and rebuild
+   rm -rf build/
+   npm run build
+   ```
+
+4. **Permission denied**:
+   - Verify you have publish permissions for the package
+   - Check if package name is available: `npm view supercomponents-server`
 
 ### Debug Commands
 
@@ -249,34 +228,52 @@ The published NPM package includes:
 # Test build locally
 npm run build
 
-# Test package contents
+# Check what will be published
 npm pack
 tar -tzf *.tgz
 
-# Check NPM token
+# Verify package contents
+npm publish --dry-run
+
+# Check NPM authentication
 npm whoami
 
-# Verify semantic release locally (requires installation)
-npx semantic-release --dry-run
+# View package info
+npm view supercomponents-server
 ```
 
 ## Files Created/Modified
 
-This deployment setup created/modified these files:
-- `package.json` - Updated for NPM publishing
+This deployment setup includes:
+- `package.json` - Updated with manual publishing scripts
 - `.npmignore` - Controls what gets published
 - `tsconfig.json` - TypeScript compilation settings
-- `.github/workflows/release.yml` - GitHub Actions workflow
-- `.releaserc.json` - Semantic release configuration
+- `.github/workflows/release.yml` - GitHub Actions for testing and optional manual publishing
 - `LICENSE` - MIT license file
 - `DEPLOYMENT.md` - This documentation
 
-## Next Steps
+## Team Workflow
 
-1. Update the repository URLs in `package.json`
-2. Add the NPM_TOKEN secret to GitHub
-3. Test the workflow with a sample commit
-4. Set up branch protection rules (optional)
-5. Share this guide with your team
+### Recommended Process
 
-The deployment system is now ready for your team to use! 🚀 
+1. **Development**: Work on feature branches, create PRs
+2. **Testing**: GitHub Actions automatically tests all PRs
+3. **Merging**: Merge PRs to master after review
+4. **Versioning**: Use `npm run version:*` to update version
+5. **Publishing**: Use `npm run publish:manual` when ready to release
+
+### Publishing Schedule
+
+Since publishing is manual, the team can decide when to release:
+- **Immediately**: For critical bug fixes
+- **Weekly**: For regular feature releases  
+- **Milestone-based**: For major version releases
+
+## Security Notes
+
+- NPM tokens have publish permissions - keep them secure
+- GitHub Actions manual publishing requires approval
+- Only publish from master branch
+- Verify package contents before publishing
+
+The deployment system is now ready for manual publishing! 🚀 

@@ -1,10 +1,11 @@
-name: Release and Publish
+name: Test and Build
 
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   test:
@@ -12,8 +13,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -45,62 +44,21 @@ jobs:
             }
           "
 
-      # Add a status check for PRs
-      - name: PR Success Comment
-        if: github.event_name == 'pull_request'
+      - name: Success notification
         run: |
-          echo "✅ Build and tests passed! Ready for merge to trigger release."
-          echo "📦 This PR will be included in the next release when merged to master."
+          echo "✅ All checks passed!"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "📦 PR is ready for merge."
+          else
+            echo "🚀 Code is ready for manual publishing if needed."
+          fi
 
-  release:
-    needs: test
-    runs-on: ubuntu-latest
-    # Only run on master branch pushes (merged PRs), not on PRs
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build project
-        run: npm run build
-
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          semantic_version: 19
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Release Success Notification
-        if: success()
-        run: |
-          echo "🚀 Successfully published new release!"
-          echo "📦 Package is now available on NPM"
-          echo "📋 Release notes have been generated"
-
-  # Manual publish job (can be triggered manually if needed)
-  publish:
+  # Manual publish job (only triggered manually via workflow_dispatch)
+  manual-publish:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
+    environment: production  # Require approval for manual publishing
     
     steps:
       - name: Checkout code
@@ -122,4 +80,9 @@ jobs:
       - name: Publish to NPM
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} 
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish success notification
+        run: |
+          echo "🚀 Successfully published to NPM!"
+          echo "📦 Package version: $(node -p "require('./package.json').version")" 
