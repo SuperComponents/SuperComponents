@@ -125,7 +125,9 @@ export const initializeProjectTool: Tool = {
         
         execSync('npm run supercomponents-setup', { 
           cwd: path, 
-          stdio: 'inherit' 
+          stdio: 'inherit',
+          // DEV env so devDependencies are installed
+          env: { ...process.env, NODE_ENV: 'development' }
         });
         
         results.push("✅ SuperComponents setup completed successfully");
