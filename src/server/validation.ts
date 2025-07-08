@@ -504,7 +504,7 @@ export function createValidationError(
   code: MCPErrorCode = MCPErrorCode.InvalidParams,
   data?: unknown
 ): ValidationError {
-  return new ValidationError(message, code, data);
+  return new ValidationError(message, code, data as Record<string, any>);
 }
 
 export function isValidationError(error: unknown): error is ValidationError {

@@ -28,12 +28,12 @@ export const TokenSchema = z.object({
 });
 
 // Individual component within a design - recursive type
-export const DesignComponentSchema = z.object({
+export const DesignComponentSchema: z.ZodType<any> = z.object({
   id: z.string(),
   name: z.string(),
   type: z.string(),
   props: z.record(z.string(), z.any()),
-  children: z.array(z.lazy(() => DesignComponentSchema)).optional(),
+  children: z.array(z.lazy((): z.ZodSchema<any> => DesignComponentSchema)).optional(),
   tokens: z.array(z.string()).optional(), // Token references used by this component
 });
 

@@ -361,7 +361,7 @@ export class TokenGenerator {
     // Extract spacing
     if (w3cTokens.spacing) {
       Object.entries(w3cTokens.spacing).forEach(([key, value]) => {
-        if (typeof value === 'object' && '$value' in value) {
+        if (typeof value === 'object' && value && '$value' in value) {
           legacy.spacing[key] = value.$value as string;
         }
       });
@@ -370,7 +370,7 @@ export class TokenGenerator {
     // Extract border radius
     if (w3cTokens.borderRadius) {
       Object.entries(w3cTokens.borderRadius).forEach(([key, value]) => {
-        if (typeof value === 'object' && '$value' in value) {
+        if (typeof value === 'object' && value && '$value' in value) {
           legacy.borderRadius[key] = value.$value as string;
         }
       });
