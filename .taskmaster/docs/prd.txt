@@ -8,15 +8,15 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 - **Why it's important**: Enables AI to understand and process design information systematically
 - **How it works**: Uses LLM integration to parse various design formats and validate against structured schemas
 
-## 2. Library Analysis
-- **What it does**: Analyzes existing component library structures and identifies patterns
+## 2. Component Analysis
+- **What it does**: Analyzes existing component structures and identifies which component libraries exist and which components are installed
 - **Why it's important**: Ensures new components align with existing design system conventions
 - **How it works**: Scans component libraries to extract patterns, naming conventions, and architectural decisions
 
 ## 3. Instruction Generation
 - **What it does**: Generates detailed implementation instructions for component development
 - **Why it's important**: Bridges the gap between design and development with actionable guidance
-- **How it works**: Combines parsed design data with library analysis to create contextual implementation steps
+- **How it works**: Combines parsed design data with analysis to create contextual implementation steps
 
 ## 4. Project Initialization
 - **What it does**: Scaffolds new or existing projects with necessary configurations for SuperComponents workflows
@@ -34,14 +34,14 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 - **How it works**: Generates interactive Storybook stories that showcase extracted design tokens in an organized, browseable format
 
 ## 7. Context-Aware Instruction Generation (Phase 2)
-- **What it does**: Synthesizes design.json and library-manifest.json to produce detailed "super-prompts" for IDE AI
+- **What it does**: Synthesizes design.json and component-manifest.json to produce detailed "super-prompts" for IDE AI
 - **Why it's important**: Core value proposition - provides superior context for better code generation than generic prompts
-- **How it works**: Combines parsed design data with library analysis to create comprehensive prompts that include component structure, styling guidelines, and prop interfaces
+- **How it works**: Combines parsed design data with component analysis to create comprehensive prompts that include component structure, styling guidelines, and prop interfaces
 
 ## 8. Design Enforcement (Phase 2)
 - **What it does**: Lints code for design system compliance and flags non-standard colors, improper component usage
 - **Why it's important**: Maintains design consistency over time and prevents design system drift
-- **How it works**: Analyzes codebase against established design tokens and component library standards, providing automated feedback on compliance violations
+- **How it works**: Analyzes codebase against established design tokens and component component standards, providing automated feedback on compliance violations
 
 # User Experience  
 ## User Personas
@@ -51,8 +51,8 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 
 ## Key User Flows
 1. **Design-to-Component Flow**: Upload design → Parse structure → Generate implementation
-2. **Library Analysis Flow**: Analyze existing components → Identify patterns → Guide new development
-3. **Instruction Generation Flow**: Combine design + library context → Generate actionable steps
+2. **Component Analysis Flow**: Analyze existing components → Identify patterns → Guide new development
+3. **Instruction Generation Flow**: Combine design + component context → Generate actionable steps
 
 ## UI/UX Considerations
 - Server operates headlessly via MCP protocol
@@ -69,13 +69,13 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 
 ## Data Models
 - **Design Schema**: Structured representation of design components and tokens
-- **Library Schema**: Component library metadata and patterns
+- **Component Schema**: Component component metadata and patterns
 - **Instruction Schema**: Implementation guidance and code generation templates
 
 ## APIs and Integrations
 - **MCP Protocol**: Standard interface for AI tool communication
 - **LLM Providers**: Integration with various AI models for processing
-- **File System**: Design asset and library file access
+- **File System**: Design asset and component file access
 
 ## Infrastructure Requirements
 - Node.js runtime environment
@@ -87,13 +87,13 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 ## Phase 1: MVP Foundation
 ### Core Infrastructure
 - Complete MCP server setup with proper handler registration
-- Create foundational schemas for design and library data
+- Create foundational schemas for design and component data
 - Establish LLM integration patterns
 - Add comprehensive error handling and validation
 
 ### Core Features Implementation
 - **Design Parsing**: Implement parseDesigns tool with multi-format support (images, descriptions, code)
-- **Library Analysis**: Build analyzeLibrary tool for component pattern detection and naming conventions
+- **Component Analysis**: Build analyzeComponent tool for component pattern detection and naming conventions
 - **Instruction Generation**: Develop generateInstruction tool for implementation guidance
 - **Project Initialization**: Create initializeProject tool for Storybook and Tailwind scaffolding
 - **Design Token Generation**: Implement generateTokens tool for theme file creation
@@ -101,7 +101,7 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 
 ## Phase 2: Advanced Features
 ### Enhanced Capabilities
-- **Context-Aware Instruction Generation**: Synthesize design.json and library-manifest.json for superior IDE AI prompts
+- **Context-Aware Instruction Generation**: Synthesize design.json and component-manifest.json for superior IDE AI prompts
 - **Design Enforcement**: Implement linting for design system compliance and consistency checking
 
 ### Production Readiness
@@ -119,7 +119,7 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 
 ## Progressive Feature Building
 1. **Basic Design Parsing**: Start with simple text/description parsing
-2. **Library Analysis**: Build on parsing to understand existing patterns
+2. **Component Analysis**: Build on parsing to understand existing patterns
 3. **Instruction Generation**: Combine parsing + analysis for comprehensive output
 4. **Advanced Input Support**: Extend to complex design formats
 
@@ -133,10 +133,6 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 - **MCP SDK Integration**: Current code shows incomplete handler registration
 - **Mitigation**: Study MCP SDK documentation and implement proper request handlers
 
-## MVP Scoping
-- **Risk**: Feature scope too broad for initial release
-- **Mitigation**: Focus on single design input type and basic library analysis
-
 ## Resource Constraints
 - **Risk**: LLM API costs for processing
 - **Mitigation**: Implement caching and efficient prompt engineering
@@ -149,7 +145,7 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 ## Research Findings
 - MCP protocol provides standardized AI tool communication
 - Design parsing requires multi-modal AI model capabilities
-- Component library analysis benefits from AST parsing techniques
+- Component analysis benefits from AST parsing techniques
 
 ## Technical Specifications
 - Node.js 18+ for MCP SDK compatibility

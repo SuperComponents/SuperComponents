@@ -1,8 +1,8 @@
-// src/schemas/library.ts
+// src/schemas/components.ts
 import { z } from "zod";
 
-export const librarySchema = z.object({
-  // Library schema placeholder
+export const componentSchema = z.object({
+  // Component schema placeholder
   id: z.string().optional(),
   name: z.string().optional(),
   description: z.string().optional(),
@@ -10,13 +10,13 @@ export const librarySchema = z.object({
   components: z.array(z.string()).optional(),
 });
 
-export type Library = z.infer<typeof librarySchema>;
+export type Component = z.infer<typeof componentSchema>;
 
-export const libraryAnalysisSchema = z.object({
-  // Library analysis schema placeholder
-  library: librarySchema,
+export const componentAnalysisSchema = z.object({
+  // Component analysis schema placeholder
+  components: z.array(z.string()).optional(),
   patterns: z.array(z.string()).optional(),
   recommendations: z.array(z.string()).optional(),
 });
 
-export type LibraryAnalysis = z.infer<typeof libraryAnalysisSchema>; 
+export type ComponentAnalysis = z.infer<typeof componentAnalysisSchema>; 

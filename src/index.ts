@@ -5,7 +5,7 @@ import { z } from "zod";
 
 // Tool implementations
 import { parseDesignTool } from "./tools/parseDesigns.js";
-import { analyzeLibraryTool } from "./tools/analyzeLibrary.js";
+import { analyzeComponentsTool } from "./tools/analyzeComponents.js";
 import { generateInstructionTool } from "./tools/generateInstruction.js";
 
 const server = new McpServer({
@@ -19,14 +19,14 @@ const server = new McpServer({
 // Tools list
 const tools = [
   parseDesignTool.definition,
-  analyzeLibraryTool.definition,
+  analyzeComponentsTool.definition,
   generateInstructionTool.definition
 ];
 
 // Tool handlers
 const toolHandlers = {
   "parse.design": parseDesignTool.handler,
-  "analyze.library": analyzeLibraryTool.handler,
+  "analyze.components": analyzeComponentsTool.handler,
   "generate.instruction": generateInstructionTool.handler
 };
 

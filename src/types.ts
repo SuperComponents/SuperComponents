@@ -12,6 +12,6 @@ export interface Design {
   // Design interface placeholder
 }
 
-export interface Library {
-  // Library interface placeholder
+export interface Component {
+  // Component interface placeholder
 } 

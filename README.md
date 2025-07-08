@@ -33,7 +33,7 @@ npm test
 ## Features
 
 - **Design Parsing**: Convert design inputs into structured JSON representations
-- **Library Analysis**: Analyze existing component library structures and patterns
+- **Component Analysis**: Analyze existing component structures and patterns
 - **Instruction Generation**: Generate detailed implementation instructions for component development
 
 ## Architecture

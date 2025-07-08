@@ -1,4 +1,4 @@
-// src/tools/analyzeLibrary.ts
+// src/tools/analyzeComponents.ts
 import { z } from "zod";
 import { Tool } from "../types.js";
 
@@ -6,10 +6,10 @@ const inputSchema = z.object({
   // Define input schema
 });
 
-export const analyzeLibraryTool: Tool = {
+export const analyzeComponentsTool: Tool = {
   definition: {
-    name: "analyze.library",
-    description: "Analyze component library structure and patterns",
+    name: "analyze.components",
+    description: "Analyze component structure and patterns",
     inputSchema: {}
   },
   handler: async (args) => {
@@ -17,7 +17,7 @@ export const analyzeLibraryTool: Tool = {
     return {
       content: [{
         type: "text",
-        text: "Library analysis placeholder"
+        text: "Component analysis placeholder"
       }]
     };
   }
