@@ -1,6 +1,6 @@
 {
   "name": "supercomponents-server",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "type": "module",
   "main": "build/index.js",
   "types": "build/index.d.ts",
