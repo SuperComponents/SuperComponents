@@ -1,4 +1,5 @@
 // src/workflows/inspiration-to-system.ts
+import { DesignTokens, DesignPrinciples } from '../types/index.js';
 
 export interface UserInspiration {
   // Visual inspiration

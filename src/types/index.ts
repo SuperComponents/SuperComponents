@@ -27,6 +27,15 @@ export interface DesignTokens {
   };
 }
 
+export interface DesignInsight {
+  imageryPalette: string[];      // hex colors, length ≤ 8
+  typographyFamilies: string[];  // font names
+  spacingScale: number[];        // e.g. [4,8,12,16]
+  uiDensity: "compact" | "regular" | "spacious";
+  brandKeywords: string[];
+  supportingReferences: string[]; // image crop URLs or CSS snippets
+}
+
 export interface ComponentSpec {
   name: string;
   category: 'atom' | 'molecule' | 'organism';
