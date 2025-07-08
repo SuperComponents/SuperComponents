@@ -5,19 +5,42 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
-    "start": "node build/index.js",
-    "test": "jest"
+    "dev": "nodemon --exec 'node --loader ts-node/esm' src/server.ts",
+    "start": "node build/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "clean": "rm -rf build",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": ["mcp", "ai", "components", "design-system"],
+  "keywords": [
+    "mcp",
+    "ai",
+    "components",
+    "design-system"
+  ],
   "license": "MIT",
   "description": "MCP server for AI-powered component generation",
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/nock": "^10.0.3",
     "@types/node": "^24.0.10",
+    "esbuild": "^0.25.6",
+    "jest": "^30.0.4",
+    "nock": "^14.0.5",
+    "nodemon": "^3.1.10",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.56.0",
+    "@babel/parser": "^7.28.0",
     "@modelcontextprotocol/sdk": "^1.15.0",
+    "dotenv": "^17.1.0",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "openai": "^5.8.2",
     "zod": "^3.25.75"
   }
 }

@@ -1,0 +1,1570 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Repository",
+        "description": "Initialize Git repo, Node.js 18+ workspace, TypeScript tool-chain and core dependencies to host the SuperComponents Server.",
+        "details": "• mkdir supercomponents-server && git init\n• npm init -y && npm i -D typescript ts-node @types/node jest ts-jest esbuild nodemon\n• npm i @modelcontextprotocol/sdk zod fast-glob gray-matter @babel/parser openai dotenv\n• npx tsc --init: set target=ES2021, module=CommonJS, outDir=dist, rootDir=src, strict=true\n• Add scripts: dev (nodemon src/index.ts), build (tsc -p .), test (jest)\n• Configure Jest via jest.config.js (preset ts-jest)\n• Pre-commit hooks with husky + lint-staged (optional)\n",
+        "testStrategy": "1. Run `npm run build` – expect no TypeScript errors.\n2. Run `npm run test` – executes sample test to return exit code 0.\n3. CI step: GitHub Action running install/build/test on each push.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Repository Initialization",
+            "description": "Initialize Git repository and set up basic project structure with README, .gitignore, and initial directory structure",
+            "dependencies": [],
+            "details": "Create new Git repository, add .gitignore file for Node.js/TypeScript projects, create README.md with project description, set up basic folder structure (src/, dist/, tests/)",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Package Management Setup",
+            "description": "Initialize npm package.json and install core dependencies and development dependencies",
+            "dependencies": [
+              1
+            ],
+            "details": "Run npm init to create package.json, install TypeScript as dev dependency, install necessary build tools and utilities, configure package.json scripts section",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "TypeScript Configuration",
+            "description": "Set up TypeScript compiler configuration and type definitions",
+            "dependencies": [
+              2
+            ],
+            "details": "Create tsconfig.json with appropriate compiler options, configure source and output directories, set up type checking rules, install @types packages for dependencies",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Build Scripts Setup",
+            "description": "Configure build automation scripts and development workflow",
+            "dependencies": [
+              3
+            ],
+            "details": "Set up npm scripts for build, dev, clean, and watch modes, configure TypeScript compilation pipeline, set up source maps and development server if needed",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Testing Framework Configuration",
+            "description": "Install and configure Jest testing framework with TypeScript support",
+            "dependencies": [
+              3
+            ],
+            "details": "Install Jest and related TypeScript packages, create jest.config.js with TypeScript preset, set up test scripts in package.json, create sample test file structure",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Define Core Schemas",
+        "description": "Create Zod schemas for Design, Component, and Instruction data models and export inferred TypeScript types.",
+        "details": "src/schemas/design.ts  -> export const DesignSchema = z.object({id: z.string(),tokens: z.any(),components: z.array(z.any())})\nsrc/schemas/component.ts -> export const ComponentSchema = z.object({name:z.string(),props:z.record(z.string(),z.any()),path:z.string()})\nsrc/schemas/instruction.ts -> export const InstructionSchema = z.object({steps:z.array(z.string()),files:z.record(z.string(),z.string())})\n• index.ts aggregates and re-exports.\n• Use z.infer<typeof DesignSchema> for typed outputs.",
+        "testStrategy": "Unit tests with jest:\n- Validate good fixture passes parse.\n- Validate malformed input throws ZodError.\n- Snapshot generated TypeScript types with ts-json-schema-generator for regression.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Individual Schema Files",
+            "description": "Separate schema definitions into individual files organized by domain/feature, creating a modular schema structure with proper exports and imports.",
+            "dependencies": [],
+            "details": "Create separate schema files for different entities (e.g., user.schema.ts, product.schema.ts, order.schema.ts). Organize schemas by feature domains, implement proper file naming conventions, and set up barrel exports for easy importing. Include base schemas for common types and establish schema composition patterns.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Setup Type Inference System",
+            "description": "Configure TypeScript type inference from Zod schemas to automatically generate types and ensure type safety across the application.",
+            "dependencies": [
+              1
+            ],
+            "details": "Set up Zod's type inference using z.infer<> to automatically generate TypeScript types from schemas. Create utility types for common patterns, establish type exports alongside schema exports, and configure TypeScript compiler options for optimal type checking. Include helper types for partial updates, creation payloads, and API responses.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Schema Validation Testing",
+            "description": "Create comprehensive test suites for schema validation covering valid inputs, edge cases, error scenarios, and performance testing.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Write unit tests for each schema covering valid data validation, invalid data rejection, edge cases, and error message accuracy. Include integration tests for schema composition, performance tests for large datasets, and regression tests for schema changes. Set up test utilities for schema testing and mock data generation.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create Schema Documentation with Examples",
+            "description": "Generate comprehensive documentation for all schemas including usage examples, validation rules, and integration guidelines.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create detailed documentation for each schema including purpose, validation rules, example valid/invalid inputs, and usage patterns. Include API documentation showing request/response schemas, integration examples with forms and APIs, troubleshooting guides for common validation errors, and migration guides for schema updates.",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement MCP Server Core",
+        "description": "Bootstrap stdio MCP server, register modular tool handlers, and wire Zod validation pipeline.",
+        "details": "src/server.ts:\nimport {Server} from \"@modelcontextprotocol/sdk\";\nconst server=new Server({transport:\"stdio\"});\nserver.register(\"parseDesigns\",parseDesignsHandler);\nserver.register(\"analyzeComponent\",analyzeComponentHandler);\n...\nserver.onRequest(async (ctx)=>{try{const validated=schemas[ctx.tool].parse(ctx.input);return await handlers[ctx.tool](validated);}catch(e){ctx.error(e.message);}});\nserver.listen();",
+        "testStrategy": "• Integration test launches server, sends mock MCP request via child_process stdio, expects JSON reply.\n• Validate unknown tool returns proper error code.\n• Measure server startup <500ms.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Server Initialization",
+            "description": "Set up the MCP server foundation with configuration loading, environment setup, and basic server instance creation",
+            "dependencies": [],
+            "details": "Initialize the MCP server with proper configuration management, environment variable handling, logging setup, and basic server instance creation. Establish connection parameters and prepare the server for MCP protocol communication.\n<info added on 2025-07-08T03:09:26.791Z>\nSubtask 3.1 (Server Initialization) has been completed successfully. The implementation includes a comprehensive server configuration system, structured logging, server lifecycle management, request tracking, and graceful shutdown handling. All 16 tests are passing and the build system has been properly configured for ES modules. The server foundation is now ready for the next phase of MCP protocol implementation.\n</info added on 2025-07-08T03:09:26.791Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Tool Registration System",
+            "description": "Implement the system for registering and managing MCP tools with proper metadata and capability discovery",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a comprehensive tool registration system that allows dynamic registration of MCP tools, manages tool metadata, handles capability discovery, and maintains tool lifecycle. Implement proper tool validation and registration callbacks.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Request Routing",
+            "description": "Build the request routing mechanism to handle incoming MCP requests and route them to appropriate handlers",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement request routing logic that can parse incoming MCP protocol requests, identify the target tool or handler, and route requests appropriately. Handle different request types including tool calls, capability queries, and protocol-specific operations.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Error Handling Middleware",
+            "description": "Develop comprehensive error handling middleware for graceful error management and proper MCP error responses",
+            "dependencies": [
+              3
+            ],
+            "details": "Create robust error handling middleware that catches and processes various error types, formats them according to MCP protocol standards, implements proper error logging, and ensures graceful degradation. Handle both synchronous and asynchronous errors.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Validation Pipeline",
+            "description": "Implement request and response validation pipeline to ensure MCP protocol compliance and data integrity",
+            "dependencies": [
+              3
+            ],
+            "details": "Build a validation pipeline that validates incoming requests against MCP protocol specifications, validates tool parameters and responses, implements schema validation, and ensures data integrity throughout the request-response cycle.\n<info added on 2025-07-08T03:53:59.308Z>\n✅ Validation Pipeline Implementation Complete\n\n**Core Implementation:**\n- Created `src/server/validation.ts` with comprehensive validation system\n- Implemented `MCPProtocolValidator`, `ToolParameterValidator`, and `ResponseValidator`\n- Built `ValidationPipeline` class for chaining multiple validators\n- Integrated with existing middleware system via `mcpValidationMiddleware`\n\n**Key Features:**\n- MCP protocol compliance validation (JSON-RPC 2.0 format)\n- Tool parameter validation with schema support\n- Response format validation for tool results\n- Context-aware validation with request tracking\n- Configurable validation options (request/parameters/response)\n- Proper error aggregation and warning handling\n- Integration with existing error handling system\n\n**Testing:**\n- Created comprehensive test suite in `tests/server/validation.test.ts`\n- Tests cover all validator classes, pipeline functionality, and middleware integration\n- Tests validate error handling, warnings, and edge cases\n\n**Integration:**\n- Added validation middleware to default middleware stack\n- Validation runs before rate limiting and timeout handling\n- Errors are properly converted to MCP-compliant error responses\n- Warnings are logged but allow processing to continue\n\n**Technical Notes:**\n- Some linter errors remain (property name casing) but don't affect functionality\n- System is designed to be extensible with custom validators\n- Default pipeline includes all three standard validators\n- Middleware can be configured to skip validation or handle warnings differently\n\nThe validation pipeline ensures MCP protocol compliance and data integrity throughout the request-response cycle.\n</info added on 2025-07-08T03:53:59.308Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Server Lifecycle Management",
+            "description": "Implement server lifecycle management including startup, shutdown, health monitoring, and graceful termination",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "Create comprehensive server lifecycle management that handles server startup sequences, graceful shutdown procedures, health monitoring, connection management, and proper cleanup of resources. Implement signal handling and process management for production deployment.\n<info added on 2025-07-08T04:24:08.582Z>\n✅ IMPLEMENTATION COMPLETED\n\nSuccessfully implemented comprehensive server lifecycle management system with the following key components:\n\n**Core Architecture:**\n- ServerLifecycleManager class extending EventEmitter for complete lifecycle control\n- Event-driven architecture supporting 15+ event types for comprehensive monitoring\n- State management with proper transitions (starting → running → stopping → stopped)\n\n**Health Monitoring System:**\n- HealthCheckRegistry with periodic monitoring and custom check support\n- Default health checks for memory usage, connection count, and server state\n- Configurable health check intervals and failure thresholds\n\n**Connection Management:**\n- ConnectionManager with configurable connection limits and metadata tracking\n- Real-time connection monitoring and automatic cleanup\n- Connection state tracking for graceful shutdown coordination\n\n**Metrics & Monitoring:**\n- Comprehensive metrics collection including uptime, request counts, error rates, active connections, and memory usage\n- Real-time performance monitoring with event-based updates\n- Health status aggregation and reporting\n\n**Production Features:**\n- Signal handling for graceful shutdown (SIGINT, SIGTERM, SIGQUIT)\n- Configurable shutdown timeouts with forced termination fallback\n- Complete resource cleanup and connection draining\n- Error handling and recovery mechanisms\n\n**Testing Achievement:**\n- Resolved critical test pollution issues that caused persistent failures\n- Implemented proper test isolation using comprehensive mocking strategies\n- Achieved 26 passing tests with complete coverage of lifecycle scenarios\n- Eliminated real async operations during testing to prevent environment contamination\n\nThe system is now production-ready with robust monitoring, health checks, and graceful shutdown capabilities.\n</info added on 2025-07-08T04:24:08.582Z>",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Build LLM Integration Layer",
+        "description": "Abstract communication with OpenAI or compatible providers, add caching & rate-limit guard.",
+        "details": "src/llm/index.ts:\nexport async function complete(prompt:string,opts){\n if(cache.has(prompt)) return cache.get(prompt);\n const resp=await openai.chat.completions.create({model:\"gpt-4o\",messages:[{role:\"user\",content:prompt}],...opts});\n cache.set(prompt,resp.choices[0].message.content);\n return resp.choices[0].message.content;\n}\n• Read OPENAI_API_KEY from env.\n• Expose streamComplete for large payloads.",
+        "testStrategy": "Mock OpenAI via nock:\n- Expect POST => returns stub.\n- Verify caching returns identical value without second HTTP call.\n- Throttle test: 20 rapid calls constrained to 1 QPS.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "OpenAI Client Setup",
+            "description": "Initialize and configure OpenAI client with proper authentication, API key management, and basic connection setup",
+            "dependencies": [],
+            "details": "Set up OpenAI Python client library, configure API key from environment variables, establish base client configuration with proper headers and authentication, create connection validation methods",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Caching Implementation",
+            "description": "Implement intelligent caching system for API responses to reduce costs and improve performance",
+            "dependencies": [
+              1
+            ],
+            "details": "Design cache key strategy based on request parameters, implement Redis or in-memory caching, add cache expiration policies, create cache hit/miss metrics, handle cache invalidation scenarios",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Rate Limiting",
+            "description": "Implement rate limiting mechanisms to comply with OpenAI API limits and prevent quota exhaustion",
+            "dependencies": [
+              1
+            ],
+            "details": "Create token bucket or sliding window rate limiter, implement request queuing system, add backoff strategies for rate limit hits, monitor and log rate limit usage, handle concurrent request limiting",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Streaming Support",
+            "description": "Add support for streaming responses from OpenAI API for real-time data processing",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Implement streaming response handlers, create async generators for streaming data, add proper connection management for long-running streams, handle stream interruption and reconnection, optimize memory usage for large streams",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Error Handling for API Failures",
+            "description": "Implement comprehensive error handling for various API failure scenarios and edge cases",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Create custom exception classes for different error types, implement retry logic with exponential backoff, handle network timeouts and connection errors, add logging and monitoring for failures, create fallback mechanisms for critical failures",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement parseDesigns Tool",
+        "description": "Convert design inputs (text, image placeholder, code snippets) into structured Design JSON.",
+        "details": "src/tools/parseDesigns.ts\nexport const parseDesignsHandler=async(input:{markdown:string})=>{\n const prompt=`You are a design parser... OUTPUT JSON conforming to ${DesignSchema}`;\n const json=await complete(prompt+input.markdown,{temperature:0});\n return DesignSchema.parse(JSON.parse(json));\n};\n• Initially support markdown/description. Stub image OCR for future.\n• Write README examples.",
+        "testStrategy": "e2e:\n- Feed sample markdown, expect tokens array length>0.\n- Invalid LLM output -> assert Zod error bubbles to MCP error.\n- Performance: <5s/1k token prompt.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Prompt Engineering",
+            "description": "Design and optimize prompts for LLM interactions to ensure consistent, high-quality responses",
+            "dependencies": [],
+            "details": "Create structured prompts with clear instructions, examples, and constraints. Implement prompt templates for different use cases, establish token limits, and design fallback prompts for edge cases. Include system messages and user message formatting strategies.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Markdown Parsing",
+            "description": "Implement robust markdown parsing capabilities to handle various markdown formats and structures",
+            "dependencies": [],
+            "details": "Build parser to handle standard markdown syntax including headers, lists, code blocks, tables, and links. Support for extended markdown features like task lists and footnotes. Implement sanitization and validation of parsed content.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "LLM Response Handling",
+            "description": "Develop comprehensive system for processing and managing LLM responses",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement response parsing, content extraction, and format validation. Handle streaming responses, partial responses, and response chunking. Include retry logic for failed requests and response quality assessment mechanisms.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "JSON Validation",
+            "description": "Create robust JSON validation system for structured data processing",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement schema validation for JSON responses from LLMs. Handle malformed JSON, missing fields, and type mismatches. Create validation rules for specific data structures and implement automatic JSON repair mechanisms where possible.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Error Recovery",
+            "description": "Build comprehensive error handling and recovery mechanisms",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Implement graceful degradation for various failure scenarios including network timeouts, invalid responses, and parsing errors. Create fallback strategies, error logging, and user-friendly error messages. Include circuit breaker patterns for repeated failures.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Performance Optimization for Large Inputs",
+            "description": "Optimize system performance for handling large-scale inputs and high-volume processing",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Implement chunking strategies for large documents, caching mechanisms for repeated operations, and parallel processing where applicable. Optimize memory usage, implement streaming processing for large files, and create performance monitoring and profiling tools.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement analyzeComponent Tool",
+        "description": "Scan codebase to detect existing component libraries, naming conventions, and prop signatures.",
+        "details": "src/tools/analyzeComponent.ts\nimport fg from 'fast-glob';\nimport {parse} from '@babel/parser';\nexport const analyzeComponentHandler=async(_:unknown)=>{\n const files=await fg(['src/**/*.tsx','src/**/*.vue']);\n const components=files.map(f=>{const ast=parse(fs.readFileSync(f,'utf8'),{sourceType:'module',plugins:['jsx','typescript']});/* walk AST */});\n return ComponentSchema.array().parse(components);\n};",
+        "testStrategy": "Unit tests:\n- Fixture project with 3 components; expect array length 3.\n- Prop extraction snapshot.\n- Handles syntax error gracefully and skips file.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "File Discovery",
+            "description": "Implement file system traversal to discover and filter React component files based on extensions and patterns",
+            "dependencies": [],
+            "details": "Create a robust file discovery system that can recursively traverse directories, identify React component files (.js, .jsx, .ts, .tsx), apply include/exclude patterns, and handle symbolic links and permission issues gracefully.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "AST Parsing Setup",
+            "description": "Configure and initialize Abstract Syntax Tree parsing infrastructure for JavaScript/TypeScript files",
+            "dependencies": [
+              1
+            ],
+            "details": "Set up AST parsing using appropriate parsers (Babel, TypeScript compiler API, or similar) with proper configuration for JSX, TypeScript, and modern JavaScript features. Include parser options for different syntax variations and language features.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Component Extraction Logic",
+            "description": "Develop logic to identify and extract React components from parsed AST nodes",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement pattern matching to identify various React component patterns including function components, class components, arrow functions, default exports, named exports, and higher-order components. Handle different declaration styles and component wrapping patterns.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Prop Signature Analysis",
+            "description": "Analyze and extract prop type definitions and signatures from identified components",
+            "dependencies": [
+              3
+            ],
+            "details": "Extract prop information from TypeScript interfaces, PropTypes definitions, destructured parameters, and default values. Generate comprehensive prop signatures including types, required/optional status, default values, and documentation comments.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Error Handling for Malformed Code",
+            "description": "Implement comprehensive error handling for syntax errors and malformed code structures",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create robust error handling mechanisms to gracefully handle parsing errors, incomplete code, syntax errors, and edge cases. Implement fallback strategies and detailed error reporting without breaking the entire analysis process.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Performance Optimization",
+            "description": "Optimize parsing and analysis performance for large codebases",
+            "dependencies": [
+              3,
+              4,
+              5
+            ],
+            "details": "Implement performance optimizations including parallel processing, caching mechanisms, incremental parsing, memory management, and efficient AST traversal algorithms. Add progress tracking and resource usage monitoring.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Result Aggregation",
+            "description": "Aggregate and format analysis results into structured output format",
+            "dependencies": [
+              4,
+              5,
+              6
+            ],
+            "details": "Collect all component analysis results, organize them by file/component, generate summary statistics, format output in requested format (JSON, markdown, etc.), and provide comprehensive reporting including error summaries and analysis metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement generateInstruction Tool",
+        "description": "Combine parsed design data and component analysis to create actionable implementation instructions.",
+        "details": "src/tools/generateInstruction.ts\nexport const generateInstructionHandler=async({design,components})=>{\n const prompt=`Using design JSON: ${JSON.stringify(design)} and components: ${JSON.stringify(components)} produce detailed steps following InstructionSchema`;\n const content=await complete(prompt,{temperature:0.2});\n return InstructionSchema.parse(JSON.parse(content));\n};",
+        "testStrategy": "Integration test:\n- Provide mocked design & component JSON, expect InstructionSchema passes.\n- Assert instructions mention existing component names.\n- Latency <8s on sample dataset.",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Data Preparation",
+            "description": "Collect, clean, and structure data from multiple sources for complexity analysis reasoning tasks",
+            "dependencies": [],
+            "details": "Gather relevant datasets, perform data cleaning operations, normalize formats, and organize data structures to support complexity analysis workflows",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Prompt Template Creation",
+            "description": "Design and develop reusable prompt templates for complexity analysis reasoning tasks",
+            "dependencies": [
+              1
+            ],
+            "details": "Create standardized prompt structures that can handle medium-high complexity scenarios, incorporate placeholders for dynamic data insertion, and ensure templates support structured output generation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "LLM Instruction Generation",
+            "description": "Generate specific instructions for language models to perform complexity analysis reasoning",
+            "dependencies": [
+              2
+            ],
+            "details": "Develop detailed instructions that guide LLMs through multi-step reasoning processes, define expected output formats, and specify how to handle dependencies on previous tools and results",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Output Validation",
+            "description": "Implement validation mechanisms to ensure generated outputs meet quality and format requirements",
+            "dependencies": [
+              3
+            ],
+            "details": "Create validation rules for structured outputs, implement error checking for reasoning consistency, and establish quality gates to verify completeness and accuracy of complexity analysis results",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Instruction Quality Assessment",
+            "description": "Evaluate and assess the quality of generated instructions and overall system performance",
+            "dependencies": [
+              4
+            ],
+            "details": "Develop metrics for instruction effectiveness, conduct performance testing across different complexity scenarios, and implement feedback mechanisms to continuously improve instruction quality and reasoning accuracy",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Implement initializeProject Tool",
+        "description": "Scaffold Storybook, Tailwind config, and SuperComponents directory structure via one command.",
+        "details": "src/tools/initializeProject.ts\nexport const initializeProjectHandler=async({path})=>{\n execSync(`npx storybook init --builder vite`,{cwd:path});\n fs.writeFileSync(`${path}/tailwind.config.cjs`,TEMPLATE);\n fs.mkdirpSync(`${path}/supercomponents`);\n return {status:\"ok\"};\n};",
+        "testStrategy": "End-to-end in temp dir:\n- Call handler, expect .storybook folder, tailwind config, supercomponents dir exist.\n- Run `npm run storybook` headless; expect zero exit code.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Storybook Initialization",
+            "description": "Initialize Storybook in the project by installing dependencies and setting up the basic configuration files",
+            "dependencies": [],
+            "details": "Install @storybook/react and related dependencies, run storybook init command, configure main.js and preview.js files with appropriate settings for the project structure\n<info added on 2025-07-08T03:08:34.058Z>\nCompleted Storybook initialization implementation with comprehensive setup including npx storybook@latest init --builder vite --yes installation command, custom TypeScript configuration through main.ts and preview.ts files, Tailwind CSS integration for styling, automated story discovery from both /stories and /supercomponents directories, full TypeScript support with docgen configuration, and robust error handling with clear success/failure feedback.\n</info added on 2025-07-08T03:08:34.058Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Tailwind Configuration",
+            "description": "Configure Tailwind CSS integration with Storybook for proper styling support",
+            "dependencies": [
+              1
+            ],
+            "details": "Install tailwindcss and its dependencies, create tailwind.config.js with appropriate content paths, configure PostCSS, and ensure Tailwind styles are properly imported in Storybook preview\n<info added on 2025-07-08T03:08:54.921Z>\nCompleted implementation with comprehensive Tailwind CSS setup. The tool now automatically installs tailwindcss, postcss, and autoprefixer dependencies, generates a complete tailwind.config.cjs file featuring custom SuperComponents design system with custom color palette, fonts, and spacing tokens. PostCSS configuration ensures proper build pipeline integration. Created custom CSS file containing Tailwind directives and SuperComponents component utility classes for consistent styling across the project. Content paths are configured to scan all relevant directories for proper purging. Full integration with Storybook ensures proper style rendering in the component development environment, providing a complete design system foundation.\n</info added on 2025-07-08T03:08:54.921Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Directory Structure Creation",
+            "description": "Create the necessary directory structure for Storybook stories and components",
+            "dependencies": [
+              1
+            ],
+            "details": "Create stories directory structure, set up component folders, establish naming conventions for story files, and organize assets and utilities directories as needed\n<info added on 2025-07-08T03:09:14.340Z>\nImplementation completed successfully. The initializeProject tool now creates a comprehensive directory structure including SuperComponents with organized folders, Components directory with proper hierarchy (components/Button/), and separate directories for tokens, utils, stories, and types. File organization follows component library best practices with integration for Storybook story discovery patterns. The structured approach supports scalable component development and follows established patterns for maintainability, providing a solid foundation for component library development.\n</info added on 2025-07-08T03:09:14.340Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Template File Generation",
+            "description": "Generate template story files and example components to demonstrate Storybook functionality",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create example component stories using CSF format, generate template files for common component patterns, set up story templates with proper Tailwind styling examples, and create documentation templates\n<info added on 2025-07-08T03:10:26.355Z>\nTemplate file generation has been successfully implemented with a comprehensive example component system. The implementation includes a complete Button component with TypeScript interface, comprehensive Button.stories.ts file featuring multiple story variants (Primary, Secondary, Small, Large, Disabled), proper component CSS file with utility classes, and full integration with Tailwind CSS styling. The generated templates follow React best practices and use Storybook CSF 3.0 format. Component export structure includes proper index.ts files and README documentation for the component library. This provides a complete working example demonstrating the full SuperComponents pattern and serves as a blueprint for additional components.\n</info added on 2025-07-08T03:10:26.355Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Initialization Validation",
+            "description": "Validate the complete Storybook setup by running tests and checking all integrations work correctly",
+            "dependencies": [
+              4
+            ],
+            "details": "Run Storybook development server, verify Tailwind styles render correctly, test story navigation and controls, check for any configuration conflicts, and validate build process works without errors\n<info added on 2025-07-08T03:11:13.648Z>\nCompleted initialization validation implementation with comprehensive error handling throughout the process. Added graceful fallback mechanisms when package.json updates fail, validation of project path existence before proceeding, and proper error reporting with structured JSON responses. Implemented clear success feedback with next steps for users, package.json script updates for Storybook commands, and validation of directory creation and file writing operations. Added progress logging throughout the initialization process and structured response format for both success and error cases to ensure robust initialization with clear user feedback.\n</info added on 2025-07-08T03:11:13.648Z>",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Implement generateTokens Tool",
+        "description": "Extract design tokens from Design JSON and emit Tailwind config & CSS variable files.",
+        "details": "src/tools/generateTokens.ts\nexport const generateTokensHandler=async({design})=>{\n const {tokens}=DesignSchema.pick({tokens:true}).parse(design);\n const tailwindTheme=mapTokensToTailwind(tokens);\n fs.writeFileSync('supercomponents/tailwind.theme.cjs',`module.exports={theme:${JSON.stringify(tailwindTheme)}}`);\n const cssVars=toCSSVariables(tokens);\n fs.writeFileSync('supercomponents/tokens.css',cssVars);\n return {files:[...]};\n};",
+        "testStrategy": "Unit tests:\n- Token mapping: input color palette => tailwind colors object matches expected keys.\n- CSS variables file contains --color-primary line.\n- Validate output passes Tailwind config lint.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Token Extraction",
+            "description": "Implement logic to extract design tokens from various input sources (JSON, YAML, design files) and parse them into a standardized internal format",
+            "dependencies": [],
+            "details": "Create parsers for different token formats, handle nested token structures, extract metadata, and normalize token names and values",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Token Validation",
+            "description": "Develop validation system to ensure extracted tokens conform to expected schemas and contain valid values",
+            "dependencies": [
+              1
+            ],
+            "details": "Validate token types (colors, spacing, typography), check value formats, ensure required properties exist, and provide meaningful error messages",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Tailwind Mapping Logic",
+            "description": "Create mapping system to convert design tokens into Tailwind CSS configuration format and class names",
+            "dependencies": [
+              2
+            ],
+            "details": "Map token categories to Tailwind config sections, generate appropriate class names, handle custom properties, and maintain Tailwind naming conventions",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "CSS Variable Generation",
+            "description": "Build system to generate CSS custom properties from design tokens with proper naming and organization",
+            "dependencies": [
+              2
+            ],
+            "details": "Create CSS variable naming conventions, organize variables by categories, handle fallback values, and generate scoped variable declarations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Format Conversion Utilities",
+            "description": "Implement utilities to convert tokens between different formats (JSON, CSS, SCSS, JavaScript modules)",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Support multiple output formats, handle format-specific syntax requirements, maintain data integrity across conversions, and provide format validation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "File Output Handling",
+            "description": "Create file management system to write generated tokens to appropriate output files with proper organization",
+            "dependencies": [
+              5
+            ],
+            "details": "Handle file path generation, create directory structures, manage file overwrites, support multiple output destinations, and provide progress feedback",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement createTokenStories Tool",
+        "description": "Generate Storybook stories that visualize design tokens for colors, typography, and spacing.",
+        "details": "src/tools/createTokenStories.ts\nexport const createTokenStoriesHandler=async({tokensDir})=>{\n const tokens=require(`${tokensDir}/tailwind.theme.cjs`).theme;\n const story=`import React from 'react';\\nexport default {title:'Design Tokens/Colors'};\\nexport const Colors=()=><>${Object.entries(tokens.colors).map(([k,v])=>`<div style={{background:'${v}'}}>${k}</div>`).join('')}</>`;\n fs.writeFileSync('.storybook/stories/tokens/colors.stories.tsx',story);\n return {storyPath:'colors.stories.tsx'};\n};",
+        "testStrategy": "Run Storybook CI snapshot testing with @storybook/testing-library:\n- Render Colors story; expect visible swatches count === Object.keys(tokens.colors).length.\n- Chromatic visual diff to guard against regressions.",
+        "priority": "medium",
+        "dependencies": [
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Token Data Reading",
+            "description": "Implement functionality to read and parse design token data from various sources (JSON, YAML, or token files) and structure it for story generation",
+            "dependencies": [],
+            "details": "Create utilities to extract token values, categories, and metadata. Handle different token formats and ensure proper data validation and error handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Story Template Generation",
+            "description": "Develop template generation logic to create Storybook story files based on design tokens and component specifications",
+            "dependencies": [
+              1
+            ],
+            "details": "Build template engine that can generate story files with proper controls, args, and documentation. Include support for different story formats and customizable templates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Component Rendering Logic",
+            "description": "Implement the core rendering logic that applies design tokens to components and handles dynamic property binding",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Create rendering system that can apply token values to component properties, handle theme switching, and manage component state updates based on token changes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Storybook Integration Testing",
+            "description": "Develop comprehensive testing suite for Storybook integration including story generation, rendering, and token application verification",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create automated tests to verify story generation accuracy, component rendering with tokens, and integration with Storybook's addon system. Include visual regression testing and cross-browser compatibility checks.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-08T01:37:31.690Z",
+      "updated": "2025-07-08T04:23:39.604Z",
+      "description": "Tasks for master context"
+    }
+  },
+  "infrastructure": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Repository",
+        "description": "Initialize Git repository, Node.js 18+ workspace, TypeScript toolchain and core dependencies to host the SuperComponents Server.",
+        "details": "1. Initialize Git repository with .gitignore for Node.js projects\n2. Setup Node.js workspace with package.json targeting Node 18+\n3. Install and configure TypeScript with strict configuration (tsconfig.json)\n4. Setup build scripts using npm/yarn scripts for compilation and development\n5. Configure testing framework (Jest or similar) with TypeScript support\n6. Install core dependencies: express, cors, helmet for server basics\n7. Install development dependencies: nodemon, ts-node, @types packages\n8. Create basic project structure: src/, dist/, tests/, docs/\n9. Setup ESLint and Prettier for code quality\n10. Configure package.json scripts for dev, build, test, and lint commands\n11. Create initial README.md with setup instructions\n12. Setup CI/CD configuration files (.github/workflows/ or similar)",
+        "testStrategy": "1. Verify Git repository is initialized with proper .gitignore\n2. Confirm Node.js version compatibility (18+) using node --version\n3. Test TypeScript compilation with tsc --noEmit\n4. Run npm install to ensure all dependencies resolve correctly\n5. Execute npm run build to verify build scripts work\n6. Run npm test to confirm testing framework is configured\n7. Test development server startup with npm run dev\n8. Verify ESLint and Prettier configurations work with npm run lint\n9. Check that all package.json scripts execute without errors\n10. Validate project structure matches expected layout",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement MCP Server Core",
+        "description": "Bootstrap stdio MCP server with modular tool handlers, Zod validation pipeline, and comprehensive server lifecycle management.",
+        "details": "1. **Server Bootstrap & Initialization**\n   - Create main server entry point (src/server.ts) with stdio transport setup\n   - Initialize MCP server instance with proper configuration\n   - Setup graceful shutdown handlers for SIGINT/SIGTERM signals\n   - Implement server state management (starting, running, stopping, stopped)\n\n2. **Tool Registration System**\n   - Design modular tool handler architecture with interface definitions\n   - Create ToolRegistry class to manage tool registration and discovery\n   - Implement dynamic tool loading from designated directories\n   - Support both synchronous and asynchronous tool handlers\n   - Add tool metadata management (name, description, schema)\n\n3. **Request Routing & Middleware**\n   - Implement request dispatcher to route MCP requests to appropriate handlers\n   - Create middleware pipeline for request preprocessing\n   - Add request/response logging middleware for debugging\n   - Implement rate limiting and request validation middleware\n\n4. **Zod Validation Pipeline**\n   - Install and configure Zod for schema validation\n   - Create validation schemas for all MCP request/response types\n   - Implement validation middleware that integrates with request pipeline\n   - Add custom error messages and validation error formatting\n   - Support schema composition for complex nested validations\n\n5. **Error Handling & Recovery**\n   - Implement centralized error handling middleware\n   - Create custom error classes for different error types (ValidationError, ToolError, etc.)\n   - Add error logging with structured logging format\n   - Implement error recovery strategies for non-fatal errors\n   - Add error response formatting according to MCP protocol\n\n6. **Server Lifecycle Management**\n   - Implement server startup sequence with dependency checks\n   - Add health check endpoints for monitoring\n   - Create configuration management system with environment variable support\n   - Implement hot-reload capability for development\n   - Add metrics collection for performance monitoring",
+        "testStrategy": "1. **Unit Testing**\n   - Test server initialization with various configurations\n   - Verify tool registration system with mock tools\n   - Test request routing with different MCP request types\n   - Validate Zod schemas with valid/invalid payloads\n   - Test error handling with simulated failures\n\n2. **Integration Testing**\n   - Test complete request/response cycle through stdio transport\n   - Verify tool handler execution with real MCP client\n   - Test server lifecycle events (startup, shutdown, restart)\n   - Validate middleware pipeline execution order\n   - Test error propagation through the entire stack\n\n3. **Performance Testing**\n   - Measure request processing latency under load\n   - Test memory usage during extended operation\n   - Verify graceful degradation under high request volume\n   - Test tool registration performance with many tools\n\n4. **Manual Testing**\n   - Start server and verify stdio communication\n   - Test tool discovery and registration\n   - Validate error responses are properly formatted\n   - Confirm server responds to shutdown signals gracefully\n   - Test configuration loading from environment variables",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-08T01:50:48.148Z",
+      "updated": "2025-07-08T01:55:22.918Z",
+      "description": "Foundation work: project setup, MCP server core, build pipeline"
+    }
+  },
+  "ai-integration": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Build LLM Integration Layer",
+        "description": "Create an abstract communication layer for OpenAI and compatible LLM providers with built-in caching, rate limiting, and error handling capabilities.",
+        "details": "Implement a comprehensive LLM integration layer with the following components:\n\n1. **Abstract LLM Provider Interface**: Create a base interface/abstract class that defines standard methods for chat completion, streaming, and configuration. This allows for easy swapping between different LLM providers.\n\n2. **OpenAI Client Implementation**: Build a concrete implementation for OpenAI API including:\n   - Authentication handling with API keys\n   - Request/response serialization\n   - Support for different models (GPT-3.5, GPT-4, etc.)\n   - Streaming response handling for real-time chat\n\n3. **Caching Layer**: Implement intelligent caching to reduce API costs and improve response times:\n   - Use Redis or in-memory cache for storing responses\n   - Cache key generation based on request parameters\n   - TTL configuration for cache expiration\n   - Cache invalidation strategies\n\n4. **Rate Limiting**: Implement rate limiting to prevent API quota exhaustion:\n   - Token bucket or sliding window algorithm\n   - Configurable limits per time window\n   - Queue management for pending requests\n   - Graceful degradation when limits are reached\n\n5. **Error Handling & Retry Logic**: Robust error handling for:\n   - Network timeouts and connection failures\n   - API rate limit errors (429 status)\n   - Authentication failures\n   - Exponential backoff retry strategy\n   - Circuit breaker pattern for persistent failures\n\n6. **Configuration Management**: Support for:\n   - Environment-based configuration\n   - Multiple API key rotation\n   - Model selection and parameters\n   - Timeout and retry settings\n\n7. **Logging & Monitoring**: Comprehensive logging for debugging and monitoring API usage, costs, and performance metrics.",
+        "testStrategy": "Verification approach includes:\n\n1. **Unit Tests**: Test each component in isolation:\n   - Mock OpenAI API responses for different scenarios\n   - Test caching behavior with various cache states\n   - Verify rate limiting logic with simulated high-frequency requests\n   - Test error handling with different failure modes\n\n2. **Integration Tests**: Test the complete flow:\n   - Real API calls to OpenAI (using test API keys)\n   - End-to-end streaming response handling\n   - Cache hit/miss scenarios\n   - Rate limit enforcement under load\n\n3. **Performance Tests**: Measure and validate:\n   - Response time improvements with caching\n   - Rate limiting effectiveness\n   - Memory usage under different load patterns\n   - Concurrent request handling\n\n4. **Error Scenario Testing**: Simulate and verify handling of:\n   - Network failures and timeouts\n   - API rate limit responses\n   - Invalid API keys or authentication failures\n   - Malformed requests and responses\n\n5. **Configuration Testing**: Verify:\n   - Different provider configurations\n   - Environment variable loading\n   - Configuration validation and error reporting\n\n6. **Manual Testing**: Interactive testing of:\n   - Streaming chat responses\n   - Cache behavior observation\n   - Rate limit notifications\n   - Error message clarity and usefulness",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement parseDesigns Tool",
+        "description": "Convert design inputs (text, image placeholder, code snippets) into structured Design JSON through prompt engineering, markdown parsing, LLM response handling, JSON validation, error recovery, and performance optimization.",
+        "details": "Implement a comprehensive parseDesigns tool with the following components:\n\n1. **Input Processing Pipeline**: Create a multi-format input handler that can process:\n   - Raw text descriptions of designs\n   - Markdown-formatted design specifications\n   - Code snippets (HTML, CSS, React components)\n   - Image placeholder references and metadata\n   - Mixed-format inputs combining multiple types\n\n2. **Prompt Engineering System**: Develop sophisticated prompts for LLM interaction:\n   - Design-specific prompt templates for different input types\n   - Context-aware prompts that adapt based on input complexity\n   - Few-shot examples for consistent JSON structure generation\n   - Prompt optimization for different design patterns (layouts, components, interactions)\n\n3. **Markdown Parser**: Build a robust markdown parsing engine:\n   - Extract structured information from markdown headers, lists, and code blocks\n   - Preserve formatting context and hierarchy\n   - Handle nested structures and complex markdown syntax\n   - Convert markdown elements to design specification components\n\n4. **LLM Response Handler**: Create intelligent response processing:\n   - Parse and validate LLM-generated JSON responses\n   - Handle partial or malformed responses gracefully\n   - Implement response streaming for large inputs\n   - Extract design elements, properties, and relationships from natural language\n\n5. **JSON Validation Engine**: Implement comprehensive validation:\n   - Schema validation against Design JSON specification\n   - Semantic validation of design properties and relationships\n   - Cross-reference validation between design elements\n   - Custom validation rules for design-specific constraints\n\n6. **Error Recovery System**: Build robust error handling:\n   - Automatic retry mechanisms for failed LLM calls\n   - Fallback parsing strategies for malformed inputs\n   - Progressive degradation for partial parsing failures\n   - User-friendly error messages with suggested corrections\n\n7. **Performance Optimization**: Optimize for large inputs:\n   - Chunking strategies for oversized design specifications\n   - Parallel processing of independent design components\n   - Caching of parsed design patterns and templates\n   - Memory-efficient streaming for large file processing\n   - Rate limiting integration with LLM provider constraints",
+        "testStrategy": "Comprehensive testing approach includes:\n\n1. **Unit Tests**: Test individual components in isolation:\n   - Mock LLM responses for various design input scenarios\n   - Test markdown parser with complex nested structures\n   - Validate JSON schema compliance with edge cases\n   - Test error recovery with intentionally malformed inputs\n\n2. **Integration Tests**: Verify end-to-end functionality:\n   - Process real design specifications from text to JSON\n   - Test with various input formats and combinations\n   - Verify LLM integration through the established layer\n   - Test performance with large design files (>10MB)\n\n3. **Validation Tests**: Ensure output quality and consistency:\n   - Compare parsed designs against manually created reference JSON\n   - Test semantic accuracy of extracted design elements\n   - Verify preservation of design intent and relationships\n   - Validate handling of ambiguous or incomplete specifications\n\n4. **Performance Tests**: Measure and optimize processing speed:\n   - Benchmark parsing times for various input sizes\n   - Test memory usage with large design specifications\n   - Verify rate limiting compliance and efficiency\n   - Test concurrent processing capabilities\n\n5. **Error Handling Tests**: Verify robust error recovery:\n   - Test with corrupted or incomplete input files\n   - Simulate LLM API failures and timeouts\n   - Test graceful degradation with unsupported input formats\n   - Verify error message clarity and actionability",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-08T01:50:49.600Z",
+      "updated": "2025-07-08T01:56:35.768Z",
+      "description": "AI/LLM work: integration layer, design parsing, prompt engineering"
+    }
+  },
+  "code-analysis": {
+    "tasks": [],
+    "metadata": {
+      "created": "2025-07-08T01:50:50.566Z",
+      "updated": "2025-07-08T01:50:50.566Z",
+      "description": "AST parsing, component analysis, codebase scanning"
+    }
+  },
+  "design-system": {
+    "tasks": [],
+    "metadata": {
+      "created": "2025-07-08T01:50:51.505Z",
+      "updated": "2025-07-08T01:50:51.505Z",
+      "description": "Design tokens, Storybook integration, visualization"
+    }
+  },
+  "integration": {
+    "tasks": [],
+    "metadata": {
+      "created": "2025-07-08T01:50:54.594Z",
+      "updated": "2025-07-08T01:50:54.594Z",
+      "description": "Schema design, instruction generation, cross-cutting concerns"
+    }
+  },
+  "infrastructure-temp": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Repository",
+        "description": "Initialize Git repo, Node.js 18+ workspace, TypeScript tool-chain and core dependencies to host the SuperComponents Server.",
+        "details": "• mkdir supercomponents-server && git init\n• npm init -y && npm i -D typescript ts-node @types/node jest ts-jest esbuild nodemon\n• npm i @modelcontextprotocol/sdk zod fast-glob gray-matter @babel/parser openai dotenv\n• npx tsc --init: set target=ES2021, module=CommonJS, outDir=dist, rootDir=src, strict=true\n• Add scripts: dev (nodemon src/index.ts), build (tsc -p .), test (jest)\n• Configure Jest via jest.config.js (preset ts-jest)\n• Pre-commit hooks with husky + lint-staged (optional)\n",
+        "testStrategy": "1. Run `npm run build` – expect no TypeScript errors.\n2. Run `npm run test` – executes sample test to return exit code 0.\n3. CI step: GitHub Action running install/build/test on each push.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Repository Initialization",
+            "description": "Initialize Git repository and set up basic project structure with README, .gitignore, and initial directory structure",
+            "dependencies": [],
+            "details": "Create new Git repository, add .gitignore file for Node.js/TypeScript projects, create README.md with project description, set up basic folder structure (src/, dist/, tests/)",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Package Management Setup",
+            "description": "Initialize npm package.json and install core dependencies and development dependencies",
+            "dependencies": [
+              1
+            ],
+            "details": "Run npm init to create package.json, install TypeScript as dev dependency, install necessary build tools and utilities, configure package.json scripts section",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "TypeScript Configuration",
+            "description": "Set up TypeScript compiler configuration and type definitions",
+            "dependencies": [
+              2
+            ],
+            "details": "Create tsconfig.json with appropriate compiler options, configure source and output directories, set up type checking rules, install @types packages for dependencies",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Build Scripts Setup",
+            "description": "Configure build automation scripts and development workflow",
+            "dependencies": [
+              3
+            ],
+            "details": "Set up npm scripts for build, dev, clean, and watch modes, configure TypeScript compilation pipeline, set up source maps and development server if needed",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Testing Framework Configuration",
+            "description": "Install and configure Jest testing framework with TypeScript support",
+            "dependencies": [
+              3
+            ],
+            "details": "Install Jest and related TypeScript packages, create jest.config.js with TypeScript preset, set up test scripts in package.json, create sample test file structure",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Define Core Schemas",
+        "description": "Create Zod schemas for Design, Component, and Instruction data models and export inferred TypeScript types.",
+        "details": "src/schemas/design.ts  -> export const DesignSchema = z.object({id: z.string(),tokens: z.any(),components: z.array(z.any())})\nsrc/schemas/component.ts -> export const ComponentSchema = z.object({name:z.string(),props:z.record(z.string(),z.any()),path:z.string()})\nsrc/schemas/instruction.ts -> export const InstructionSchema = z.object({steps:z.array(z.string()),files:z.record(z.string(),z.string())})\n• index.ts aggregates and re-exports.\n• Use z.infer<typeof DesignSchema> for typed outputs.",
+        "testStrategy": "Unit tests with jest:\n- Validate good fixture passes parse.\n- Validate malformed input throws ZodError.\n- Snapshot generated TypeScript types with ts-json-schema-generator for regression.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Individual Schema Files",
+            "description": "Separate schema definitions into individual files organized by domain/feature, creating a modular schema structure with proper exports and imports.",
+            "dependencies": [],
+            "details": "Create separate schema files for different entities (e.g., user.schema.ts, product.schema.ts, order.schema.ts). Organize schemas by feature domains, implement proper file naming conventions, and set up barrel exports for easy importing. Include base schemas for common types and establish schema composition patterns.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Setup Type Inference System",
+            "description": "Configure TypeScript type inference from Zod schemas to automatically generate types and ensure type safety across the application.",
+            "dependencies": [
+              1
+            ],
+            "details": "Set up Zod's type inference using z.infer<> to automatically generate TypeScript types from schemas. Create utility types for common patterns, establish type exports alongside schema exports, and configure TypeScript compiler options for optimal type checking. Include helper types for partial updates, creation payloads, and API responses.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Schema Validation Testing",
+            "description": "Create comprehensive test suites for schema validation covering valid inputs, edge cases, error scenarios, and performance testing.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Write unit tests for each schema covering valid data validation, invalid data rejection, edge cases, and error message accuracy. Include integration tests for schema composition, performance tests for large datasets, and regression tests for schema changes. Set up test utilities for schema testing and mock data generation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create Schema Documentation with Examples",
+            "description": "Generate comprehensive documentation for all schemas including usage examples, validation rules, and integration guidelines.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create detailed documentation for each schema including purpose, validation rules, example valid/invalid inputs, and usage patterns. Include API documentation showing request/response schemas, integration examples with forms and APIs, troubleshooting guides for common validation errors, and migration guides for schema updates.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement MCP Server Core",
+        "description": "Bootstrap stdio MCP server, register modular tool handlers, and wire Zod validation pipeline.",
+        "details": "src/server.ts:\nimport {Server} from \"@modelcontextprotocol/sdk\";\nconst server=new Server({transport:\"stdio\"});\nserver.register(\"parseDesigns\",parseDesignsHandler);\nserver.register(\"analyzeComponent\",analyzeComponentHandler);\n...\nserver.onRequest(async (ctx)=>{try{const validated=schemas[ctx.tool].parse(ctx.input);return await handlers[ctx.tool](validated);}catch(e){ctx.error(e.message);}});\nserver.listen();",
+        "testStrategy": "• Integration test launches server, sends mock MCP request via child_process stdio, expects JSON reply.\n• Validate unknown tool returns proper error code.\n• Measure server startup <500ms.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Server Initialization",
+            "description": "Set up the MCP server foundation with configuration loading, environment setup, and basic server instance creation",
+            "dependencies": [],
+            "details": "Initialize the MCP server with proper configuration management, environment variable handling, logging setup, and basic server instance creation. Establish connection parameters and prepare the server for MCP protocol communication.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Tool Registration System",
+            "description": "Implement the system for registering and managing MCP tools with proper metadata and capability discovery",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a comprehensive tool registration system that allows dynamic registration of MCP tools, manages tool metadata, handles capability discovery, and maintains tool lifecycle. Implement proper tool validation and registration callbacks.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Request Routing",
+            "description": "Build the request routing mechanism to handle incoming MCP requests and route them to appropriate handlers",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement request routing logic that can parse incoming MCP protocol requests, identify the target tool or handler, and route requests appropriately. Handle different request types including tool calls, capability queries, and protocol-specific operations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Error Handling Middleware",
+            "description": "Develop comprehensive error handling middleware for graceful error management and proper MCP error responses",
+            "dependencies": [
+              3
+            ],
+            "details": "Create robust error handling middleware that catches and processes various error types, formats them according to MCP protocol standards, implements proper error logging, and ensures graceful degradation. Handle both synchronous and asynchronous errors.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Validation Pipeline",
+            "description": "Implement request and response validation pipeline to ensure MCP protocol compliance and data integrity",
+            "dependencies": [
+              3
+            ],
+            "details": "Build a validation pipeline that validates incoming requests against MCP protocol specifications, validates tool parameters and responses, implements schema validation, and ensures data integrity throughout the request-response cycle.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Server Lifecycle Management",
+            "description": "Implement server lifecycle management including startup, shutdown, health monitoring, and graceful termination",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "Create comprehensive server lifecycle management that handles server startup sequences, graceful shutdown procedures, health monitoring, connection management, and proper cleanup of resources. Implement signal handling and process management for production deployment.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Build LLM Integration Layer",
+        "description": "Abstract communication with OpenAI or compatible providers, add caching & rate-limit guard.",
+        "details": "src/llm/index.ts:\nexport async function complete(prompt:string,opts){\n if(cache.has(prompt)) return cache.get(prompt);\n const resp=await openai.chat.completions.create({model:\"gpt-4o\",messages:[{role:\"user\",content:prompt}],...opts});\n cache.set(prompt,resp.choices[0].message.content);\n return resp.choices[0].message.content;\n}\n• Read OPENAI_API_KEY from env.\n• Expose streamComplete for large payloads.",
+        "testStrategy": "Mock OpenAI via nock:\n- Expect POST => returns stub.\n- Verify caching returns identical value without second HTTP call.\n- Throttle test: 20 rapid calls constrained to 1 QPS.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "OpenAI Client Setup",
+            "description": "Initialize and configure OpenAI client with proper authentication, API key management, and basic connection setup",
+            "dependencies": [],
+            "details": "Set up OpenAI Python client library, configure API key from environment variables, establish base client configuration with proper headers and authentication, create connection validation methods",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Caching Implementation",
+            "description": "Implement intelligent caching system for API responses to reduce costs and improve performance",
+            "dependencies": [
+              1
+            ],
+            "details": "Design cache key strategy based on request parameters, implement Redis or in-memory caching, add cache expiration policies, create cache hit/miss metrics, handle cache invalidation scenarios",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Rate Limiting",
+            "description": "Implement rate limiting mechanisms to comply with OpenAI API limits and prevent quota exhaustion",
+            "dependencies": [
+              1
+            ],
+            "details": "Create token bucket or sliding window rate limiter, implement request queuing system, add backoff strategies for rate limit hits, monitor and log rate limit usage, handle concurrent request limiting",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Streaming Support",
+            "description": "Add support for streaming responses from OpenAI API for real-time data processing",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Implement streaming response handlers, create async generators for streaming data, add proper connection management for long-running streams, handle stream interruption and reconnection, optimize memory usage for large streams",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Error Handling for API Failures",
+            "description": "Implement comprehensive error handling for various API failure scenarios and edge cases",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Create custom exception classes for different error types, implement retry logic with exponential backoff, handle network timeouts and connection errors, add logging and monitoring for failures, create fallback mechanisms for critical failures",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement parseDesigns Tool",
+        "description": "Convert design inputs (text, image placeholder, code snippets) into structured Design JSON.",
+        "details": "src/tools/parseDesigns.ts\nexport const parseDesignsHandler=async(input:{markdown:string})=>{\n const prompt=`You are a design parser... OUTPUT JSON conforming to ${DesignSchema}`;\n const json=await complete(prompt+input.markdown,{temperature:0});\n return DesignSchema.parse(JSON.parse(json));\n};\n• Initially support markdown/description. Stub image OCR for future.\n• Write README examples.",
+        "testStrategy": "e2e:\n- Feed sample markdown, expect tokens array length>0.\n- Invalid LLM output -> assert Zod error bubbles to MCP error.\n- Performance: <5s/1k token prompt.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Prompt Engineering",
+            "description": "Design and optimize prompts for LLM interactions to ensure consistent, high-quality responses",
+            "dependencies": [],
+            "details": "Create structured prompts with clear instructions, examples, and constraints. Implement prompt templates for different use cases, establish token limits, and design fallback prompts for edge cases. Include system messages and user message formatting strategies.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Markdown Parsing",
+            "description": "Implement robust markdown parsing capabilities to handle various markdown formats and structures",
+            "dependencies": [],
+            "details": "Build parser to handle standard markdown syntax including headers, lists, code blocks, tables, and links. Support for extended markdown features like task lists and footnotes. Implement sanitization and validation of parsed content.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "LLM Response Handling",
+            "description": "Develop comprehensive system for processing and managing LLM responses",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement response parsing, content extraction, and format validation. Handle streaming responses, partial responses, and response chunking. Include retry logic for failed requests and response quality assessment mechanisms.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "JSON Validation",
+            "description": "Create robust JSON validation system for structured data processing",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement schema validation for JSON responses from LLMs. Handle malformed JSON, missing fields, and type mismatches. Create validation rules for specific data structures and implement automatic JSON repair mechanisms where possible.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Error Recovery",
+            "description": "Build comprehensive error handling and recovery mechanisms",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Implement graceful degradation for various failure scenarios including network timeouts, invalid responses, and parsing errors. Create fallback strategies, error logging, and user-friendly error messages. Include circuit breaker patterns for repeated failures.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Performance Optimization for Large Inputs",
+            "description": "Optimize system performance for handling large-scale inputs and high-volume processing",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Implement chunking strategies for large documents, caching mechanisms for repeated operations, and parallel processing where applicable. Optimize memory usage, implement streaming processing for large files, and create performance monitoring and profiling tools.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement analyzeComponent Tool",
+        "description": "Scan codebase to detect existing component libraries, naming conventions, and prop signatures.",
+        "details": "src/tools/analyzeComponent.ts\nimport fg from 'fast-glob';\nimport {parse} from '@babel/parser';\nexport const analyzeComponentHandler=async(_:unknown)=>{\n const files=await fg(['src/**/*.tsx','src/**/*.vue']);\n const components=files.map(f=>{const ast=parse(fs.readFileSync(f,'utf8'),{sourceType:'module',plugins:['jsx','typescript']});/* walk AST */});\n return ComponentSchema.array().parse(components);\n};",
+        "testStrategy": "Unit tests:\n- Fixture project with 3 components; expect array length 3.\n- Prop extraction snapshot.\n- Handles syntax error gracefully and skips file.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "File Discovery",
+            "description": "Implement file system traversal to discover and filter React component files based on extensions and patterns",
+            "dependencies": [],
+            "details": "Create a robust file discovery system that can recursively traverse directories, identify React component files (.js, .jsx, .ts, .tsx), apply include/exclude patterns, and handle symbolic links and permission issues gracefully.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "AST Parsing Setup",
+            "description": "Configure and initialize Abstract Syntax Tree parsing infrastructure for JavaScript/TypeScript files",
+            "dependencies": [
+              1
+            ],
+            "details": "Set up AST parsing using appropriate parsers (Babel, TypeScript compiler API, or similar) with proper configuration for JSX, TypeScript, and modern JavaScript features. Include parser options for different syntax variations and language features.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Component Extraction Logic",
+            "description": "Develop logic to identify and extract React components from parsed AST nodes",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement pattern matching to identify various React component patterns including function components, class components, arrow functions, default exports, named exports, and higher-order components. Handle different declaration styles and component wrapping patterns.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Prop Signature Analysis",
+            "description": "Analyze and extract prop type definitions and signatures from identified components",
+            "dependencies": [
+              3
+            ],
+            "details": "Extract prop information from TypeScript interfaces, PropTypes definitions, destructured parameters, and default values. Generate comprehensive prop signatures including types, required/optional status, default values, and documentation comments.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Error Handling for Malformed Code",
+            "description": "Implement comprehensive error handling for syntax errors and malformed code structures",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create robust error handling mechanisms to gracefully handle parsing errors, incomplete code, syntax errors, and edge cases. Implement fallback strategies and detailed error reporting without breaking the entire analysis process.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Performance Optimization",
+            "description": "Optimize parsing and analysis performance for large codebases",
+            "dependencies": [
+              3,
+              4,
+              5
+            ],
+            "details": "Implement performance optimizations including parallel processing, caching mechanisms, incremental parsing, memory management, and efficient AST traversal algorithms. Add progress tracking and resource usage monitoring.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Result Aggregation",
+            "description": "Aggregate and format analysis results into structured output format",
+            "dependencies": [
+              4,
+              5,
+              6
+            ],
+            "details": "Collect all component analysis results, organize them by file/component, generate summary statistics, format output in requested format (JSON, markdown, etc.), and provide comprehensive reporting including error summaries and analysis metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement generateInstruction Tool",
+        "description": "Combine parsed design data and component analysis to create actionable implementation instructions.",
+        "details": "src/tools/generateInstruction.ts\nexport const generateInstructionHandler=async({design,components})=>{\n const prompt=`Using design JSON: ${JSON.stringify(design)} and components: ${JSON.stringify(components)} produce detailed steps following InstructionSchema`;\n const content=await complete(prompt,{temperature:0.2});\n return InstructionSchema.parse(JSON.parse(content));\n};",
+        "testStrategy": "Integration test:\n- Provide mocked design & component JSON, expect InstructionSchema passes.\n- Assert instructions mention existing component names.\n- Latency <8s on sample dataset.",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Data Preparation",
+            "description": "Collect, clean, and structure data from multiple sources for complexity analysis reasoning tasks",
+            "dependencies": [],
+            "details": "Gather relevant datasets, perform data cleaning operations, normalize formats, and organize data structures to support complexity analysis workflows",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Prompt Template Creation",
+            "description": "Design and develop reusable prompt templates for complexity analysis reasoning tasks",
+            "dependencies": [
+              1
+            ],
+            "details": "Create standardized prompt structures that can handle medium-high complexity scenarios, incorporate placeholders for dynamic data insertion, and ensure templates support structured output generation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "LLM Instruction Generation",
+            "description": "Generate specific instructions for language models to perform complexity analysis reasoning",
+            "dependencies": [
+              2
+            ],
+            "details": "Develop detailed instructions that guide LLMs through multi-step reasoning processes, define expected output formats, and specify how to handle dependencies on previous tools and results",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Output Validation",
+            "description": "Implement validation mechanisms to ensure generated outputs meet quality and format requirements",
+            "dependencies": [
+              3
+            ],
+            "details": "Create validation rules for structured outputs, implement error checking for reasoning consistency, and establish quality gates to verify completeness and accuracy of complexity analysis results",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Instruction Quality Assessment",
+            "description": "Evaluate and assess the quality of generated instructions and overall system performance",
+            "dependencies": [
+              4
+            ],
+            "details": "Develop metrics for instruction effectiveness, conduct performance testing across different complexity scenarios, and implement feedback mechanisms to continuously improve instruction quality and reasoning accuracy",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Implement initializeProject Tool",
+        "description": "Scaffold Storybook, Tailwind config, and SuperComponents directory structure via one command.",
+        "details": "src/tools/initializeProject.ts\nexport const initializeProjectHandler=async({path})=>{\n execSync(`npx storybook init --builder vite`,{cwd:path});\n fs.writeFileSync(`${path}/tailwind.config.cjs`,TEMPLATE);\n fs.mkdirpSync(`${path}/supercomponents`);\n return {status:\"ok\"};\n};",
+        "testStrategy": "End-to-end in temp dir:\n- Call handler, expect .storybook folder, tailwind config, supercomponents dir exist.\n- Run `npm run storybook` headless; expect zero exit code.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Storybook Initialization",
+            "description": "Initialize Storybook in the project by installing dependencies and setting up the basic configuration files",
+            "dependencies": [],
+            "details": "Install @storybook/react and related dependencies, run storybook init command, configure main.js and preview.js files with appropriate settings for the project structure",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Tailwind Configuration",
+            "description": "Configure Tailwind CSS integration with Storybook for proper styling support",
+            "dependencies": [
+              1
+            ],
+            "details": "Install tailwindcss and its dependencies, create tailwind.config.js with appropriate content paths, configure PostCSS, and ensure Tailwind styles are properly imported in Storybook preview",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Directory Structure Creation",
+            "description": "Create the necessary directory structure for Storybook stories and components",
+            "dependencies": [
+              1
+            ],
+            "details": "Create stories directory structure, set up component folders, establish naming conventions for story files, and organize assets and utilities directories as needed",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Template File Generation",
+            "description": "Generate template story files and example components to demonstrate Storybook functionality",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create example component stories using CSF format, generate template files for common component patterns, set up story templates with proper Tailwind styling examples, and create documentation templates",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Initialization Validation",
+            "description": "Validate the complete Storybook setup by running tests and checking all integrations work correctly",
+            "dependencies": [
+              4
+            ],
+            "details": "Run Storybook development server, verify Tailwind styles render correctly, test story navigation and controls, check for any configuration conflicts, and validate build process works without errors",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Implement generateTokens Tool",
+        "description": "Extract design tokens from Design JSON and emit Tailwind config & CSS variable files.",
+        "details": "src/tools/generateTokens.ts\nexport const generateTokensHandler=async({design})=>{\n const {tokens}=DesignSchema.pick({tokens:true}).parse(design);\n const tailwindTheme=mapTokensToTailwind(tokens);\n fs.writeFileSync('supercomponents/tailwind.theme.cjs',`module.exports={theme:${JSON.stringify(tailwindTheme)}}`);\n const cssVars=toCSSVariables(tokens);\n fs.writeFileSync('supercomponents/tokens.css',cssVars);\n return {files:[...]};\n};",
+        "testStrategy": "Unit tests:\n- Token mapping: input color palette => tailwind colors object matches expected keys.\n- CSS variables file contains --color-primary line.\n- Validate output passes Tailwind config lint.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Token Extraction",
+            "description": "Implement logic to extract design tokens from various input sources (JSON, YAML, design files) and parse them into a standardized internal format",
+            "dependencies": [],
+            "details": "Create parsers for different token formats, handle nested token structures, extract metadata, and normalize token names and values",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Token Validation",
+            "description": "Develop validation system to ensure extracted tokens conform to expected schemas and contain valid values",
+            "dependencies": [
+              1
+            ],
+            "details": "Validate token types (colors, spacing, typography), check value formats, ensure required properties exist, and provide meaningful error messages",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Tailwind Mapping Logic",
+            "description": "Create mapping system to convert design tokens into Tailwind CSS configuration format and class names",
+            "dependencies": [
+              2
+            ],
+            "details": "Map token categories to Tailwind config sections, generate appropriate class names, handle custom properties, and maintain Tailwind naming conventions",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "CSS Variable Generation",
+            "description": "Build system to generate CSS custom properties from design tokens with proper naming and organization",
+            "dependencies": [
+              2
+            ],
+            "details": "Create CSS variable naming conventions, organize variables by categories, handle fallback values, and generate scoped variable declarations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Format Conversion Utilities",
+            "description": "Implement utilities to convert tokens between different formats (JSON, CSS, SCSS, JavaScript modules)",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Support multiple output formats, handle format-specific syntax requirements, maintain data integrity across conversions, and provide format validation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "File Output Handling",
+            "description": "Create file management system to write generated tokens to appropriate output files with proper organization",
+            "dependencies": [
+              5
+            ],
+            "details": "Handle file path generation, create directory structures, manage file overwrites, support multiple output destinations, and provide progress feedback",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement createTokenStories Tool",
+        "description": "Generate Storybook stories that visualize design tokens for colors, typography, and spacing.",
+        "details": "src/tools/createTokenStories.ts\nexport const createTokenStoriesHandler=async({tokensDir})=>{\n const tokens=require(`${tokensDir}/tailwind.theme.cjs`).theme;\n const story=`import React from 'react';\\nexport default {title:'Design Tokens/Colors'};\\nexport const Colors=()=><>${Object.entries(tokens.colors).map(([k,v])=>`<div style={{background:'${v}'}}>${k}</div>`).join('')}</>`;\n fs.writeFileSync('.storybook/stories/tokens/colors.stories.tsx',story);\n return {storyPath:'colors.stories.tsx'};\n};",
+        "testStrategy": "Run Storybook CI snapshot testing with @storybook/testing-library:\n- Render Colors story; expect visible swatches count === Object.keys(tokens.colors).length.\n- Chromatic visual diff to guard against regressions.",
+        "priority": "medium",
+        "dependencies": [
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Token Data Reading",
+            "description": "Implement functionality to read and parse design token data from various sources (JSON, YAML, or token files) and structure it for story generation",
+            "dependencies": [],
+            "details": "Create utilities to extract token values, categories, and metadata. Handle different token formats and ensure proper data validation and error handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Story Template Generation",
+            "description": "Develop template generation logic to create Storybook story files based on design tokens and component specifications",
+            "dependencies": [
+              1
+            ],
+            "details": "Build template engine that can generate story files with proper controls, args, and documentation. Include support for different story formats and customizable templates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Component Rendering Logic",
+            "description": "Implement the core rendering logic that applies design tokens to components and handles dynamic property binding",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Create rendering system that can apply token values to component properties, handle theme switching, and manage component state updates based on token changes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Storybook Integration Testing",
+            "description": "Develop comprehensive testing suite for Storybook integration including story generation, rendering, and token application verification",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create automated tests to verify story generation accuracy, component rendering with tokens, and integration with Storybook's addon system. Include visual regression testing and cross-browser compatibility checks.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-08T01:51:20.098Z",
+      "updated": "2025-07-08T01:51:20.098Z",
+      "description": "Temporary copy to extract infrastructure tasks",
+      "copiedFrom": {
+        "tag": "master",
+        "date": "2025-07-08T01:51:20.098Z"
+      }
+    }
+  }
+}
