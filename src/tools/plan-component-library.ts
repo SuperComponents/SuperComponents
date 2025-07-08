@@ -1,21 +1,27 @@
-import { DesignPrinciples, DesignTokens } from '../types/index.js';
+import { DesignPrinciples, DesignTokens } from '../types/index.js'
 
 interface PlanComponentLibraryArgs {
-  principles?: string;
-  tokens?: string;
+  principles?: string
+  tokens?: string
 }
 
-export async function planComponentLibraryTool(args?: PlanComponentLibraryArgs) {
+export async function planComponentLibraryTool(
+  args?: PlanComponentLibraryArgs
+) {
   try {
-    const principlesContext = args?.principles ? `
+    const principlesContext = args?.principles
+      ? `
 Based on your design principles:
 ${args.principles}
-` : '';
+`
+      : ''
 
-    const tokensContext = args?.tokens ? `
+    const tokensContext = args?.tokens
+      ? `
 Your design tokens include:
 ${args.tokens}
-` : '';
+`
+      : ''
 
     const promptText = `Let's plan your component library structure. ${principlesContext}${tokensContext}
 
@@ -87,21 +93,25 @@ Each component should include:
 - Storybook documentation
 - Unit tests
 
-Would you like me to adjust this plan based on your specific needs, or shall we proceed with detailed implementation prompts for specific components?`;
+Would you like me to adjust this plan based on your specific needs, or shall we proceed with detailed implementation prompts for specific components?`
 
     return {
-      content: [{
-        type: "text",
-        text: promptText
-      }]
-    };
+      content: [
+        {
+          type: 'text',
+          text: promptText,
+        },
+      ],
+    }
   } catch (error) {
     return {
-      content: [{
-        type: "text",
-        text: `❌ Failed to generate component library plan: ${error instanceof Error ? error.message : 'Unknown error'}`
-      }],
-      isError: true
-    };
+      content: [
+        {
+          type: 'text',
+          text: `❌ Failed to generate component library plan: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        },
+      ],
+      isError: true,
+    }
   }
 }

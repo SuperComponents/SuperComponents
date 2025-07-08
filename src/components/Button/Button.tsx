@@ -1,13 +1,14 @@
-import React from 'react';
-import { cn } from '../../utils/cn.js';
+import React from 'react'
+import { cn } from '../../utils/cn.js'
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'destructive' | 'ghost' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  fullWidth?: boolean;
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'destructive' | 'ghost' | 'outline'
+  size?: 'sm' | 'md' | 'lg'
+  isLoading?: boolean
+  leftIcon?: React.ReactNode
+  rightIcon?: React.ReactNode
+  fullWidth?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -30,45 +31,45 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center gap-2 rounded-md font-medium',
       'transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2',
       'focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-      'active:scale-95 transition-transform'
-    ];
+      'active:scale-95 transition-transform',
+    ]
 
     const variants = {
       primary: [
         'bg-primary-600 text-white hover:bg-primary-700',
-        'focus-visible:ring-primary-500'
+        'focus-visible:ring-primary-500',
       ],
       secondary: [
         'bg-secondary-600 text-white hover:bg-secondary-700',
-        'focus-visible:ring-secondary-500'
+        'focus-visible:ring-secondary-500',
       ],
       destructive: [
         'bg-red-600 text-white hover:bg-red-700',
-        'focus-visible:ring-red-500'
+        'focus-visible:ring-red-500',
       ],
       ghost: [
         'hover:bg-neutral-100 hover:text-neutral-900',
-        'focus-visible:ring-neutral-500'
+        'focus-visible:ring-neutral-500',
       ],
       outline: [
         'border border-neutral-200 bg-white hover:bg-neutral-50',
-        'focus-visible:ring-neutral-500'
-      ]
-    };
+        'focus-visible:ring-neutral-500',
+      ],
+    }
 
     const sizes = {
       sm: 'h-8 px-3 text-sm',
       md: 'h-10 px-4 text-base',
-      lg: 'h-12 px-6 text-lg'
-    };
+      lg: 'h-12 px-6 text-lg',
+    }
 
     const iconSizes = {
       sm: 'w-4 h-4',
       md: 'w-5 h-5',
-      lg: 'w-6 h-6'
-    };
+      lg: 'w-6 h-6',
+    }
 
-    const isDisabled = disabled || isLoading;
+    const isDisabled = disabled || isLoading
 
     return (
       <button
@@ -113,10 +114,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <span className={iconSizes[size]}>{rightIcon}</span>
         )}
       </button>
-    );
+    )
   }
-);
+)
 
-Button.displayName = 'Button';
+Button.displayName = 'Button'
 
-export default Button;
+export default Button

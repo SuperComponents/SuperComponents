@@ -1,96 +1,96 @@
-import path from 'path';
-import { writeFile, ensureDir } from '../utils/file-system.js';
+import path from 'path'
+import { writeFile, ensureDir } from '../utils/file-system.js'
 
 interface InitProjectArgs {
-  projectName: string;
-  projectPath: string;
+  projectName: string
+  projectPath: string
 }
 
 export async function initProjectTool(args: InitProjectArgs) {
-  const { projectName, projectPath } = args;
-  const fullPath = path.join(projectPath, projectName);
+  const { projectName, projectPath } = args
+  const fullPath = path.join(projectPath, projectName)
 
   try {
     // Create project directory
-    await ensureDir(fullPath);
+    await ensureDir(fullPath)
 
     // Create package.json
     const packageJson = {
       name: projectName,
-      version: "0.1.0",
+      version: '0.1.0',
       private: true,
       scripts: {
-        dev: "vite",
-        build: "tsc && vite build",
-        preview: "vite preview",
-        storybook: "storybook dev -p 6006",
-        "build-storybook": "storybook build",
-        lint: "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        format: "prettier --write .",
-        typecheck: "tsc --noEmit"
+        dev: 'vite',
+        build: 'tsc && vite build',
+        preview: 'vite preview',
+        storybook: 'storybook dev -p 6006',
+        'build-storybook': 'storybook build',
+        lint: 'eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0',
+        format: 'prettier --write .',
+        typecheck: 'tsc --noEmit',
       },
       dependencies: {
-        react: "^18.3.1",
-        "react-dom": "^18.3.1"
+        react: '^18.3.1',
+        'react-dom': '^18.3.1',
       },
       devDependencies: {
-        "@storybook/addon-essentials": "^8.5.0",
-        "@storybook/addon-interactions": "^8.5.0",
-        "@storybook/addon-links": "^8.5.0",
-        "@storybook/blocks": "^8.5.0",
-        "@storybook/react": "^8.5.0",
-        "@storybook/react-vite": "^8.5.0",
-        "@types/react": "^18.3.14",
-        "@types/react-dom": "^18.3.5",
-        "@typescript-eslint/eslint-plugin": "^8.20.0",
-        "@typescript-eslint/parser": "^8.20.0",
-        "@vitejs/plugin-react": "^4.3.4",
-        autoprefixer: "^10.4.21",
-        eslint: "^9.17.0",
-        "eslint-plugin-react-hooks": "^5.1.0",
-        "eslint-plugin-react-refresh": "^0.4.16",
-        "eslint-plugin-storybook": "^0.11.2",
-        postcss: "^8.4.49",
-        prettier: "^3.4.2",
-        storybook: "^8.5.0",
-        tailwindcss: "^4.0.0-beta.10",
-        typescript: "^5.7.3",
-        vite: "^6.0.7"
-      }
-    };
+        '@storybook/addon-essentials': '^8.5.0',
+        '@storybook/addon-interactions': '^8.5.0',
+        '@storybook/addon-links': '^8.5.0',
+        '@storybook/blocks': '^8.5.0',
+        '@storybook/react': '^8.5.0',
+        '@storybook/react-vite': '^8.5.0',
+        '@types/react': '^18.3.14',
+        '@types/react-dom': '^18.3.5',
+        '@typescript-eslint/eslint-plugin': '^8.20.0',
+        '@typescript-eslint/parser': '^8.20.0',
+        '@vitejs/plugin-react': '^4.3.4',
+        autoprefixer: '^10.4.21',
+        eslint: '^9.17.0',
+        'eslint-plugin-react-hooks': '^5.1.0',
+        'eslint-plugin-react-refresh': '^0.4.16',
+        'eslint-plugin-storybook': '^0.11.2',
+        postcss: '^8.4.49',
+        prettier: '^3.4.2',
+        storybook: '^8.5.0',
+        tailwindcss: '^4.0.0-beta.10',
+        typescript: '^5.7.3',
+        vite: '^6.0.7',
+      },
+    }
 
     await writeFile(
       path.join(fullPath, 'package.json'),
       JSON.stringify(packageJson, null, 2)
-    );
+    )
 
     // Create tsconfig.json
     const tsConfig = {
       compilerOptions: {
-        target: "ES2020",
+        target: 'ES2020',
         useDefineForClassFields: true,
-        lib: ["ES2020", "DOM", "DOM.Iterable"],
-        module: "ESNext",
+        lib: ['ES2020', 'DOM', 'DOM.Iterable'],
+        module: 'ESNext',
         skipLibCheck: true,
-        moduleResolution: "bundler",
+        moduleResolution: 'bundler',
         allowImportingTsExtensions: true,
         resolveJsonModule: true,
         isolatedModules: true,
         noEmit: true,
-        jsx: "react-jsx",
+        jsx: 'react-jsx',
         strict: true,
         noUnusedLocals: true,
         noUnusedParameters: true,
-        noFallthroughCasesInSwitch: true
+        noFallthroughCasesInSwitch: true,
       },
-      include: ["src"],
-      references: [{ path: "./tsconfig.node.json" }]
-    };
+      include: ['src'],
+      references: [{ path: './tsconfig.node.json' }],
+    }
 
     await writeFile(
       path.join(fullPath, 'tsconfig.json'),
       JSON.stringify(tsConfig, null, 2)
-    );
+    )
 
     // Create vite.config.ts
     const viteConfig = `import { defineConfig } from 'vite'
@@ -102,9 +102,9 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
 })
-`;
+`
 
-    await writeFile(path.join(fullPath, 'vite.config.ts'), viteConfig);
+    await writeFile(path.join(fullPath, 'vite.config.ts'), viteConfig)
 
     // Create postcss.config.js
     const postcssConfig = `export default {
@@ -113,9 +113,9 @@ export default defineConfig({
     autoprefixer: {},
   },
 }
-`;
+`
 
-    await writeFile(path.join(fullPath, 'postcss.config.js'), postcssConfig);
+    await writeFile(path.join(fullPath, 'postcss.config.js'), postcssConfig)
 
     // Create Tailwind v4 config (CSS file)
     const tailwindCSS = `@import "tailwindcss";
@@ -155,9 +155,9 @@ export default defineConfig({
   --radius-2xl: 1rem;
   --radius-full: 9999px;
 }
-`;
+`
 
-    await writeFile(path.join(fullPath, 'src/index.css'), tailwindCSS);
+    await writeFile(path.join(fullPath, 'src/index.css'), tailwindCSS)
 
     // Create .storybook/main.ts
     const storybookMain = `import type { StorybookConfig } from '@storybook/react-vite';
@@ -176,10 +176,10 @@ const config: StorybookConfig = {
 };
 
 export default config;
-`;
+`
 
-    await ensureDir(path.join(fullPath, '.storybook'));
-    await writeFile(path.join(fullPath, '.storybook/main.ts'), storybookMain);
+    await ensureDir(path.join(fullPath, '.storybook'))
+    await writeFile(path.join(fullPath, '.storybook/main.ts'), storybookMain)
 
     // Create .storybook/preview.ts
     const storybookPreview = `import type { Preview } from '@storybook/react';
@@ -197,9 +197,12 @@ const preview: Preview = {
 };
 
 export default preview;
-`;
+`
 
-    await writeFile(path.join(fullPath, '.storybook/preview.ts'), storybookPreview);
+    await writeFile(
+      path.join(fullPath, '.storybook/preview.ts'),
+      storybookPreview
+    )
 
     // Create src/App.tsx
     const appComponent = `function App() {
@@ -218,9 +221,9 @@ export default preview;
 }
 
 export default App
-`;
+`
 
-    await writeFile(path.join(fullPath, 'src/App.tsx'), appComponent);
+    await writeFile(path.join(fullPath, 'src/App.tsx'), appComponent)
 
     // Create src/main.tsx
     const mainEntry = `import React from 'react'
@@ -233,9 +236,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <App />
   </React.StrictMode>,
 )
-`;
+`
 
-    await writeFile(path.join(fullPath, 'src/main.tsx'), mainEntry);
+    await writeFile(path.join(fullPath, 'src/main.tsx'), mainEntry)
 
     // Create index.html
     const indexHtml = `<!doctype html>
@@ -251,9 +254,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-`;
+`
 
-    await writeFile(path.join(fullPath, 'index.html'), indexHtml);
+    await writeFile(path.join(fullPath, 'index.html'), indexHtml)
 
     // Create .gitignore
     const gitignore = `node_modules
@@ -266,9 +269,9 @@ dist-ssr
 .env.local
 .env.*.local
 storybook-static
-`;
+`
 
-    await writeFile(path.join(fullPath, '.gitignore'), gitignore);
+    await writeFile(path.join(fullPath, '.gitignore'), gitignore)
 
     // Create README.md
     const readme = `# ${projectName}
@@ -293,14 +296,15 @@ npm run storybook
 \`\`\`bash
 npm run build
 \`\`\`
-`;
+`
 
-    await writeFile(path.join(fullPath, 'README.md'), readme);
+    await writeFile(path.join(fullPath, 'README.md'), readme)
 
     return {
-      content: [{
-        type: "text",
-        text: `✅ Project "${projectName}" initialized successfully at ${fullPath}
+      content: [
+        {
+          type: 'text',
+          text: `✅ Project "${projectName}" initialized successfully at ${fullPath}
 
 Next steps:
 1. Navigate to the project: cd ${fullPath}
@@ -313,16 +317,19 @@ The project includes:
 - Tailwind CSS v4 with design tokens
 - Storybook for component development
 - ESLint and Prettier configuration
-- Basic project structure`
-      }]
-    };
+- Basic project structure`,
+        },
+      ],
+    }
   } catch (error) {
     return {
-      content: [{
-        type: "text",
-        text: `❌ Failed to initialize project: ${error instanceof Error ? error.message : 'Unknown error'}`
-      }],
-      isError: true
-    };
+      content: [
+        {
+          type: 'text',
+          text: `❌ Failed to initialize project: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        },
+      ],
+      isError: true,
+    }
   }
 }

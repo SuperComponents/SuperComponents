@@ -16,21 +16,25 @@ Please answer the following questions:
 
 6. **Constraints**: Are there any specific constraints or requirements? (e.g., WCAG compliance, mobile-first, performance budgets)
 
-Based on your answers, I'll help you create a comprehensive design principles document that will guide all future design decisions.`;
+Based on your answers, I'll help you create a comprehensive design principles document that will guide all future design decisions.`
 
     return {
-      content: [{
-        type: "text",
-        text: promptText
-      }]
-    };
+      content: [
+        {
+          type: 'text',
+          text: promptText,
+        },
+      ],
+    }
   } catch (error) {
     return {
-      content: [{
-        type: "text",
-        text: `❌ Failed to generate design principles prompt: ${error instanceof Error ? error.message : 'Unknown error'}`
-      }],
-      isError: true
-    };
+      content: [
+        {
+          type: 'text',
+          text: `❌ Failed to generate design principles prompt: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        },
+      ],
+      isError: true,
+    }
   }
 }

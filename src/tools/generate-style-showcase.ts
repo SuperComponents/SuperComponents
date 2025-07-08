@@ -1,10 +1,10 @@
-import path from 'path';
-import { writeFile, ensureDir } from '../utils/file-system.js';
-import { DesignTokens } from '../types/index.js';
+import path from 'path'
+import { writeFile, ensureDir } from '../utils/file-system.js'
+import { DesignTokens } from '../types/index.js'
 
 interface GenerateStyleShowcaseArgs {
-  outputPath: string;
-  format?: 'html' | 'react';
+  outputPath: string
+  format?: 'html' | 'react'
 }
 
 // Mock tokens for POC - in real implementation, these would come from stored state
@@ -12,49 +12,52 @@ const mockTokens: DesignTokens = {
   colors: {
     'primary-500': '#3b82f6',
     'gray-900': '#111827',
-    'gray-50': '#f9fafb'
+    'gray-50': '#f9fafb',
   },
   typography: {
     fonts: ['Inter', 'system-ui', 'sans-serif'],
     sizes: {
-      'base': '1rem',
-      'lg': '1.125rem',
-      'xl': '1.25rem'
+      base: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem',
     },
     weights: {
-      'normal': 400,
-      'semibold': 600,
-      'bold': 700
+      normal: 400,
+      semibold: 600,
+      bold: 700,
     },
     lineHeights: {
-      'normal': '1.5'
-    }
+      normal: '1.5',
+    },
   },
   spacing: {
     '4': '1rem',
-    '8': '2rem'
+    '8': '2rem',
   },
   borderRadius: {
-    'md': '0.375rem',
-    'lg': '0.5rem'
-  }
-};
+    md: '0.375rem',
+    lg: '0.5rem',
+  },
+}
 
-export async function generateStyleShowcaseTool(args: GenerateStyleShowcaseArgs) {
-  const { outputPath, format = 'html' } = args;
+export async function generateStyleShowcaseTool(
+  args: GenerateStyleShowcaseArgs
+) {
+  const { outputPath, format = 'html' } = args
 
   try {
-    await ensureDir(outputPath);
+    await ensureDir(outputPath)
 
     if (format === 'html') {
-      const htmlContent = generateHTMLShowcase(mockTokens);
-      const filePath = path.join(outputPath, 'design-tokens-showcase.html');
-      await writeFile(filePath, htmlContent);
+      const htmlContent = generateHTMLShowcase(mockTokens)
+      const filePath = path.join(outputPath, 'design-tokens-showcase.html')
+      await writeFile(filePath, htmlContent)
 
       return {
-        content: [{
-          type: "text",
-          text: `✅ Style showcase generated successfully!
+        content: [
+          {
+            type: 'text',
+            text: `✅ Style showcase generated successfully!
 
 Created: ${filePath}
 
@@ -65,18 +68,20 @@ The showcase includes:
 - Border radius examples
 - Interactive hover states
 
-Open the file in a browser to view your design tokens in action.`
-        }]
-      };
+Open the file in a browser to view your design tokens in action.`,
+          },
+        ],
+      }
     } else {
-      const reactContent = generateReactShowcase(mockTokens);
-      const filePath = path.join(outputPath, 'DesignTokensShowcase.tsx');
-      await writeFile(filePath, reactContent);
+      const reactContent = generateReactShowcase(mockTokens)
+      const filePath = path.join(outputPath, 'DesignTokensShowcase.tsx')
+      await writeFile(filePath, reactContent)
 
       return {
-        content: [{
-          type: "text",
-          text: `✅ React component showcase generated successfully!
+        content: [
+          {
+            type: 'text',
+            text: `✅ React component showcase generated successfully!
 
 Created: ${filePath}
 
@@ -86,18 +91,21 @@ The component includes:
 - Copy-to-clipboard functionality for token values
 - TypeScript support
 
-Import and use in your Storybook or application to view your design tokens.`
-        }]
-      };
+Import and use in your Storybook or application to view your design tokens.`,
+          },
+        ],
+      }
     }
   } catch (error) {
     return {
-      content: [{
-        type: "text",
-        text: `❌ Failed to generate style showcase: ${error instanceof Error ? error.message : 'Unknown error'}`
-      }],
-      isError: true
-    };
+      content: [
+        {
+          type: 'text',
+          text: `❌ Failed to generate style showcase: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        },
+      ],
+      isError: true,
+    }
   }
 }
 
@@ -215,51 +223,67 @@ function generateHTMLShowcase(tokens: DesignTokens): string {
     <section>
       <h2>Colors</h2>
       <div class="color-grid">
-        ${Object.entries(tokens.colors).map(([name, value]) => `
+        ${Object.entries(tokens.colors)
+          .map(
+            ([name, value]) => `
         <div class="color-swatch">
           <div class="color-box" style="background-color: ${value}"></div>
           <div><strong>${name}</strong></div>
           <div style="font-size: 0.875rem; color: #6b7280">${value}</div>
         </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     </section>
     
     <section>
       <h2>Typography</h2>
-      ${Object.entries(tokens.typography.sizes).map(([size, value]) => `
+      ${Object.entries(tokens.typography.sizes)
+        .map(
+          ([size, value]) => `
       <div class="typography-sample">
         <div style="font-size: ${value}; font-weight: ${tokens.typography.weights.normal}">
           ${size} - ${value} - The quick brown fox jumps over the lazy dog
         </div>
       </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </section>
     
     <section>
       <h2>Spacing</h2>
       <div class="spacing-demo">
-        ${Object.entries(tokens.spacing).map(([name, value]) => `
+        ${Object.entries(tokens.spacing)
+          .map(
+            ([name, value]) => `
         <div class="spacing-box" style="width: ${value}; height: ${value}">
           ${name}
         </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     </section>
     
     <section>
       <h2>Border Radius</h2>
       <div class="radius-demo">
-        ${Object.entries(tokens.borderRadius).map(([name, value]) => `
+        ${Object.entries(tokens.borderRadius)
+          .map(
+            ([name, value]) => `
         <div class="radius-box" style="border-radius: ${value}">
           ${name}
         </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     </section>
   </div>
 </body>
-</html>`;
+</html>`
 }
 
 function generateReactShowcase(tokens: DesignTokens): string {
@@ -356,5 +380,5 @@ const DesignTokensShowcase: React.FC = () => {
   );
 };
 
-export default DesignTokensShowcase;`;
+export default DesignTokensShowcase;`
 }

@@ -1,80 +1,97 @@
-import { W3CDesignTokens, W3CDesignToken, ContrastResult } from './tokens.js';
+import { W3CDesignTokens, W3CDesignToken, ContrastResult } from './tokens.js'
 
 export interface WCAGValidationResult {
-  passes: boolean;
-  ratio: number;
-  level: 'AA' | 'AAA' | 'fail';
-  foreground: string;
-  background: string;
-  adjustedForeground?: string;
-  adjustedBackground?: string;
+  passes: boolean
+  ratio: number
+  level: 'AA' | 'AAA' | 'fail'
+  foreground: string
+  background: string
+  adjustedForeground?: string
+  adjustedBackground?: string
 }
 
 export interface ColorCombination {
-  foreground: string;
-  background: string;
-  name: string;
-  usage: string;
+  foreground: string
+  background: string
+  name: string
+  usage: string
 }
 
 export interface SwatchData {
-  name: string;
-  value: string;
-  rgb: { r: number; g: number; b: number };
-  hsl: { h: number; s: number; l: number };
-  luminance: number;
-  contrastWithWhite: number;
-  contrastWithBlack: number;
+  name: string
+  value: string
+  rgb: { r: number; g: number; b: number }
+  hsl: { h: number; s: number; l: number }
+  luminance: number
+  contrastWithWhite: number
+  contrastWithBlack: number
 }
 
 export class WCAGValidator {
-  private minContrastRatio: number;
-  private largeTextRatio: number;
+  private minContrastRatio: number
+  private largeTextRatio: number
 
   constructor(minContrastRatio = 4.5, largeTextRatio = 3.0) {
-    this.minContrastRatio = minContrastRatio;
-    this.largeTextRatio = largeTextRatio;
+    this.minContrastRatio = minContrastRatio
+    this.largeTextRatio = largeTextRatio
   }
 
   /**
    * Validate all color combinations in design tokens
    */
   validateTokens(tokens: W3CDesignTokens): WCAGValidationResult[] {
-    const results: WCAGValidationResult[] = [];
-    const colors = this.extractColors(tokens);
-    const combinations = this.generateColorCombinations(colors);
+    const results: WCAGValidationResult[] = []
+    const colors = this.extractColors(tokens)
+    const combinations = this.generateColorCombinations(colors)
 
-    combinations.forEach(combo => {
-      const result = this.validateColorCombination(combo.foreground, combo.background);
+    combinations.forEach((combo) => {
+      const result = this.validateColorCombination(
+        combo.foreground,
+        combo.background
+      )
       results.push({
         ...result,
         foreground: combo.foreground,
-        background: combo.background
-      });
-    });
+        background: combo.background,
+      })
+    })
 
-    return results;
+    return results
   }
 
   /**
    * Validate a specific color combination
    */
-  validateColorCombination(foreground: string, background: string): WCAGValidationResult {
-    const ratio = this.calculateContrastRatio(foreground, background);
-    const passes = ratio >= this.minContrastRatio;
-    const level = this.getWCAGLevel(ratio);
+  validateColorCombination(
+    foreground: string,
+    background: string
+  ): WCAGValidationResult {
+    const ratio = this.calculateContrastRatio(foreground, background)
+    const passes = ratio >= this.minContrastRatio
+    const level = this.getWCAGLevel(ratio)
 
-    let adjustedForeground: string | undefined;
-    let adjustedBackground: string | undefined;
+    let adjustedForeground: string | undefined
+    let adjustedBackground: string | undefined
 
     if (!passes) {
       // Try adjusting foreground first
-      adjustedForeground = this.adjustColorForContrast(foreground, background, this.minContrastRatio);
-      
+      adjustedForeground = this.adjustColorForContrast(
+        foreground,
+        background,
+        this.minContrastRatio
+      )
+
       // If foreground adjustment isn't enough, try background
-      const newRatio = this.calculateContrastRatio(adjustedForeground, background);
+      const newRatio = this.calculateContrastRatio(
+        adjustedForeground,
+        background
+      )
       if (newRatio < this.minContrastRatio) {
-        adjustedBackground = this.adjustColorForContrast(background, adjustedForeground, this.minContrastRatio);
+        adjustedBackground = this.adjustColorForContrast(
+          background,
+          adjustedForeground,
+          this.minContrastRatio
+        )
       }
     }
 
@@ -85,17 +102,20 @@ export class WCAGValidator {
       foreground,
       background,
       adjustedForeground,
-      adjustedBackground
-    };
+      adjustedBackground,
+    }
   }
 
   /**
    * Generate HTML swatch renderer
    */
-  generateSwatchHTML(tokens: W3CDesignTokens, includeValidation = true): string {
-    const colors = this.extractColors(tokens);
-    const swatches = this.generateSwatchData(colors);
-    
+  generateSwatchHTML(
+    tokens: W3CDesignTokens,
+    includeValidation = true
+  ): string {
+    const colors = this.extractColors(tokens)
+    const swatches = this.generateSwatchData(colors)
+
     let html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -264,14 +284,23 @@ export class WCAGValidator {
         </div>
         
         <div class="swatch-grid">
-`;
+`
 
     // Generate swatch cards
-    swatches.forEach(swatch => {
-      const textColor = swatch.contrastWithWhite > swatch.contrastWithBlack ? 'white' : 'black';
-      const contrastRatio = textColor === 'white' ? swatch.contrastWithWhite : swatch.contrastWithBlack;
-      const contrastClass = contrastRatio >= 4.5 ? 'contrast-pass' : contrastRatio >= 3.0 ? 'contrast-warning' : 'contrast-fail';
-      
+    swatches.forEach((swatch) => {
+      const textColor =
+        swatch.contrastWithWhite > swatch.contrastWithBlack ? 'white' : 'black'
+      const contrastRatio =
+        textColor === 'white'
+          ? swatch.contrastWithWhite
+          : swatch.contrastWithBlack
+      const contrastClass =
+        contrastRatio >= 4.5
+          ? 'contrast-pass'
+          : contrastRatio >= 3.0
+            ? 'contrast-warning'
+            : 'contrast-fail'
+
       html += `
             <div class="swatch-card">
                 <div class="swatch-color" style="background-color: ${swatch.value}; color: ${textColor};" aria-label="Color swatch for ${swatch.name}">
@@ -294,31 +323,31 @@ export class WCAGValidator {
                     </div>
                 </div>
             </div>
-`;
-    });
+`
+    })
 
     html += `
         </div>
-`;
+`
 
     // Add validation section if requested
     if (includeValidation) {
-      html += this.generateValidationSection(tokens);
+      html += this.generateValidationSection(tokens)
     }
 
     html += `
     </div>
 </body>
 </html>
-`;
+`
 
-    return html;
+    return html
   }
 
   private generateValidationSection(tokens: W3CDesignTokens): string {
-    const validationResults = this.validateTokens(tokens);
-    const combinations = this.generateTestCombinations(tokens);
-    
+    const validationResults = this.validateTokens(tokens)
+    const combinations = this.generateTestCombinations(tokens)
+
     let html = `
         <div class="validation-section">
             <div class="header">
@@ -326,13 +355,24 @@ export class WCAGValidator {
                 <p>Common color combinations tested against WCAG 2.1 guidelines</p>
             </div>
             <div class="validation-grid">
-`;
+`
 
-    combinations.forEach(combo => {
-      const result = this.validateColorCombination(combo.foreground, combo.background);
-      const ratioClass = result.passes ? 'ratio-pass' : result.ratio >= this.largeTextRatio ? 'ratio-warning' : 'ratio-fail';
-      const ratioText = result.passes ? 'PASS' : result.ratio >= this.largeTextRatio ? 'LARGE' : 'FAIL';
-      
+    combinations.forEach((combo) => {
+      const result = this.validateColorCombination(
+        combo.foreground,
+        combo.background
+      )
+      const ratioClass = result.passes
+        ? 'ratio-pass'
+        : result.ratio >= this.largeTextRatio
+          ? 'ratio-warning'
+          : 'ratio-fail'
+      const ratioText = result.passes
+        ? 'PASS'
+        : result.ratio >= this.largeTextRatio
+          ? 'LARGE'
+          : 'FAIL'
+
       html += `
                 <div class="validation-card">
                     <div class="validation-preview" style="background-color: ${combo.background}; color: ${combo.foreground};">
@@ -349,47 +389,59 @@ export class WCAGValidator {
                         </div>
                     </div>
                 </div>
-`;
-    });
+`
+    })
 
     html += `
             </div>
         </div>
-`;
+`
 
-    return html;
+    return html
   }
 
   private extractColors(tokens: W3CDesignTokens): { [key: string]: string } {
-    const colors: { [key: string]: string } = {};
-    this.extractColorValues(tokens, colors);
-    return colors;
+    const colors: { [key: string]: string } = {}
+    this.extractColorValues(tokens, colors)
+    return colors
   }
 
-  private extractColorValues(tokens: W3CDesignTokens, colors: { [key: string]: string }, prefix = ''): void {
+  private extractColorValues(
+    tokens: W3CDesignTokens,
+    colors: { [key: string]: string },
+    prefix = ''
+  ): void {
     Object.entries(tokens).forEach(([key, value]) => {
-      const fullKey = prefix ? `${prefix}-${key}` : key;
-      
+      const fullKey = prefix ? `${prefix}-${key}` : key
+
       if (typeof value === 'object' && '$value' in value) {
-        const token = value as W3CDesignToken;
+        const token = value as W3CDesignToken
         if (token.$type === 'color') {
-          colors[fullKey] = token.$value;
+          colors[fullKey] = token.$value
         }
       } else if (typeof value === 'object' && !('$value' in value)) {
-        this.extractColorValues(value as W3CDesignTokens, colors, fullKey);
+        this.extractColorValues(value as W3CDesignTokens, colors, fullKey)
       }
-    });
+    })
   }
 
-  private generateColorCombinations(colors: { [key: string]: string }): ColorCombination[] {
-    const combinations: ColorCombination[] = [];
-    const colorEntries = Object.entries(colors);
-    
+  private generateColorCombinations(colors: {
+    [key: string]: string
+  }): ColorCombination[] {
+    const combinations: ColorCombination[] = []
+    const colorEntries = Object.entries(colors)
+
     // Generate common UI combinations
-    const primaryColors = colorEntries.filter(([name]) => name.includes('primary'));
-    const neutralColors = colorEntries.filter(([name]) => name.includes('neutral'));
-    const semanticColors = colorEntries.filter(([name]) => name.includes('semantic'));
-    
+    const primaryColors = colorEntries.filter(([name]) =>
+      name.includes('primary')
+    )
+    const neutralColors = colorEntries.filter(([name]) =>
+      name.includes('neutral')
+    )
+    const semanticColors = colorEntries.filter(([name]) =>
+      name.includes('semantic')
+    )
+
     // Primary on neutral backgrounds
     primaryColors.forEach(([primaryName, primaryValue]) => {
       neutralColors.forEach(([neutralName, neutralValue]) => {
@@ -397,11 +449,11 @@ export class WCAGValidator {
           foreground: primaryValue,
           background: neutralValue,
           name: `${primaryName} on ${neutralName}`,
-          usage: 'Primary text on neutral background'
-        });
-      });
-    });
-    
+          usage: 'Primary text on neutral background',
+        })
+      })
+    })
+
     // Semantic colors on neutral backgrounds
     semanticColors.forEach(([semanticName, semanticValue]) => {
       neutralColors.forEach(([neutralName, neutralValue]) => {
@@ -409,53 +461,95 @@ export class WCAGValidator {
           foreground: semanticValue,
           background: neutralValue,
           name: `${semanticName} on ${neutralName}`,
-          usage: 'Semantic color on neutral background'
-        });
-      });
-    });
-    
-    return combinations;
+          usage: 'Semantic color on neutral background',
+        })
+      })
+    })
+
+    return combinations
   }
 
-  private generateTestCombinations(tokens: W3CDesignTokens): ColorCombination[] {
-    const colors = this.extractColors(tokens);
-    const combinations: ColorCombination[] = [];
-    
+  private generateTestCombinations(
+    tokens: W3CDesignTokens
+  ): ColorCombination[] {
+    const colors = this.extractColors(tokens)
+    const combinations: ColorCombination[] = []
+
     // Common UI combinations
     const testCombos = [
-      { fg: 'primary-500', bg: 'neutral-50', name: 'Primary Button', usage: 'Primary button background' },
-      { fg: 'neutral-50', bg: 'primary-500', name: 'Primary Button Text', usage: 'Primary button text' },
-      { fg: 'neutral-900', bg: 'neutral-50', name: 'Body Text', usage: 'Main body text' },
-      { fg: 'neutral-600', bg: 'neutral-50', name: 'Secondary Text', usage: 'Secondary text content' },
-      { fg: 'semantic-error', bg: 'neutral-50', name: 'Error Text', usage: 'Error messages' },
-      { fg: 'semantic-success', bg: 'neutral-50', name: 'Success Text', usage: 'Success messages' },
-      { fg: 'semantic-warning', bg: 'neutral-50', name: 'Warning Text', usage: 'Warning messages' },
-      { fg: 'neutral-50', bg: 'semantic-error', name: 'Error Background', usage: 'Error alert background' }
-    ];
-    
-    testCombos.forEach(combo => {
-      const fgColor = colors[combo.fg];
-      const bgColor = colors[combo.bg];
-      
+      {
+        fg: 'primary-500',
+        bg: 'neutral-50',
+        name: 'Primary Button',
+        usage: 'Primary button background',
+      },
+      {
+        fg: 'neutral-50',
+        bg: 'primary-500',
+        name: 'Primary Button Text',
+        usage: 'Primary button text',
+      },
+      {
+        fg: 'neutral-900',
+        bg: 'neutral-50',
+        name: 'Body Text',
+        usage: 'Main body text',
+      },
+      {
+        fg: 'neutral-600',
+        bg: 'neutral-50',
+        name: 'Secondary Text',
+        usage: 'Secondary text content',
+      },
+      {
+        fg: 'semantic-error',
+        bg: 'neutral-50',
+        name: 'Error Text',
+        usage: 'Error messages',
+      },
+      {
+        fg: 'semantic-success',
+        bg: 'neutral-50',
+        name: 'Success Text',
+        usage: 'Success messages',
+      },
+      {
+        fg: 'semantic-warning',
+        bg: 'neutral-50',
+        name: 'Warning Text',
+        usage: 'Warning messages',
+      },
+      {
+        fg: 'neutral-50',
+        bg: 'semantic-error',
+        name: 'Error Background',
+        usage: 'Error alert background',
+      },
+    ]
+
+    testCombos.forEach((combo) => {
+      const fgColor = colors[combo.fg]
+      const bgColor = colors[combo.bg]
+
       if (fgColor && bgColor) {
         combinations.push({
           foreground: fgColor,
           background: bgColor,
           name: combo.name,
-          usage: combo.usage
-        });
+          usage: combo.usage,
+        })
       }
-    });
-    
-    return combinations;
+    })
+
+    return combinations
   }
 
   private generateSwatchData(colors: { [key: string]: string }): SwatchData[] {
     return Object.entries(colors).map(([name, value]) => {
-      const rgb = this.hexToRgb(value);
-      const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
-      const luminance = this.calculateLuminance(value);
-      
+      const rgb = this.hexToRgb(value)
+      const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b)
+      const luminance = this.calculateLuminance(value)
+
       return {
         name,
         value,
@@ -463,170 +557,189 @@ export class WCAGValidator {
         hsl,
         luminance,
         contrastWithWhite: this.calculateContrastRatio(value, '#ffffff'),
-        contrastWithBlack: this.calculateContrastRatio(value, '#000000')
-      };
-    });
+        contrastWithBlack: this.calculateContrastRatio(value, '#000000'),
+      }
+    })
   }
 
   private calculateLuminance(hex: string): number {
-    const rgb = this.hexToRgb(hex);
-    const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(c => {
-      c = c / 255;
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    });
-    
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const rgb = this.hexToRgb(hex)
+    const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((c) => {
+      c = c / 255
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+    })
+
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
   }
 
   private calculateContrastRatio(color1: string, color2: string): number {
-    const lum1 = this.calculateLuminance(color1);
-    const lum2 = this.calculateLuminance(color2);
-    const lightest = Math.max(lum1, lum2);
-    const darkest = Math.min(lum1, lum2);
-    
-    return (lightest + 0.05) / (darkest + 0.05);
+    const lum1 = this.calculateLuminance(color1)
+    const lum2 = this.calculateLuminance(color2)
+    const lightest = Math.max(lum1, lum2)
+    const darkest = Math.min(lum1, lum2)
+
+    return (lightest + 0.05) / (darkest + 0.05)
   }
 
   private getWCAGLevel(ratio: number): 'AA' | 'AAA' | 'fail' {
-    if (ratio >= 7.0) return 'AAA';
-    if (ratio >= 4.5) return 'AA';
-    return 'fail';
+    if (ratio >= 7.0) return 'AAA'
+    if (ratio >= 4.5) return 'AA'
+    return 'fail'
   }
 
-  private adjustColorForContrast(color: string, background: string, targetRatio: number): string {
-    let adjustedColor = color;
-    let currentRatio = this.calculateContrastRatio(color, background);
-    
+  private adjustColorForContrast(
+    color: string,
+    background: string,
+    targetRatio: number
+  ): string {
+    let adjustedColor = color
+    let currentRatio = this.calculateContrastRatio(color, background)
+
     if (currentRatio < targetRatio) {
       // Try darkening first
-      let darkenAmount = 0.1;
+      let darkenAmount = 0.1
       while (currentRatio < targetRatio && darkenAmount < 0.9) {
-        adjustedColor = this.darkenColor(color, darkenAmount);
-        currentRatio = this.calculateContrastRatio(adjustedColor, background);
-        darkenAmount += 0.1;
+        adjustedColor = this.darkenColor(color, darkenAmount)
+        currentRatio = this.calculateContrastRatio(adjustedColor, background)
+        darkenAmount += 0.1
       }
-      
+
       // If darkening didn't work, try lightening
       if (currentRatio < targetRatio) {
-        adjustedColor = color;
-        let lightenAmount = 0.1;
+        adjustedColor = color
+        let lightenAmount = 0.1
         while (currentRatio < targetRatio && lightenAmount < 0.9) {
-          adjustedColor = this.lightenColor(color, lightenAmount);
-          currentRatio = this.calculateContrastRatio(adjustedColor, background);
-          lightenAmount += 0.1;
+          adjustedColor = this.lightenColor(color, lightenAmount)
+          currentRatio = this.calculateContrastRatio(adjustedColor, background)
+          lightenAmount += 0.1
         }
       }
     }
-    
-    return adjustedColor;
+
+    return adjustedColor
   }
 
   private hexToRgb(hex: string): { r: number; g: number; b: number } {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : { r: 0, g: 0, b: 0 };
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : { r: 0, g: 0, b: 0 }
   }
 
-  private rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-    
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0;
-    let s = 0;
-    const l = (max + min) / 2;
-    
+  private rgbToHsl(
+    r: number,
+    g: number,
+    b: number
+  ): { h: number; s: number; l: number } {
+    r /= 255
+    g /= 255
+    b /= 255
+
+    const max = Math.max(r, g, b)
+    const min = Math.min(r, g, b)
+    let h = 0
+    let s = 0
+    const l = (max + min) / 2
+
     if (max === min) {
-      h = s = 0;
+      h = s = 0
     } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      
+      const d = max - min
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+
       switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0)
+          break
+        case g:
+          h = (b - r) / d + 2
+          break
+        case b:
+          h = (r - g) / d + 4
+          break
       }
-      h /= 6;
+      h /= 6
     }
-    
+
     return {
       h: Math.round(h * 360),
       s: Math.round(s * 100),
-      l: Math.round(l * 100)
-    };
+      l: Math.round(l * 100),
+    }
   }
 
   private lightenColor(hex: string, amount: number): string {
-    const rgb = this.hexToRgb(hex);
-    const r = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * amount));
-    const g = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * amount));
-    const b = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * amount));
-    
-    return this.rgbToHex(r, g, b);
+    const rgb = this.hexToRgb(hex)
+    const r = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * amount))
+    const g = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * amount))
+    const b = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * amount))
+
+    return this.rgbToHex(r, g, b)
   }
 
   private darkenColor(hex: string, amount: number): string {
-    const rgb = this.hexToRgb(hex);
-    const r = Math.max(0, Math.round(rgb.r * (1 - amount)));
-    const g = Math.max(0, Math.round(rgb.g * (1 - amount)));
-    const b = Math.max(0, Math.round(rgb.b * (1 - amount)));
-    
-    return this.rgbToHex(r, g, b);
+    const rgb = this.hexToRgb(hex)
+    const r = Math.max(0, Math.round(rgb.r * (1 - amount)))
+    const g = Math.max(0, Math.round(rgb.g * (1 - amount)))
+    const b = Math.max(0, Math.round(rgb.b * (1 - amount)))
+
+    return this.rgbToHex(r, g, b)
   }
 
   private rgbToHex(r: number, g: number, b: number): string {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
   }
 
   /**
    * Save swatch HTML to file
    */
-  async saveSwatchHTML(tokens: W3CDesignTokens, filename: string): Promise<void> {
-    const html = this.generateSwatchHTML(tokens, true);
-    const fs = await import('fs');
-    fs.writeFileSync(filename, html);
+  async saveSwatchHTML(
+    tokens: W3CDesignTokens,
+    filename: string
+  ): Promise<void> {
+    const html = this.generateSwatchHTML(tokens, true)
+    const fs = await import('fs')
+    fs.writeFileSync(filename, html)
   }
 
   /**
    * Generate accessibility report
    */
   generateAccessibilityReport(tokens: W3CDesignTokens): string {
-    const results = this.validateTokens(tokens);
-    const passed = results.filter(r => r.passes).length;
-    const total = results.length;
-    const passRate = (passed / total) * 100;
-    
-    let report = `# WCAG Accessibility Report\n\n`;
-    report += `**Overall Pass Rate:** ${passRate.toFixed(1)}% (${passed}/${total})\n\n`;
-    report += `## Summary\n\n`;
-    report += `- ✅ **AA Level:** ${results.filter(r => r.level === 'AA').length} combinations\n`;
-    report += `- 🏆 **AAA Level:** ${results.filter(r => r.level === 'AAA').length} combinations\n`;
-    report += `- ❌ **Failed:** ${results.filter(r => r.level === 'fail').length} combinations\n\n`;
-    
-    const failedResults = results.filter(r => !r.passes);
+    const results = this.validateTokens(tokens)
+    const passed = results.filter((r) => r.passes).length
+    const total = results.length
+    const passRate = (passed / total) * 100
+
+    let report = `# WCAG Accessibility Report\n\n`
+    report += `**Overall Pass Rate:** ${passRate.toFixed(1)}% (${passed}/${total})\n\n`
+    report += `## Summary\n\n`
+    report += `- ✅ **AA Level:** ${results.filter((r) => r.level === 'AA').length} combinations\n`
+    report += `- 🏆 **AAA Level:** ${results.filter((r) => r.level === 'AAA').length} combinations\n`
+    report += `- ❌ **Failed:** ${results.filter((r) => r.level === 'fail').length} combinations\n\n`
+
+    const failedResults = results.filter((r) => !r.passes)
     if (failedResults.length > 0) {
-      report += `## Failed Combinations\n\n`;
-      failedResults.forEach(result => {
-        report += `- **${result.foreground}** on **${result.background}**\n`;
-        report += `  - Ratio: ${result.ratio.toFixed(2)}:1 (minimum: ${this.minContrastRatio}:1)\n`;
+      report += `## Failed Combinations\n\n`
+      failedResults.forEach((result) => {
+        report += `- **${result.foreground}** on **${result.background}**\n`
+        report += `  - Ratio: ${result.ratio.toFixed(2)}:1 (minimum: ${this.minContrastRatio}:1)\n`
         if (result.adjustedForeground) {
-          report += `  - Suggested foreground: ${result.adjustedForeground}\n`;
+          report += `  - Suggested foreground: ${result.adjustedForeground}\n`
         }
         if (result.adjustedBackground) {
-          report += `  - Suggested background: ${result.adjustedBackground}\n`;
+          report += `  - Suggested background: ${result.adjustedBackground}\n`
         }
-        report += `\n`;
-      });
+        report += `\n`
+      })
     }
-    
-    return report;
+
+    return report
   }
 }
 
-export default WCAGValidator;
+export default WCAGValidator

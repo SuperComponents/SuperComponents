@@ -2,9 +2,9 @@ export function defineDesignPrinciplesPrompt(args?: any) {
   return {
     messages: [
       {
-        role: "user",
+        role: 'user',
         content: {
-          type: "text",
+          type: 'text',
           text: `Let's establish the north-star design principles for your component library. I'll guide you through a series of questions to help define your design system's foundation.
 
 Please answer the following questions:
@@ -21,9 +21,9 @@ Please answer the following questions:
 
 6. **Constraints**: Are there any specific constraints or requirements? (e.g., WCAG compliance, mobile-first, performance budgets)
 
-Based on your answers, I'll help you create a comprehensive design principles document that will guide all future design decisions.`
-        }
-      }
-    ]
-  };
+Based on your answers, I'll help you create a comprehensive design principles document that will guide all future design decisions.`,
+        },
+      },
+    ],
+  }
 }

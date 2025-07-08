@@ -1,12 +1,13 @@
-import { DesignTokens } from '../types/index.js';
+import { DesignTokens, W3CDesignTokens, DesignInsight } from '../types/index.js'
+import { TokenGenerator } from '../generators/tokens.js'
 
 interface ExtractDesignTokensArgs {
-  source: string;
-  sourceType: 'url' | 'image' | 'text';
+  source: string
+  sourceType: 'url' | 'image' | 'text'
 }
 
 export async function extractDesignTokensTool(args: ExtractDesignTokensArgs) {
-  const { source, sourceType } = args;
+  const { source, sourceType } = args
 
   try {
     // For proof of concept, we'll return example tokens
@@ -14,7 +15,7 @@ export async function extractDesignTokensTool(args: ExtractDesignTokensArgs) {
     // - Fetch and analyze URLs
     // - Process images with computer vision
     // - Parse text descriptions
-    
+
     const tokens: DesignTokens = {
       colors: {
         'primary-50': '#eff6ff',
@@ -37,44 +38,39 @@ export async function extractDesignTokensTool(args: ExtractDesignTokensArgs) {
         'gray-700': '#374151',
         'gray-800': '#1f2937',
         'gray-900': '#111827',
-        'success': '#10b981',
-        'warning': '#f59e0b',
-        'error': '#ef4444',
-        'info': '#3b82f6'
+        success: '#10b981',
+        warning: '#f59e0b',
+        error: '#ef4444',
+        info: '#3b82f6',
       },
       typography: {
-        fonts: [
-          'Inter',
-          'system-ui',
-          '-apple-system',
-          'sans-serif'
-        ],
+        fonts: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         sizes: {
-          'xs': '0.75rem',
-          'sm': '0.875rem',
-          'base': '1rem',
-          'lg': '1.125rem',
-          'xl': '1.25rem',
+          xs: '0.75rem',
+          sm: '0.875rem',
+          base: '1rem',
+          lg: '1.125rem',
+          xl: '1.25rem',
           '2xl': '1.5rem',
           '3xl': '1.875rem',
           '4xl': '2.25rem',
-          '5xl': '3rem'
+          '5xl': '3rem',
         },
         weights: {
-          'light': 300,
-          'normal': 400,
-          'medium': 500,
-          'semibold': 600,
-          'bold': 700,
-          'extrabold': 800
+          light: 300,
+          normal: 400,
+          medium: 500,
+          semibold: 600,
+          bold: 700,
+          extrabold: 800,
         },
         lineHeights: {
-          'tight': '1.25',
-          'snug': '1.375',
-          'normal': '1.5',
-          'relaxed': '1.625',
-          'loose': '1.75'
-        }
+          tight: '1.25',
+          snug: '1.375',
+          normal: '1.5',
+          relaxed: '1.625',
+          loose: '1.75',
+        },
       },
       spacing: {
         '0': '0',
@@ -94,36 +90,42 @@ export async function extractDesignTokensTool(args: ExtractDesignTokensArgs) {
         '40': '10rem',
         '48': '12rem',
         '56': '14rem',
-        '64': '16rem'
+        '64': '16rem',
       },
       borderRadius: {
-        'none': '0',
-        'sm': '0.125rem',
-        'base': '0.25rem',
-        'md': '0.375rem',
-        'lg': '0.5rem',
-        'xl': '0.75rem',
+        none: '0',
+        sm: '0.125rem',
+        base: '0.25rem',
+        md: '0.375rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
         '2xl': '1rem',
         '3xl': '1.5rem',
-        'full': '9999px'
+        full: '9999px',
       },
       shadows: {
-        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        'base': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-        'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-        '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)'
-      }
-    };
+        sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        base: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+      },
+    }
+
+    // Convert legacy tokens to W3C format using TokenGenerator
+    const tokenGenerator = new TokenGenerator()
+    const fakeInsight = createFakeDesignInsight(tokens)
+    const w3cTokens = tokenGenerator.generateTokens(fakeInsight)
 
     // Generate Tailwind v4 CSS format
-    const cssOutput = generateTailwindV4CSS(tokens);
+    const cssOutput = generateTailwindV4CSS(tokens)
 
     return {
-      content: [{
-        type: "text",
-        text: `✅ Design tokens extracted successfully from ${sourceType}: ${source}
+      content: [
+        {
+          type: 'text',
+          text: `✅ Design tokens extracted successfully from ${sourceType}: ${source}
 
 Extracted tokens include:
 - ${Object.keys(tokens.colors).length} colors
@@ -139,66 +141,87 @@ Generated Tailwind v4 CSS theme:
 ${cssOutput}
 \`\`\`
 
-These tokens have been saved and can be used with the generate_style_showcase tool.`
-      }]
-    };
+W3C Design Tokens v1 compliant JSON:
+
+\`\`\`json
+${JSON.stringify(w3cTokens, null, 2)}
+\`\`\`
+
+These tokens have been saved and can be used with the generate_style_showcase tool.`,
+        },
+      ],
+    }
   } catch (error) {
     return {
-      content: [{
-        type: "text",
-        text: `❌ Failed to extract design tokens: ${error instanceof Error ? error.message : 'Unknown error'}`
-      }],
-      isError: true
-    };
+      content: [
+        {
+          type: 'text',
+          text: `❌ Failed to extract design tokens: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        },
+      ],
+      isError: true,
+    }
   }
 }
 
 function generateTailwindV4CSS(tokens: DesignTokens): string {
-  let css = '@theme {\n';
-  
+  let css = '@theme {\n'
+
   // Colors
   Object.entries(tokens.colors).forEach(([key, value]) => {
-    css += `  --color-${key}: ${value};\n`;
-  });
-  
+    css += `  --color-${key}: ${value};\n`
+  })
+
   // Typography
-  css += `\n  --font-sans: ${tokens.typography.fonts.join(', ')};\n`;
-  
+  css += `\n  --font-sans: ${tokens.typography.fonts.join(', ')};\n`
+
   // Font sizes
   Object.entries(tokens.typography.sizes).forEach(([key, value]) => {
-    css += `  --font-size-${key}: ${value};\n`;
-  });
-  
+    css += `  --font-size-${key}: ${value};\n`
+  })
+
   // Font weights
   Object.entries(tokens.typography.weights).forEach(([key, value]) => {
-    css += `  --font-weight-${key}: ${value};\n`;
-  });
-  
+    css += `  --font-weight-${key}: ${value};\n`
+  })
+
   // Line heights
   Object.entries(tokens.typography.lineHeights).forEach(([key, value]) => {
-    css += `  --line-height-${key}: ${value};\n`;
-  });
-  
+    css += `  --line-height-${key}: ${value};\n`
+  })
+
   // Spacing
-  css += '\n';
+  css += '\n'
   Object.entries(tokens.spacing).forEach(([key, value]) => {
-    css += `  --spacing-${key}: ${value};\n`;
-  });
-  
+    css += `  --spacing-${key}: ${value};\n`
+  })
+
   // Border radius
-  css += '\n';
+  css += '\n'
   Object.entries(tokens.borderRadius).forEach(([key, value]) => {
-    css += `  --radius-${key}: ${value};\n`;
-  });
-  
+    css += `  --radius-${key}: ${value};\n`
+  })
+
   // Shadows
   if (tokens.shadows) {
-    css += '\n';
+    css += '\n'
     Object.entries(tokens.shadows).forEach(([key, value]) => {
-      css += `  --shadow-${key}: ${value};\n`;
-    });
+      css += `  --shadow-${key}: ${value};\n`
+    })
   }
-  
-  css += '}';
-  return css;
+
+  css += '}'
+  return css
+}
+
+function createFakeDesignInsight(tokens: DesignTokens): DesignInsight {
+  // Create a basic DesignInsight from legacy tokens
+  return {
+    imageryPalette: Object.values(tokens.colors).slice(0, 8),
+    typographyFamilies: tokens.typography.fonts,
+    spacingScale: Object.values(tokens.spacing).map(s => parseInt(s.replace('px', '').replace('rem', '')) * 16),
+    uiDensity: 'regular',
+    brandKeywords: [],
+    supportingReferences: []
+  }
 }

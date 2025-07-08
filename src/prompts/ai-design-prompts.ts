@@ -110,7 +110,7 @@ CRITICAL REQUIREMENTS:
 2. Typography scale must be harmonious and readable
 3. Spacing system must create visual rhythm
 4. Color palette must work together cohesively
-5. Design tokens must be implementable in Tailwind CSS v4`;
+5. Design tokens must be implementable in Tailwind CSS v4`
 
 export const COMPONENT_GENERATION_PROMPT = `You are an expert React component architect. Generate a production-ready component implementation.
 
@@ -135,4 +135,4 @@ OUTPUT COMPLETE IMPLEMENTATION:
 - Test file (.test.tsx)
 - README documentation
 
-Focus on production quality, accessibility, and design system consistency.`;
+Focus on production quality, accessibility, and design system consistency.`

@@ -1,21 +1,21 @@
-import React, { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { cn } from '../../utils/cn.js';
+import React, { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { cn } from '../../utils/cn.js'
 
 export interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  title?: string;
-  description?: string;
-  children: React.ReactNode;
-  footer?: React.ReactNode;
-  closeOnOverlay?: boolean;
-  closeOnEscape?: boolean;
-  showCloseButton?: boolean;
-  className?: string;
-  overlayClassName?: string;
-  portalTarget?: HTMLElement;
+  isOpen: boolean
+  onClose: () => void
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  title?: string
+  description?: string
+  children: React.ReactNode
+  footer?: React.ReactNode
+  closeOnOverlay?: boolean
+  closeOnEscape?: boolean
+  showCloseButton?: boolean
+  className?: string
+  overlayClassName?: string
+  portalTarget?: HTMLElement
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -31,101 +31,103 @@ const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   className,
   overlayClassName,
-  portalTarget
+  portalTarget,
 }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
 
   // Handle escape key
   useEffect(() => {
-    if (!closeOnEscape) return;
+    if (!closeOnEscape) return
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) {
-        onClose();
+        onClose()
       }
-    };
+    }
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener('keydown', handleEscape)
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, onClose, closeOnEscape]);
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen, onClose, closeOnEscape])
 
   // Handle focus management
   useEffect(() => {
     if (isOpen) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
-      modalRef.current?.focus();
+      previousFocusRef.current = document.activeElement as HTMLElement
+      modalRef.current?.focus()
     } else if (previousFocusRef.current) {
-      previousFocusRef.current.focus();
+      previousFocusRef.current.focus()
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Handle body scroll lock
   useEffect(() => {
     if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+
       return () => {
-        document.body.style.overflow = originalOverflow;
-      };
+        document.body.style.overflow = originalOverflow
+      }
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Handle focus trap
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const handleTabKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab') return;
+      if (event.key !== 'Tab') return
 
-      const modal = modalRef.current;
-      if (!modal) return;
+      const modal = modalRef.current
+      if (!modal) return
 
       const focusableElements = modal.querySelectorAll(
         'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
-      );
-      
-      const firstElement = focusableElements[0] as HTMLElement;
-      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+      )
+
+      const firstElement = focusableElements[0] as HTMLElement
+      const lastElement = focusableElements[
+        focusableElements.length - 1
+      ] as HTMLElement
 
       if (event.shiftKey) {
         if (document.activeElement === firstElement) {
-          lastElement.focus();
-          event.preventDefault();
+          lastElement.focus()
+          event.preventDefault()
         }
       } else {
         if (document.activeElement === lastElement) {
-          firstElement.focus();
-          event.preventDefault();
+          firstElement.focus()
+          event.preventDefault()
         }
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleTabKey);
-    return () => document.removeEventListener('keydown', handleTabKey);
-  }, [isOpen]);
+    document.addEventListener('keydown', handleTabKey)
+    return () => document.removeEventListener('keydown', handleTabKey)
+  }, [isOpen])
 
   const handleOverlayClick = (event: React.MouseEvent) => {
     if (closeOnOverlay && event.target === event.currentTarget) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
   const sizes = {
     sm: 'max-w-sm',
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
-    full: 'max-w-full mx-4'
-  };
+    full: 'max-w-full mx-4',
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const modalContent = (
     <div
@@ -157,17 +159,23 @@ const Modal: React.FC<ModalProps> = ({
           <div className="flex items-center justify-between p-6 border-b border-neutral-200">
             <div className="flex-1">
               {title && (
-                <h2 id="modal-title" className="text-xl font-semibold text-neutral-900">
+                <h2
+                  id="modal-title"
+                  className="text-xl font-semibold text-neutral-900"
+                >
                   {title}
                 </h2>
               )}
               {description && (
-                <p id="modal-description" className="mt-1 text-sm text-neutral-500">
+                <p
+                  id="modal-description"
+                  className="mt-1 text-sm text-neutral-500"
+                >
                   {description}
                 </p>
               )}
             </div>
-            
+
             {showCloseButton && (
               <button
                 type="button"
@@ -179,8 +187,18 @@ const Modal: React.FC<ModalProps> = ({
                 onClick={onClose}
                 aria-label="Close modal"
               >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}
@@ -189,40 +207,33 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
-          <div className="p-6">
-            {children}
-          </div>
+          <div className="p-6">{children}</div>
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="border-t border-neutral-200 p-6">
-            {footer}
-          </div>
+          <div className="border-t border-neutral-200 p-6">{footer}</div>
         )}
       </div>
     </div>
-  );
+  )
 
-  return createPortal(
-    modalContent,
-    portalTarget || document.body
-  );
-};
+  return createPortal(modalContent, portalTarget || document.body)
+}
 
 // Sub-components
 export interface ModalHeaderProps {
-  title: string;
-  description?: string;
-  onClose?: () => void;
-  showCloseButton?: boolean;
+  title: string
+  description?: string
+  onClose?: () => void
+  showCloseButton?: boolean
 }
 
 export const ModalHeader: React.FC<ModalHeaderProps> = ({
   title,
   description,
   onClose,
-  showCloseButton = true
+  showCloseButton = true,
 }) => (
   <div className="flex items-center justify-between p-6 border-b border-neutral-200">
     <div className="flex-1">
@@ -231,7 +242,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
         <p className="mt-1 text-sm text-neutral-500">{description}</p>
       )}
     </div>
-    
+
     {showCloseButton && onClose && (
       <button
         type="button"
@@ -239,34 +250,51 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
         onClick={onClose}
         aria-label="Close modal"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     )}
   </div>
-);
+)
 
 export interface ModalContentProps {
-  children: React.ReactNode;
-  className?: string;
+  children: React.ReactNode
+  className?: string
 }
 
-export const ModalContent: React.FC<ModalContentProps> = ({ children, className }) => (
-  <div className={cn('p-6', className)}>
-    {children}
-  </div>
-);
+export const ModalContent: React.FC<ModalContentProps> = ({
+  children,
+  className,
+}) => <div className={cn('p-6', className)}>{children}</div>
 
 export interface ModalFooterProps {
-  children: React.ReactNode;
-  className?: string;
+  children: React.ReactNode
+  className?: string
 }
 
-export const ModalFooter: React.FC<ModalFooterProps> = ({ children, className }) => (
-  <div className={cn('border-t border-neutral-200 p-6 flex justify-end gap-3', className)}>
+export const ModalFooter: React.FC<ModalFooterProps> = ({
+  children,
+  className,
+}) => (
+  <div
+    className={cn(
+      'border-t border-neutral-200 p-6 flex justify-end gap-3',
+      className
+    )}
+  >
     {children}
   </div>
-);
+)
 
-export default Modal;
+export default Modal

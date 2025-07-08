@@ -1,73 +1,100 @@
-import { DesignPrinciples, DesignTokens } from '../types/index.js';
+import { DesignPrinciples, DesignTokens } from '../types/index.js'
 
 interface GenerateComponentPromptArgs {
-  componentName: string;
-  principles?: DesignPrinciples;
-  tokens?: DesignTokens;
+  componentName: string
+  principles?: DesignPrinciples
+  tokens?: DesignTokens
 }
 
 export function generateComponentPrompt(args?: GenerateComponentPromptArgs) {
   if (!args?.componentName) {
     return {
-      messages: [{
-        role: "user",
-        content: {
-          type: "text",
-          text: "Please specify a component name to generate an implementation prompt for."
-        }
-      }]
-    };
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: 'Please specify a component name to generate an implementation prompt for.',
+          },
+        },
+      ],
+    }
   }
 
-  const { componentName, principles, tokens } = args;
+  const { componentName, principles, tokens } = args
 
   // Component-specific configurations
   const componentConfigs: Record<string, any> = {
     Button: {
-      props: ['variant', 'size', 'disabled', 'loading', 'fullWidth', 'icon', 'onClick'],
+      props: [
+        'variant',
+        'size',
+        'disabled',
+        'loading',
+        'fullWidth',
+        'icon',
+        'onClick',
+      ],
       variants: ['primary', 'secondary', 'danger', 'ghost', 'link'],
       sizes: ['sm', 'md', 'lg'],
-      a11y: ['aria-label', 'aria-pressed', 'aria-disabled', 'keyboard navigation']
+      a11y: [
+        'aria-label',
+        'aria-pressed',
+        'aria-disabled',
+        'keyboard navigation',
+      ],
     },
     Input: {
-      props: ['type', 'value', 'placeholder', 'disabled', 'error', 'icon', 'onChange'],
+      props: [
+        'type',
+        'value',
+        'placeholder',
+        'disabled',
+        'error',
+        'icon',
+        'onChange',
+      ],
       types: ['text', 'email', 'password', 'number', 'search'],
       states: ['default', 'focus', 'error', 'disabled'],
-      a11y: ['aria-label', 'aria-describedby', 'aria-invalid', 'role']
+      a11y: ['aria-label', 'aria-describedby', 'aria-invalid', 'role'],
     },
     Card: {
       props: ['title', 'description', 'image', 'actions', 'variant', 'padding'],
       variants: ['default', 'bordered', 'elevated', 'interactive'],
       layout: ['vertical', 'horizontal'],
-      a11y: ['semantic HTML', 'proper heading hierarchy']
-    }
-  };
+      a11y: ['semantic HTML', 'proper heading hierarchy'],
+    },
+  }
 
   const config = componentConfigs[componentName] || {
     props: ['children', 'className'],
     variants: ['default'],
-    a11y: ['proper ARIA attributes']
-  };
+    a11y: ['proper ARIA attributes'],
+  }
 
-  const designContext = principles ? `
+  const designContext = principles
+    ? `
 Design Principles to Follow:
 - ${principles.coreValues.join('\n- ')}
 - Target audience: ${principles.targetAudience}
-` : '';
+`
+    : ''
 
-  const tokensContext = tokens ? `
+  const tokensContext = tokens
+    ? `
 Use these design tokens from your Tailwind v4 theme:
 - Colors: ${Object.keys(tokens.colors).slice(0, 5).join(', ')}
 - Spacing: ${Object.keys(tokens.spacing).slice(0, 5).join(', ')}
 - Border radius: ${Object.keys(tokens.borderRadius).slice(0, 5).join(', ')}
-` : '';
+`
+    : ''
 
   return {
     messages: [
       {
-        role: "user",
+        role: 'user',
         content: {
-          type: "text",
+          type: 'text',
           text: `## Implementation Prompt for ${componentName} Component
 
 Please implement a ${componentName} component with the following specifications:
@@ -119,11 +146,11 @@ Create a story file at \`src/components/${componentName}/${componentName}.storie
 - Test ARIA attributes
 - Test event handlers
 
-Please implement this component following React best practices and ensure it's production-ready.`
-        }
-      }
-    ]
-  };
+Please implement this component following React best practices and ensure it's production-ready.`,
+        },
+      },
+    ],
+  }
 }
 
 function getPropType(prop: string): string {
@@ -144,7 +171,7 @@ function getPropType(prop: string): string {
     description: 'string',
     image: 'string',
     actions: 'React.ReactNode',
-    padding: 'string'
-  };
-  return propTypes[prop] || 'any';
+    padding: 'string',
+  }
+  return propTypes[prop] || 'any'
 }

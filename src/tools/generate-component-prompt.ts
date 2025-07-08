@@ -1,60 +1,96 @@
 interface GenerateComponentPromptArgs {
-  componentName: string;
-  principles?: string;
-  tokens?: string;
+  componentName: string
+  principles?: string
+  tokens?: string
 }
 
-export async function generateComponentPromptTool(args?: GenerateComponentPromptArgs) {
+export async function generateComponentPromptTool(
+  args?: GenerateComponentPromptArgs
+) {
   try {
     if (!args?.componentName) {
       return {
-        content: [{
-          type: "text",
-          text: "❌ Please specify a component name to generate an implementation prompt for."
-        }],
-        isError: true
-      };
+        content: [
+          {
+            type: 'text',
+            text: '❌ Please specify a component name to generate an implementation prompt for.',
+          },
+        ],
+        isError: true,
+      }
     }
 
-    const { componentName, principles, tokens } = args;
+    const { componentName, principles, tokens } = args
 
     // Component-specific configurations
     const componentConfigs: Record<string, any> = {
       Button: {
-        props: ['variant', 'size', 'disabled', 'loading', 'fullWidth', 'icon', 'onClick'],
+        props: [
+          'variant',
+          'size',
+          'disabled',
+          'loading',
+          'fullWidth',
+          'icon',
+          'onClick',
+        ],
         variants: ['primary', 'secondary', 'danger', 'ghost', 'link'],
         sizes: ['sm', 'md', 'lg'],
-        a11y: ['aria-label', 'aria-pressed', 'aria-disabled', 'keyboard navigation']
+        a11y: [
+          'aria-label',
+          'aria-pressed',
+          'aria-disabled',
+          'keyboard navigation',
+        ],
       },
       Input: {
-        props: ['type', 'value', 'placeholder', 'disabled', 'error', 'icon', 'onChange'],
+        props: [
+          'type',
+          'value',
+          'placeholder',
+          'disabled',
+          'error',
+          'icon',
+          'onChange',
+        ],
         types: ['text', 'email', 'password', 'number', 'search'],
         states: ['default', 'focus', 'error', 'disabled'],
-        a11y: ['aria-label', 'aria-describedby', 'aria-invalid', 'role']
+        a11y: ['aria-label', 'aria-describedby', 'aria-invalid', 'role'],
       },
       Card: {
-        props: ['title', 'description', 'image', 'actions', 'variant', 'padding'],
+        props: [
+          'title',
+          'description',
+          'image',
+          'actions',
+          'variant',
+          'padding',
+        ],
         variants: ['default', 'bordered', 'elevated', 'interactive'],
         layout: ['vertical', 'horizontal'],
-        a11y: ['semantic HTML', 'proper heading hierarchy']
-      }
-    };
+        a11y: ['semantic HTML', 'proper heading hierarchy'],
+      },
+    }
 
     const config = componentConfigs[componentName] || {
       props: ['children', 'className'],
       variants: ['default'],
-      a11y: ['proper ARIA attributes']
-    };
+      a11y: ['proper ARIA attributes'],
+    }
 
-    const designContext = principles ? `
+    const designContext = principles
+      ? `
 Design Principles to Follow:
 ${principles}
-` : '';
+`
+      : ''
 
-    const tokensContext = tokens ? `
+    const tokensContext = tokens
+      ? `
 Use these design tokens from your Tailwind v4 theme:
 ${tokens}
-` : '';
+`
+      : ''
 
     const promptText = `## Implementation Prompt for ${componentName} Component
 
@@ -107,22 +143,26 @@ Create a story file at \`src/components/${componentName}/${componentName}.storie
 - Test ARIA attributes
 - Test event handlers
 
-Please implement this component following React best practices and ensure it's production-ready.`;
+Please implement this component following React best practices and ensure it's production-ready.`
 
     return {
-      content: [{
-        type: "text",
-        text: promptText
-      }]
-    };
+      content: [
+        {
+          type: 'text',
+          text: promptText,
+        },
+      ],
+    }
   } catch (error) {
     return {
-      content: [{
-        type: "text",
-        text: `❌ Failed to generate component prompt: ${error instanceof Error ? error.message : 'Unknown error'}`
-      }],
-      isError: true
-    };
+      content: [
+        {
+          type: 'text',
+          text: `❌ Failed to generate component prompt: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        },
+      ],
+      isError: true,
+    }
   }
 }
 
@@ -144,7 +184,7 @@ function getPropType(prop: string): string {
     description: 'string',
     image: 'string',
     actions: 'React.ReactNode',
-    padding: 'string'
-  };
-  return propTypes[prop] || 'any';
+    padding: 'string',
+  }
+  return propTypes[prop] || 'any'
 }

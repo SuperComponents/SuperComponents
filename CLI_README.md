@@ -28,17 +28,37 @@ npx inspiration-to-system [options]
 
 ### Input Sources (choose one)
 - `--image <url>` - Image URL for visual inspiration
+  - Supports: JPG, PNG, GIF, WebP formats
+  - Examples: Dribbble shots, Behance designs, UI screenshots
 - `--url <url>` - Website URL for design inspiration  
+  - Analyzes live websites for design patterns
+  - Examples: https://stripe.com, https://vercel.com
 - `--description <text>` - Text description of desired design
+  - AI-powered design generation from natural language
+  - Examples: "Modern tech startup", "Luxury e-commerce store"
 
-### Context (optional)
+### Context Options (optional)
 - `--brand <keywords>` - Brand keywords (comma-separated)
-- `--industry <type>` - Industry type (e.g., tech, finance, creative)
+  - Influences color palette and typography choices
+  - Examples: "modern,minimal,tech", "luxury,elegant,premium"
+- `--industry <type>` - Industry type for design patterns
+  - Values: `tech`, `finance`, `creative`, `healthcare`, `education`, `ecommerce`
+  - Affects component priorities and design conventions
 - `--audience <description>` - Target audience description
-- `--style <preferences>` - Style preferences (modern, classic, playful, professional, minimalist)
+  - Influences accessibility and UX decisions
+  - Examples: "developers and designers", "children ages 5-12"
+- `--style <preferences>` - Style preferences (comma-separated)
+  - Values: `modern`, `classic`, `playful`, `professional`, `minimalist`, `bold`
+  - Affects visual hierarchy and component styling
 - `--colors <preferences>` - Color preferences (hex codes or names)
-- `--accessibility <level>` - Accessibility level (basic, enhanced, enterprise)
+  - Examples: "#3b82f6,#10b981", "blue,green", "bright,rainbow"
+  - Influences generated color palette
+- `--accessibility <level>` - Accessibility compliance level
+  - Values: `basic` (WCAG A), `enhanced` (WCAG AA), `enterprise` (WCAG AAA)
+  - Default: `enhanced`
 - `--output <path>` - Output directory (default: ./design-system)
+  - Relative or absolute path for generated files
+  - Directory will be created if it doesn't exist
 
 ## Examples
 

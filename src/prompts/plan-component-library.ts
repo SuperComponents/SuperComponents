@@ -1,32 +1,36 @@
-import { DesignPrinciples, DesignTokens } from '../types/index.js';
+import { DesignPrinciples, DesignTokens } from '../types/index.js'
 
 interface PlanComponentLibraryArgs {
-  principles?: DesignPrinciples;
-  tokens?: DesignTokens;
+  principles?: DesignPrinciples
+  tokens?: DesignTokens
 }
 
 export function planComponentLibraryPrompt(args?: PlanComponentLibraryArgs) {
-  const principlesContext = args?.principles ? `
+  const principlesContext = args?.principles
+    ? `
 Based on your design principles:
 - Brand: ${args.principles.brandIdentity}
 - Audience: ${args.principles.targetAudience}
 - Values: ${args.principles.coreValues.join(', ')}
 - Goals: ${args.principles.designGoals.join(', ')}
-` : '';
+`
+    : ''
 
-  const tokensContext = args?.tokens ? `
+  const tokensContext = args?.tokens
+    ? `
 Your design tokens include:
 - Colors: ${Object.keys(args.tokens.colors).join(', ')}
 - Typography: ${args.tokens.typography.fonts.join(', ')}
 - Spacing scale: ${Object.keys(args.tokens.spacing).join(', ')}
-` : '';
+`
+    : ''
 
   return {
     messages: [
       {
-        role: "user",
+        role: 'user',
         content: {
-          type: "text",
+          type: 'text',
           text: `Let's plan your component library structure. ${principlesContext}${tokensContext}
 
 I'll help you create a comprehensive component library plan following atomic design principles:
@@ -97,9 +101,9 @@ Each component should include:
 - Storybook documentation
 - Unit tests
 
-Would you like me to adjust this plan based on your specific needs, or shall we proceed with detailed implementation prompts for specific components?`
-        }
-      }
-    ]
-  };
+Would you like me to adjust this plan based on your specific needs, or shall we proceed with detailed implementation prompts for specific components?`,
+        },
+      },
+    ],
+  }
 }
