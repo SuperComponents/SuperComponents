@@ -12,16 +12,24 @@
 
     /* Emit */
     "outDir": "./build",                                 /* Output directory */
+    "declaration": true,                                 /* Generate .d.ts files */
+    "declarationMap": true,                              /* Generate declaration source maps */
     "sourceMap": true,                                   /* Create source map files */
+    "removeComments": false,                             /* Keep comments in output */
 
     /* Interop Constraints */
     "esModuleInterop": true,                             /* CommonJS interop */
     "forceConsistentCasingInFileNames": true,            /* Ensure consistent casing */
+    "allowSyntheticDefaultImports": true,                /* Allow default imports from modules with no default export */
 
     /* Type Checking */
     "strict": true,                                      /* Enable strict type checking */
+    "noImplicitAny": true,                               /* Error on expressions and declarations with an implied 'any' type */
+    "noImplicitReturns": false,                          /* Allow functions that don't return in all paths (skeleton code) */
+    "noUnusedLocals": false,                             /* Allow unused locals (skeleton code) */
+    "noUnusedParameters": false,                         /* Allow unused parameters (skeleton code) */
     "skipLibCheck": true                                 /* Skip type checking of .d.ts files */
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules", "build", "tests"]
 }

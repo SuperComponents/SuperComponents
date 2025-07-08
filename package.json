@@ -2,18 +2,51 @@
   "name": "supercomponents-server",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "build/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node build/index.js",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["mcp", "ai", "components", "design-system"],
+  "keywords": [
+    "mcp",
+    "ai",
+    "components",
+    "design-system",
+    "typescript",
+    "nodejs"
+  ],
   "license": "MIT",
   "description": "MCP server for AI-powered component generation",
+  "author": "SuperComponents Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SuperComponents/SuperComponents.git"
+  },
+  "homepage": "https://github.com/SuperComponents/SuperComponents#readme",
+  "bugs": {
+    "url": "https://github.com/SuperComponents/SuperComponents/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.3",
+    "@semantic-release/release-notes-generator": "^14.0.3",
     "@types/node": "^24.0.10",
+    "conventional-changelog-conventionalcommits": "^9.0.0",
+    "semantic-release": "^24.2.6",
     "typescript": "^5.8.3"
   },
   "dependencies": {
