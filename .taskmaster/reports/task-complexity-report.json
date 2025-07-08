@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-07-08T01:40:32.611Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Setup Project Repository",
+			"complexityScore": 4,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the project setup into discrete configuration steps: repository initialization, package management, TypeScript configuration, build scripts setup, and testing framework configuration.",
+			"reasoning": "Medium complexity due to multiple tool configurations and dependencies. Well-defined steps but requires coordination between different tools (Git, npm, TypeScript, Jest)."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Define Core Schemas",
+			"complexityScore": 3,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Separate schema definition into individual schema files, type inference setup, schema validation testing, and schema documentation with examples.",
+			"reasoning": "Low-medium complexity. Straightforward Zod schema definitions but requires careful type design and comprehensive validation testing."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Implement MCP Server Core",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Divide into server initialization, tool registration system, request routing, error handling middleware, validation pipeline, and server lifecycle management.",
+			"reasoning": "Medium-high complexity due to integration with MCP SDK, error handling, and request routing. Requires understanding of the MCP protocol and proper async handling."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Build LLM Integration Layer",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Split into OpenAI client setup, caching implementation, rate limiting, streaming support, and error handling for API failures.",
+			"reasoning": "Medium complexity involving external API integration, caching strategy, and rate limiting. Requires robust error handling and performance optimization."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Implement parseDesigns Tool",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into prompt engineering, markdown parsing, LLM response handling, JSON validation, error recovery, and performance optimization for large inputs.",
+			"reasoning": "Medium-high complexity due to LLM integration, prompt engineering, and handling unpredictable LLM outputs. Requires robust parsing and validation."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implement analyzeComponent Tool",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Separate into file discovery, AST parsing setup, component extraction logic, prop signature analysis, error handling for malformed code, performance optimization, and result aggregation.",
+			"reasoning": "High complexity involving AST parsing, file system operations, and complex code analysis. Requires handling various component patterns and syntax errors."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Implement generateInstruction Tool",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into data preparation, prompt template creation, LLM instruction generation, output validation, and instruction quality assessment.",
+			"reasoning": "Medium-high complexity combining multiple data sources and generating structured output. Depends on previous tools and requires sophisticated prompt engineering."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Implement initializeProject Tool",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break into Storybook initialization, Tailwind configuration, directory structure creation, template file generation, and initialization validation.",
+			"reasoning": "Medium complexity involving multiple external tool integrations and file system operations. Requires handling different project structures and potential conflicts."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Implement generateTokens Tool",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Separate into token extraction, Tailwind mapping logic, CSS variable generation, file output handling, token validation, and format conversion utilities.",
+			"reasoning": "Medium-high complexity requiring token transformation logic and multiple output formats. Needs to handle various token types and maintain consistency."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Implement createTokenStories Tool",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into token data reading, story template generation, component rendering logic, and Storybook integration testing.",
+			"reasoning": "Medium complexity involving template generation and Storybook integration. Relatively straightforward but requires understanding of Storybook story format."
+		}
+	]
+}

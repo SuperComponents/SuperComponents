@@ -17,8 +17,22 @@ import { defineDesignPrinciplesPrompt } from "./prompts/define-design-principles
 import { planComponentLibraryPrompt } from "./prompts/plan-component-library.js";
 import { generateComponentPrompt } from "./prompts/generate-component-prompt.js";
 
+// Import dev architecture components for potential future use
+import { 
+  initializeServer, 
+  setupShutdownHandlers, 
+  performHealthChecks, 
+  createServerState,
+  type ServerState 
+} from './server/initialization.js';
+import { getLogger } from './utils/logger.js';
+import type { ServerConfig } from './config/server.js';
+import { ToolRegistry, type ToolRegistrationOptions } from './server/tools.js';
+
 export class DesignSystemMCPServer {
   private server: Server;
+  private serverState: ServerState;
+  private toolRegistry: ToolRegistry;
 
   constructor() {
     this.server = new Server(
@@ -33,6 +47,10 @@ export class DesignSystemMCPServer {
         },
       }
     );
+
+    // Initialize enhanced server state tracking from dev
+    this.serverState = createServerState();
+    this.toolRegistry = new ToolRegistry();
 
     this.setupHandlers();
   }
@@ -205,8 +223,172 @@ export class DesignSystemMCPServer {
   }
 
   async start() {
-    const transport = new StdioServerTransport();
-    await this.server.connect(transport);
-    console.error("Design System MCP Server started");
+    const logger = getLogger();
+    
+    try {
+      this.serverState.setStatus('starting');
+      
+      // Setup shutdown handlers from dev architecture
+      setupShutdownHandlers(async (signal) => {
+        await this.shutdown(signal);
+      });
+      
+      const transport = new StdioServerTransport();
+      await this.server.connect(transport);
+      
+      this.serverState.setStatus('running');
+      logger.logServerReady('stdio');
+      console.error("Design System MCP Server started");
+      
+    } catch (error) {
+      this.serverState.setStatus('stopped');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown startup error';
+      logger.error('❌ Failed to start server', {}, error instanceof Error ? error : new Error(errorMessage));
+      throw error;
+    }
+  }
+
+  async shutdown(reason: string = 'Manual shutdown'): Promise<void> {
+    const logger = getLogger();
+    
+    this.serverState.setStatus('stopping');
+    logger.logServerShutdown(reason);
+    
+    try {
+      // Log final statistics
+      const stats = this.serverState.getStats();
+      logger.info('📊 Final server statistics', stats);
+      
+      this.serverState.setStatus('stopped');
+      
+    } catch (error) {
+      logger.error('❌ Error during shutdown', {}, error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
+  }
+
+  public getStats() {
+    const baseStats = this.serverState.getStats();
+    const toolStats = this.toolRegistry.getStatistics();
+    
+    return {
+      ...baseStats,
+      tools: toolStats
+    };
+  }
+
+  public getStatus() {
+    return this.serverState.status;
   }
 }
+
+// Export SuperComponentsServer for compatibility with dev architecture
+export class SuperComponentsServer extends DesignSystemMCPServer {
+  private config: ServerConfig;
+
+  constructor(config: ServerConfig) {
+    super();
+    this.config = config;
+  }
+
+  public registerTool(options: ToolRegistrationOptions): void;
+  public registerTool(name: string, handler: (args: any) => Promise<any>): void;
+  public registerTool(
+    nameOrOptions: string | ToolRegistrationOptions, 
+    handler?: (args: any) => Promise<any>
+  ): void {
+    const logger = getLogger();
+    
+    if (typeof nameOrOptions === 'string' && handler) {
+      const options: ToolRegistrationOptions = {
+        name: nameOrOptions,
+        description: `Tool: ${nameOrOptions}`,
+        inputSchema: { type: "object", additionalProperties: true },
+        handler,
+        category: 'legacy'
+      };
+      this.toolRegistry.register(options);
+    } else if (typeof nameOrOptions === 'object') {
+      this.toolRegistry.register(nameOrOptions);
+    } else {
+      throw new Error('Invalid tool registration arguments');
+    }
+    
+    logger.logToolRegistered(
+      typeof nameOrOptions === 'string' ? nameOrOptions : nameOrOptions.name, 
+      this.toolRegistry.getAllTools().length
+    );
+  }
+
+  public getToolRegistry(): ToolRegistry {
+    return this.toolRegistry;
+  }
+
+  public getTools() {
+    return this.toolRegistry.getAllTools();
+  }
+
+  public getCapabilities() {
+    return this.toolRegistry.getCapabilities();
+  }
+}
+
+/**
+ * Main server entry point - supports both architectures
+ */
+async function main(): Promise<void> {
+  try {
+    // Try to initialize with dev architecture first
+    const { config } = await initializeServer();
+    
+    // Create and configure server
+    const server = new SuperComponentsServer(config);
+    
+    // Register placeholder tools
+    server.registerTool('parse.design', async (args) => {
+      return {
+        content: [{
+          type: 'text',
+          text: 'Design parsing not yet implemented',
+        }],
+      };
+    });
+    
+    server.registerTool('analyze.components', async (args) => {
+      return {
+        content: [{
+          type: 'text',
+          text: 'Component analysis not yet implemented',
+        }],
+      };
+    });
+    
+    server.registerTool('generate.instruction', async (args) => {
+      return {
+        content: [{
+          type: 'text',
+          text: 'Instruction generation not yet implemented',
+        }],
+      };
+    });
+    
+    // Start the server
+    await server.start();
+    
+  } catch (error) {
+    // Fallback to MVP architecture if dev initialization fails
+    console.error('Dev architecture initialization failed, falling back to MVP architecture');
+    const server = new DesignSystemMCPServer();
+    await server.start();
+  }
+}
+
+// Start the server if this file is run directly
+if (process.argv[1] && process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.js')) {
+  main().catch((error) => {
+    console.error('❌ Unhandled error in main:', error);
+    process.exit(1);
+  });
+}
+
+export { main };

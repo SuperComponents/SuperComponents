@@ -39,15 +39,26 @@ npm install -g supercomponents-server
 npx supercomponents-server --description "Modern SaaS application with clean design" --output ./my-design-system
 ```
 
-### Environment Setup
+## Environment Variables
 
-```bash
-# Required: Set your OpenAI API key
-export OPENAI_API_KEY="your-api-key-here"
+Create a `.env` file in the root directory with **either** OpenAI or Anthropic API key:
 
-# Alternative: Create a .env file
-echo "OPENAI_API_KEY=your-api-key-here" > .env
+```env
+# Option 1: Use OpenAI (GPT models)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Option 2: Use Anthropic (Claude models) - Preferred
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Option 3: Use both (Anthropic will be preferred)
+OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
+
+**Provider Selection:**
+- If both keys are provided, **Anthropic (Claude) will be used** by default
+- If only one key is provided, that provider will be used
+- If no keys are provided, the system will throw an error
 
 ### Development Setup
 
@@ -67,6 +78,24 @@ npm test
 
 # Launch Storybook
 npm run storybook
+```
+
+### LLM Integration Examples
+
+```typescript
+import { complete, streamComplete, getCurrentProvider } from './src/llm/index';
+
+// Check current provider
+const provider = getCurrentProvider();
+console.log(`Using: ${provider.name}`);
+
+// Basic completion
+const response = await complete('Explain design systems');
+
+// Streaming completion
+for await (const chunk of streamComplete('Generate component code')) {
+  console.log(chunk);
+}
 ```
 
 ## 📖 Usage
@@ -150,6 +179,9 @@ my-design-system/
 | `npm start` | Run compiled production server |
 | `npm test` | Run Jest test suite |
 | `npm run test:cli` | Test CLI functionality end-to-end |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage |
+| `npm run clean` | Clean build directory |
 | `npm run lint` | Run ESLint on TypeScript files |
 | `npm run typecheck` | Type check without compilation |
 | `npm run storybook` | Launch Storybook development server |
@@ -190,7 +222,7 @@ Accessible dialog component:
 
 ### Common Issues
 
-#### OpenAI API Key Missing
+#### API Key Missing
 ```bash
 # Error: "The OPENAI_API_KEY environment variable is missing..."
 export OPENAI_API_KEY="your-api-key-here"
