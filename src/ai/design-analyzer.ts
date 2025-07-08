@@ -5,12 +5,12 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const DesignInsightSchema = z.object({
-  imageryPalette: z.array(z.string()).max(8),
-  typographyFamilies: z.array(z.string()),
-  spacingScale: z.array(z.number()),
-  uiDensity: z.enum(['compact', 'regular', 'spacious']),
-  brandKeywords: z.array(z.string()),
-  supportingReferences: z.array(z.string())
+  imageryPalette: z.array(z.string()).max(8).default([]),
+  typographyFamilies: z.array(z.string()).default([]),
+  spacingScale: z.array(z.number()).default([]),
+  uiDensity: z.enum(['compact', 'regular', 'spacious']).default('regular'),
+  brandKeywords: z.array(z.string()).default([]),
+  supportingReferences: z.array(z.string()).default([])
 });
 
 export interface InspirationInput {
@@ -57,7 +57,8 @@ export class AIDesignAnalyzer {
       const response = await this.callVisionAPI(prompt, input);
       const insights = this.parseInsightsResponse(response);
       
-      return DesignInsightSchema.parse(insights);
+      const parsedInsights = DesignInsightSchema.parse(insights);
+      return parsedInsights as DesignInsight;
     } catch (error) {
       throw new Error(`Failed to extract design insights: ${error instanceof Error ? error.message : String(error)}`);
     }
