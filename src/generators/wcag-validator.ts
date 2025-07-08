@@ -200,6 +200,7 @@ export class WCAGValidator {
             color: #d97706;
         }
         
+${includeValidation ? `
         .validation-section {
             margin-top: 40px;
         }
@@ -253,7 +254,7 @@ export class WCAGValidator {
         .ratio-warning {
             background: #fef3c7;
             color: #d97706;
-        }
+        }` : ''}
     </style>
 </head>
 <body>

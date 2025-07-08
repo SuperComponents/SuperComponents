@@ -19,7 +19,7 @@ describe('TokenGenerator', () => {
 
   describe('generateTokens', () => {
     it('should generate W3C compliant tokens', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       expect(tokens).toHaveProperty('color');
       expect(tokens).toHaveProperty('typography');
@@ -31,7 +31,7 @@ describe('TokenGenerator', () => {
     });
 
     it('should include $type and $value properties', () => {
-      const tokens = generator.generateTokens(mockInsight) as any;
+      const tokens = generator.generateTokens(mockInsight) as any as any;
       
       // Check color tokens
       const primaryColor = tokens.color?.primary?.[500];
@@ -50,21 +50,21 @@ describe('TokenGenerator', () => {
     });
 
     it('should generate primary color palette from first imagery color', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       const primaryColor = tokens.color?.primary?.[500];
       
       expect(primaryColor?.$value).toBe('#3b82f6');
     });
 
     it('should generate secondary color palette from second imagery color', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       const secondaryColor = tokens.color?.secondary?.[500];
       
       expect(secondaryColor?.$value).toBe('#10b981');
     });
 
     it('should include semantic colors', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       expect(tokens.color?.semantic?.success).toHaveProperty('$type', 'color');
       expect(tokens.color?.semantic?.warning).toHaveProperty('$type', 'color');
@@ -73,7 +73,7 @@ describe('TokenGenerator', () => {
     });
 
     it('should generate font family tokens from typography families', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       const primaryFont = tokens.typography?.fontFamily?.primary;
       expect(primaryFont?.$value).toEqual(['Inter', 'sans-serif']);
@@ -89,9 +89,9 @@ describe('TokenGenerator', () => {
       const compactInsight = { ...mockInsight, uiDensity: 'compact' as const };
       const spaciousInsight = { ...mockInsight, uiDensity: 'spacious' as const };
       
-      const regularTokens = generator.generateTokens(mockInsight);
-      const compactTokens = compactGenerator.generateTokens(compactInsight);
-      const spaciousTokens = spaciousGenerator.generateTokens(spaciousInsight);
+      const regularTokens = generator.generateTokens(mockInsight) as any;
+      const compactTokens = compactGenerator.generateTokens(compactInsight) as any;
+      const spaciousTokens = spaciousGenerator.generateTokens(spaciousInsight) as any;
       
       // Extract spacing values
       const regularSpacing = regularTokens.spacing?.md?.$value;
@@ -107,9 +107,9 @@ describe('TokenGenerator', () => {
       const compactInsight = { ...mockInsight, uiDensity: 'compact' as const };
       const spaciousInsight = { ...mockInsight, uiDensity: 'spacious' as const };
       
-      const regularTokens = generator.generateTokens(mockInsight);
-      const compactTokens = generator.generateTokens(compactInsight);
-      const spaciousTokens = generator.generateTokens(spaciousInsight);
+      const regularTokens = generator.generateTokens(mockInsight) as any;
+      const compactTokens = generator.generateTokens(compactInsight) as any;
+      const spaciousTokens = generator.generateTokens(spaciousInsight) as any;
       
       const regularRadius = regularTokens.borderRadius?.md?.$value;
       const compactRadius = compactTokens.borderRadius?.md?.$value;
@@ -121,7 +121,7 @@ describe('TokenGenerator', () => {
     });
 
     it('should generate shadow tokens', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       expect(tokens.shadow?.sm).toHaveProperty('$type', 'shadow');
       expect(tokens.shadow?.md).toHaveProperty('$type', 'shadow');
@@ -130,7 +130,7 @@ describe('TokenGenerator', () => {
     });
 
     it('should generate transition tokens', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       expect(tokens.transition?.duration?.fast).toHaveProperty('$type', 'duration');
       expect(tokens.transition?.duration?.normal).toHaveProperty('$type', 'duration');
@@ -201,7 +201,7 @@ describe('TokenGenerator', () => {
   describe('WCAG enforcement', () => {
     it('should enforce WCAG contrast when enabled', () => {
       const wcagGenerator = new TokenGenerator({ enforceWCAG: true });
-      const tokens = wcagGenerator.generateTokens(mockInsight);
+      const tokens = wcagGenerator.generateTokens(mockInsight) as any;
       
       // Check that semantic colors meet contrast requirements
       const successColor = tokens.color?.semantic?.success?.$value;
@@ -220,7 +220,7 @@ describe('TokenGenerator', () => {
 
     it('should allow disabling WCAG enforcement', () => {
       const noWcagGenerator = new TokenGenerator({ enforceWCAG: false });
-      const tokens = noWcagGenerator.generateTokens(mockInsight);
+      const tokens = noWcagGenerator.generateTokens(mockInsight) as any;
       
       // Tokens should still be generated even if they don't meet contrast requirements
       expect(tokens.color?.semantic?.success).toBeDefined();
@@ -239,7 +239,7 @@ describe('TokenGenerator', () => {
   describe('edge cases', () => {
     it('should handle empty imagery palette', () => {
       const emptyInsight = { ...mockInsight, imageryPalette: [] };
-      const tokens = generator.generateTokens(emptyInsight);
+      const tokens = generator.generateTokens(emptyInsight) as any;
       
       expect(tokens.color?.neutral).toBeDefined();
       expect(tokens.color?.semantic).toBeDefined();
@@ -247,7 +247,7 @@ describe('TokenGenerator', () => {
 
     it('should handle single color in palette', () => {
       const singleColorInsight = { ...mockInsight, imageryPalette: ['#3b82f6'] };
-      const tokens = generator.generateTokens(singleColorInsight);
+      const tokens = generator.generateTokens(singleColorInsight) as any;
       
       expect(tokens.color?.primary).toBeDefined();
       expect(tokens.color?.secondary).toBeUndefined();
@@ -255,7 +255,7 @@ describe('TokenGenerator', () => {
 
     it('should handle empty typography families', () => {
       const emptyTypographyInsight = { ...mockInsight, typographyFamilies: [] };
-      const tokens = generator.generateTokens(emptyTypographyInsight);
+      const tokens = generator.generateTokens(emptyTypographyInsight) as any;
       
       expect(tokens.typography?.fontSize).toBeDefined();
       expect(tokens.typography?.fontWeight).toBeDefined();
@@ -264,7 +264,7 @@ describe('TokenGenerator', () => {
 
     it('should handle empty spacing scale', () => {
       const emptySpacingInsight = { ...mockInsight, spacingScale: [] };
-      const tokens = generator.generateTokens(emptySpacingInsight);
+      const tokens = generator.generateTokens(emptySpacingInsight) as any;
       
       expect(tokens.spacing?.md).toBeDefined();
       expect(tokens.spacing?.lg).toBeDefined();
@@ -280,7 +280,7 @@ describe('TokenGenerator', () => {
   describe('color manipulation', () => {
     it('should lighten colors correctly', () => {
       const originalColor = '#3b82f6';
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       const lighterShade = tokens.color?.primary?.[100]?.$value;
       expect(lighterShade).toBeDefined();
@@ -289,7 +289,7 @@ describe('TokenGenerator', () => {
 
     it('should darken colors correctly', () => {
       const originalColor = '#3b82f6';
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       
       const darkerShade = tokens.color?.primary?.[900]?.$value;
       expect(darkerShade).toBeDefined();
@@ -297,7 +297,7 @@ describe('TokenGenerator', () => {
     });
 
     it('should generate complete color scales', () => {
-      const tokens = generator.generateTokens(mockInsight);
+      const tokens = generator.generateTokens(mockInsight) as any;
       const primaryColors = tokens.color?.primary;
       
       const expectedShades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
