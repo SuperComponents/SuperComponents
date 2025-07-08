@@ -18,6 +18,31 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 - **Why it's important**: Bridges the gap between design and development with actionable guidance
 - **How it works**: Combines parsed design data with library analysis to create contextual implementation steps
 
+## 4. Project Initialization
+- **What it does**: Scaffolds new or existing projects with necessary configurations for SuperComponents workflows
+- **Why it's important**: One-command setup reduces friction and ensures consistent development environments
+- **How it works**: Installs and configures Storybook for component visualization, sets up base styling files (Tailwind CSS config), and creates directories for SuperComponents outputs
+
+## 5. Design Token Generation
+- **What it does**: Extracts design tokens from design.json and generates theme files (Tailwind config, CSS variables)
+- **Why it's important**: Establishes consistent design language across the project with reusable tokens
+- **How it works**: Processes parsed design data to identify color palettes, typography scales, spacing systems, and other design tokens, then outputs them in various formats
+
+## 6. Token Visualization
+- **What it does**: Creates Storybook stories for design tokens to provide visual reference for colors, typography, spacing
+- **Why it's important**: Immediate visual feedback confirms correct parsing and provides living documentation
+- **How it works**: Generates interactive Storybook stories that showcase extracted design tokens in an organized, browseable format
+
+## 7. Context-Aware Instruction Generation (Phase 2)
+- **What it does**: Synthesizes design.json and library-manifest.json to produce detailed "super-prompts" for IDE AI
+- **Why it's important**: Core value proposition - provides superior context for better code generation than generic prompts
+- **How it works**: Combines parsed design data with library analysis to create comprehensive prompts that include component structure, styling guidelines, and prop interfaces
+
+## 8. Design Enforcement (Phase 2)
+- **What it does**: Lints code for design system compliance and flags non-standard colors, improper component usage
+- **Why it's important**: Maintains design consistency over time and prevents design system drift
+- **How it works**: Analyzes codebase against established design tokens and component library standards, providing automated feedback on compliance violations
+
 # User Experience  
 ## User Personas
 - **Frontend Developers**: Need to quickly implement components from designs
@@ -60,25 +85,28 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 
 # Development Roadmap  
 ## Phase 1: MVP Foundation
+### Core Infrastructure
 - Complete MCP server setup with proper handler registration
-- Implement basic design parsing functionality
 - Create foundational schemas for design and library data
 - Establish LLM integration patterns
-
-## Phase 2: Core Tool Implementation
-- Fully implement parseDesigns tool with multi-format support
-- Build analyzeLibrary tool for component pattern detection
-- Develop generateInstruction tool for implementation guidance
 - Add comprehensive error handling and validation
 
-## Phase 3: Advanced Features
-- Multi-format design input support (Figma, Sketch, images)
-- Advanced library analysis with dependency mapping
-- Context-aware instruction generation
-- Performance optimization and caching
+### Core Features Implementation
+- **Design Parsing**: Implement parseDesigns tool with multi-format support (images, descriptions, code)
+- **Library Analysis**: Build analyzeLibrary tool for component pattern detection and naming conventions
+- **Instruction Generation**: Develop generateInstruction tool for implementation guidance
+- **Project Initialization**: Create initializeProject tool for Storybook and Tailwind scaffolding
+- **Design Token Generation**: Implement generateTokens tool for theme file creation
+- **Token Visualization**: Build createTokenStories tool for Storybook token documentation
 
-## Phase 4: Integration & Polish
-- Plugin ecosystem for extended functionality
+## Phase 2: Advanced Features
+### Enhanced Capabilities
+- **Context-Aware Instruction Generation**: Synthesize design.json and library-manifest.json for superior IDE AI prompts
+- **Design Enforcement**: Implement linting for design system compliance and consistency checking
+
+### Production Readiness
+- VSCode extension for extended functionality
+- CLI tool for CI/CD integration
 - Documentation and examples
 - Testing infrastructure
 - Production deployment capabilities
@@ -128,3 +156,6 @@ SuperComponents Server is an MCP (Model Context Protocol) server that provides A
 - TypeScript for type safety and developer experience
 - Zod for runtime validation and schema management
 - Stdio transport for cross-platform compatibility 
+
+## Success Criteria
+ -“Image → component code in < 2 minutes”, token accuracy, models reuse of existing components
