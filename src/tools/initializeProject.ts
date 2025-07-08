@@ -87,8 +87,8 @@ function fetchScaffold(targetPath: string) {
     }
     
     // Copy all files from the subdirectory to target directory
-    execSync(`cp -r ${sourceDir}/* ${targetPath}/ 2>/dev/null || true`, { stdio: 'inherit' });
-    execSync(`cp -r ${sourceDir}/.* ${targetPath}/ 2>/dev/null || true`, { stdio: 'inherit' });
+    // Use rsync to properly copy all files (including hidden) without duplicating
+    execSync(`rsync -av --exclude='.git' ${sourceDir}/ ${targetPath}/`, { stdio: 'inherit' });
   } finally {
     // Always clean up the temp directory
     execSync(`rm -rf ${tempDir}`, { stdio: 'inherit' });
