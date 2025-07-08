@@ -1,0 +1,998 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Token Swatches</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .swatch-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .swatch-color {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .swatch-info {
+            padding: 16px;
+        }
+        
+        .swatch-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .swatch-value {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .swatch-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .metric {
+            font-size: 12px;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+        }
+        
+        .contrast-pass {
+            color: #16a34a;
+        }
+        
+        .contrast-fail {
+            color: #dc2626;
+        }
+        
+        .contrast-warning {
+            color: #d97706;
+        }
+        
+        .validation-section {
+            margin-top: 40px;
+        }
+        
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .validation-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .validation-preview {
+            height: 60px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .validation-details {
+            font-size: 12px;
+        }
+        
+        .ratio-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .ratio-pass {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .ratio-fail {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        
+        .ratio-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Design Token Swatches</h1>
+            <p>Generated color swatches with WCAG accessibility validation</p>
+        </div>
+        
+        <div class="swatch-grid">
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #f5f9ff; color: black;">
+                    color-primary-50
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-50</div>
+                    <div class="swatch-value">HEX: #f5f9ff</div>
+                    <div class="swatch-value">RGB: rgb(245, 249, 255)</div>
+                    <div class="swatch-value">HSL: hsl(216°, 100%, 98%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.944</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">19.88:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #ebf3fe; color: black;">
+                    color-primary-100
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-100</div>
+                    <div class="swatch-value">HEX: #ebf3fe</div>
+                    <div class="swatch-value">RGB: rgb(235, 243, 254)</div>
+                    <div class="swatch-value">HSL: hsl(215°, 90%, 96%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.889</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">18.78:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #d8e6fd; color: black;">
+                    color-primary-200
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-200</div>
+                    <div class="swatch-value">HEX: #d8e6fd</div>
+                    <div class="swatch-value">RGB: rgb(216, 230, 253)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 90%, 92%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.783</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">16.66:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #b1cdfb; color: black;">
+                    color-primary-300
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-300</div>
+                    <div class="swatch-value">HEX: #b1cdfb</div>
+                    <div class="swatch-value">RGB: rgb(177, 205, 251)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 90%, 84%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.600</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">12.99:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #89b4fa; color: black;">
+                    color-primary-400
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-400</div>
+                    <div class="swatch-value">HEX: #89b4fa</div>
+                    <div class="swatch-value">RGB: rgb(137, 180, 250)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 92%, 76%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.449</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">9.97:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #3b82f6; color: black;">
+                    color-primary-500
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-500</div>
+                    <div class="swatch-value">HEX: #3b82f6</div>
+                    <div class="swatch-value">RGB: rgb(59, 130, 246)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 91%, 60%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.235</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">5.71:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #2f68c5; color: white;">
+                    color-primary-600
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-600</div>
+                    <div class="swatch-value">HEX: #2f68c5</div>
+                    <div class="swatch-value">RGB: rgb(47, 104, 197)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 61%, 48%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.145</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">5.37:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #234e94; color: white;">
+                    color-primary-700
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-700</div>
+                    <div class="swatch-value">HEX: #234e94</div>
+                    <div class="swatch-value">RGB: rgb(35, 78, 148)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 62%, 36%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.079</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">8.11:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #183462; color: white;">
+                    color-primary-800
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-800</div>
+                    <div class="swatch-value">HEX: #183462</div>
+                    <div class="swatch-value">RGB: rgb(24, 52, 98)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 61%, 24%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.035</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">12.31:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #0c1a31; color: white;">
+                    color-primary-900
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-900</div>
+                    <div class="swatch-value">HEX: #0c1a31</div>
+                    <div class="swatch-value">RGB: rgb(12, 26, 49)</div>
+                    <div class="swatch-value">HSL: hsl(217°, 61%, 12%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.010</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">17.39:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #060d19; color: white;">
+                    color-primary-950
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-primary-950</div>
+                    <div class="swatch-value">HEX: #060d19</div>
+                    <div class="swatch-value">RGB: rgb(6, 13, 25)</div>
+                    <div class="swatch-value">HSL: hsl(218°, 61%, 6%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.004</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">19.46:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #f3fcf9; color: black;">
+                    color-secondary-50
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-50</div>
+                    <div class="swatch-value">HEX: #f3fcf9</div>
+                    <div class="swatch-value">RGB: rgb(243, 252, 249)</div>
+                    <div class="swatch-value">HSL: hsl(160°, 60%, 97%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.955</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">20.10:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #e7f8f2; color: black;">
+                    color-secondary-100
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-100</div>
+                    <div class="swatch-value">HEX: #e7f8f2</div>
+                    <div class="swatch-value">RGB: rgb(231, 248, 242)</div>
+                    <div class="swatch-value">HSL: hsl(159°, 55%, 94%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.905</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">19.11:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #cff1e6; color: black;">
+                    color-secondary-200
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-200</div>
+                    <div class="swatch-value">HEX: #cff1e6</div>
+                    <div class="swatch-value">RGB: rgb(207, 241, 230)</div>
+                    <div class="swatch-value">HSL: hsl(161°, 55%, 88%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.819</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">17.38:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #9fe3cd; color: black;">
+                    color-secondary-300
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-300</div>
+                    <div class="swatch-value">HEX: #9fe3cd</div>
+                    <div class="swatch-value">RGB: rgb(159, 227, 205)</div>
+                    <div class="swatch-value">HSL: hsl(161°, 55%, 76%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.667</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">14.34:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #70d5b3; color: black;">
+                    color-secondary-400
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-400</div>
+                    <div class="swatch-value">HEX: #70d5b3</div>
+                    <div class="swatch-value">RGB: rgb(112, 213, 179)</div>
+                    <div class="swatch-value">HSL: hsl(160°, 55%, 64%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.543</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">11.86:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #10b981; color: black;">
+                    color-secondary-500
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-500</div>
+                    <div class="swatch-value">HEX: #10b981</div>
+                    <div class="swatch-value">RGB: rgb(16, 185, 129)</div>
+                    <div class="swatch-value">HSL: hsl(160°, 84%, 39%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.364</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">8.28:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #0d9467; color: black;">
+                    color-secondary-600
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-600</div>
+                    <div class="swatch-value">HEX: #0d9467</div>
+                    <div class="swatch-value">RGB: rgb(13, 148, 103)</div>
+                    <div class="swatch-value">HSL: hsl(160°, 84%, 32%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.222</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">5.45:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #0a6f4d; color: white;">
+                    color-secondary-700
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-700</div>
+                    <div class="swatch-value">HEX: #0a6f4d</div>
+                    <div class="swatch-value">RGB: rgb(10, 111, 77)</div>
+                    <div class="swatch-value">HSL: hsl(160°, 83%, 24%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.120</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">6.19:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #064a34; color: white;">
+                    color-secondary-800
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-800</div>
+                    <div class="swatch-value">HEX: #064a34</div>
+                    <div class="swatch-value">RGB: rgb(6, 74, 52)</div>
+                    <div class="swatch-value">HSL: hsl(161°, 85%, 16%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.052</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">10.31:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #03251a; color: white;">
+                    color-secondary-900
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-900</div>
+                    <div class="swatch-value">HEX: #03251a</div>
+                    <div class="swatch-value">RGB: rgb(3, 37, 26)</div>
+                    <div class="swatch-value">HSL: hsl(161°, 85%, 8%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.014</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">16.36:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #02120d; color: white;">
+                    color-secondary-950
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-secondary-950</div>
+                    <div class="swatch-value">HEX: #02120d</div>
+                    <div class="swatch-value">RGB: rgb(2, 18, 13)</div>
+                    <div class="swatch-value">HSL: hsl(161°, 80%, 4%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.005</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">19.18:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #fafafa; color: black;">
+                    color-neutral-50
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-50</div>
+                    <div class="swatch-value">HEX: #fafafa</div>
+                    <div class="swatch-value">RGB: rgb(250, 250, 250)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 98%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.956</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">20.12:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #f5f5f5; color: black;">
+                    color-neutral-100
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-100</div>
+                    <div class="swatch-value">HEX: #f5f5f5</div>
+                    <div class="swatch-value">RGB: rgb(245, 245, 245)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 96%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.913</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">19.26:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #e5e5e5; color: black;">
+                    color-neutral-200
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-200</div>
+                    <div class="swatch-value">HEX: #e5e5e5</div>
+                    <div class="swatch-value">RGB: rgb(229, 229, 229)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 90%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.784</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">16.67:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #d4d4d4; color: black;">
+                    color-neutral-300
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-300</div>
+                    <div class="swatch-value">HEX: #d4d4d4</div>
+                    <div class="swatch-value">RGB: rgb(212, 212, 212)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 83%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.658</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">14.17:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #a3a3a3; color: black;">
+                    color-neutral-400
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-400</div>
+                    <div class="swatch-value">HEX: #a3a3a3</div>
+                    <div class="swatch-value">RGB: rgb(163, 163, 163)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 64%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.366</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">8.33:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #737373; color: white;">
+                    color-neutral-500
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-500</div>
+                    <div class="swatch-value">HEX: #737373</div>
+                    <div class="swatch-value">RGB: rgb(115, 115, 115)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 45%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.171</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">4.74:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #525252; color: white;">
+                    color-neutral-600
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-600</div>
+                    <div class="swatch-value">HEX: #525252</div>
+                    <div class="swatch-value">RGB: rgb(82, 82, 82)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 32%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.084</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">7.81:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #404040; color: white;">
+                    color-neutral-700
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-700</div>
+                    <div class="swatch-value">HEX: #404040</div>
+                    <div class="swatch-value">RGB: rgb(64, 64, 64)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 25%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.051</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">10.37:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #262626; color: white;">
+                    color-neutral-800
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-800</div>
+                    <div class="swatch-value">HEX: #262626</div>
+                    <div class="swatch-value">RGB: rgb(38, 38, 38)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 15%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.019</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">15.13:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #171717; color: white;">
+                    color-neutral-900
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-900</div>
+                    <div class="swatch-value">HEX: #171717</div>
+                    <div class="swatch-value">RGB: rgb(23, 23, 23)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 9%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.009</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">17.93:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #0a0a0a; color: white;">
+                    color-neutral-950
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-neutral-950</div>
+                    <div class="swatch-value">HEX: #0a0a0a</div>
+                    <div class="swatch-value">RGB: rgb(10, 10, 10)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 0%, 4%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.003</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">19.80:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #12823b; color: white;">
+                    color-semantic-success
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-semantic-success</div>
+                    <div class="swatch-value">HEX: #12823b</div>
+                    <div class="swatch-value">RGB: rgb(18, 130, 59)</div>
+                    <div class="swatch-value">HSL: hsl(142°, 76%, 29%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.164</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">4.90:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #ae5f05; color: white;">
+                    color-semantic-warning
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-semantic-warning</div>
+                    <div class="swatch-value">HEX: #ae5f05</div>
+                    <div class="swatch-value">RGB: rgb(174, 95, 5)</div>
+                    <div class="swatch-value">HSL: hsl(32°, 94%, 35%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.172</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">4.73:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #dc2626; color: white;">
+                    color-semantic-error
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-semantic-error</div>
+                    <div class="swatch-value">HEX: #dc2626</div>
+                    <div class="swatch-value">RGB: rgb(220, 38, 38)</div>
+                    <div class="swatch-value">HSL: hsl(0°, 72%, 51%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.167</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">4.83:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swatch-card">
+                <div class="swatch-color" style="background-color: #2563eb; color: white;">
+                    color-semantic-info
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">color-semantic-info</div>
+                    <div class="swatch-value">HEX: #2563eb</div>
+                    <div class="swatch-value">RGB: rgb(37, 99, 235)</div>
+                    <div class="swatch-value">HSL: hsl(221°, 83%, 53%)</div>
+                    <div class="swatch-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Luminance</div>
+                            <div class="metric-value">0.153</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Contrast</div>
+                            <div class="metric-value contrast-pass">5.17:1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="validation-section">
+            <div class="header">
+                <h2>WCAG Contrast Validation</h2>
+                <p>Common color combinations tested against WCAG 2.1 guidelines</p>
+            </div>
+            <div class="validation-grid">
+
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,289 @@
+name: E2E Generation Testing
+
+on:
+  push:
+    branches: [main, master, feature/integration-mvp]
+  pull_request:
+    branches: [main, master, feature/integration-mvp]
+  workflow_dispatch:
+
+jobs:
+  e2e-generation:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        inspiration: [
+          { name: "sample", file: "fixtures/inspiration/sample.json" },
+          { name: "dashboard", file: "fixtures/inspiration/dashboard.json" }
+        ]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Set up test environment
+        run: |
+          mkdir -p test-output
+          echo "Setting up test environment for ${{ matrix.inspiration.name }}"
+
+      - name: Run CLI generation test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "🚀 Testing CLI generation with ${{ matrix.inspiration.name }} inspiration"
+          
+          # Create output directory
+          OUTPUT_DIR="test-output/${{ matrix.inspiration.name }}-system"
+          mkdir -p "$OUTPUT_DIR"
+          
+          # Run CLI with JSON inspiration
+          if [ -f "${{ matrix.inspiration.file }}" ]; then
+            echo "📋 Reading inspiration from ${{ matrix.inspiration.file }}"
+            DESCRIPTION=$(cat "${{ matrix.inspiration.file }}" | jq -r '.description // "Modern design system"')
+            BRAND_KEYWORDS=$(cat "${{ matrix.inspiration.file }}" | jq -r '.brandKeywords // [] | join(",")')
+            INDUSTRY_TYPE=$(cat "${{ matrix.inspiration.file }}" | jq -r '.industryType // "technology"')
+            COLOR_PREFERENCES=$(cat "${{ matrix.inspiration.file }}" | jq -r '.colorPreferences // [] | join(",")')
+            STYLE_PREFERENCES=$(cat "${{ matrix.inspiration.file }}" | jq -r '.stylePreferences // [] | join(",")')
+            ACCESSIBILITY=$(cat "${{ matrix.inspiration.file }}" | jq -r '.accessibility // "enhanced"')
+            
+            echo "📝 Generated CLI arguments:"
+            echo "  Description: $DESCRIPTION"
+            echo "  Brand Keywords: $BRAND_KEYWORDS"
+            echo "  Industry: $INDUSTRY_TYPE"
+            echo "  Colors: $COLOR_PREFERENCES"
+            echo "  Styles: $STYLE_PREFERENCES"
+            echo "  Accessibility: $ACCESSIBILITY"
+            
+            # Build CLI command
+            CLI_ARGS="--description '$DESCRIPTION' --output '$OUTPUT_DIR' --verbose"
+            
+            if [ -n "$BRAND_KEYWORDS" ] && [ "$BRAND_KEYWORDS" != "null" ]; then
+              CLI_ARGS="$CLI_ARGS --brand-keywords '$BRAND_KEYWORDS'"
+            fi
+            
+            if [ -n "$INDUSTRY_TYPE" ] && [ "$INDUSTRY_TYPE" != "null" ]; then
+              CLI_ARGS="$CLI_ARGS --industry-type '$INDUSTRY_TYPE'"
+            fi
+            
+            if [ -n "$COLOR_PREFERENCES" ] && [ "$COLOR_PREFERENCES" != "null" ]; then
+              CLI_ARGS="$CLI_ARGS --color-preferences '$COLOR_PREFERENCES'"
+            fi
+            
+            if [ -n "$STYLE_PREFERENCES" ] && [ "$STYLE_PREFERENCES" != "null" ]; then
+              CLI_ARGS="$CLI_ARGS --style-preferences '$STYLE_PREFERENCES'"
+            fi
+            
+            if [ -n "$ACCESSIBILITY" ] && [ "$ACCESSIBILITY" != "null" ]; then
+              CLI_ARGS="$CLI_ARGS --accessibility '$ACCESSIBILITY'"
+            fi
+            
+            echo "🔧 Running CLI: pnpm run inspiration-to-system $CLI_ARGS"
+            
+            # Run CLI with timeout
+            timeout 300 pnpm run inspiration-to-system $CLI_ARGS || {
+              echo "❌ CLI generation failed or timed out"
+              exit 1
+            }
+          else
+            echo "❌ Inspiration file not found: ${{ matrix.inspiration.file }}"
+            exit 1
+          fi
+
+      - name: Validate generated output
+        run: |
+          OUTPUT_DIR="test-output/${{ matrix.inspiration.name }}-system"
+          
+          echo "🔍 Validating generated output in $OUTPUT_DIR"
+          
+          # Check for required files
+          REQUIRED_FILES=(
+            "design/PRINCIPLES.md"
+            "tokens/design-tokens.json"
+            "tailwind.config.ts"
+            "package.json"
+            "src/components"
+            ".supercomponents/metadata.json"
+          )
+          
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -e "$OUTPUT_DIR/$file" ]; then
+              echo "❌ Required file missing: $file"
+              exit 1
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+          
+          # Validate JSON files
+          echo "🔍 Validating JSON files..."
+          if ! jq empty "$OUTPUT_DIR/tokens/design-tokens.json" 2>/dev/null; then
+            echo "❌ Invalid JSON: tokens/design-tokens.json"
+            exit 1
+          fi
+          
+          if ! jq empty "$OUTPUT_DIR/.supercomponents/metadata.json" 2>/dev/null; then
+            echo "❌ Invalid JSON: .supercomponents/metadata.json"
+            exit 1
+          fi
+          
+          echo "✅ All validation checks passed"
+
+      - name: Install dependencies in generated project
+        run: |
+          OUTPUT_DIR="test-output/${{ matrix.inspiration.name }}-system"
+          cd "$OUTPUT_DIR"
+          
+          echo "📦 Installing dependencies in generated project"
+          pnpm install --frozen-lockfile
+
+      - name: Build Storybook from generated output
+        run: |
+          OUTPUT_DIR="test-output/${{ matrix.inspiration.name }}-system"
+          cd "$OUTPUT_DIR"
+          
+          echo "🏗️ Building Storybook from generated output"
+          pnpm run build-storybook --quiet
+          
+          # Verify Storybook build
+          if [ ! -d "storybook-static" ]; then
+            echo "❌ Storybook build failed - no storybook-static directory"
+            exit 1
+          fi
+          
+          if [ ! -f "storybook-static/index.html" ]; then
+            echo "❌ Storybook build failed - no index.html"
+            exit 1
+          fi
+          
+          echo "✅ Storybook build successful"
+
+      - name: Install Lighthouse CI
+        run: |
+          npm install -g @lhci/cli
+
+      - name: Run Lighthouse accessibility audit
+        run: |
+          OUTPUT_DIR="test-output/${{ matrix.inspiration.name }}-system"
+          cd "$OUTPUT_DIR"
+          
+          echo "🔍 Running Lighthouse accessibility audit"
+          
+          # Create Lighthouse config specific to this build
+          cat > .lighthouserc.json << 'EOF'
+          {
+            "ci": {
+              "collect": {
+                "staticDistDir": "./storybook-static",
+                "numberOfRuns": 2
+              },
+              "assert": {
+                "assertions": {
+                  "categories:accessibility": ["error", {"minScore": 0.9}],
+                  "categories:performance": ["warn", {"minScore": 0.7}],
+                  "categories:best-practices": ["warn", {"minScore": 0.8}]
+                }
+              }
+            }
+          }
+          EOF
+          
+          # Run Lighthouse CI
+          lhci autorun --config=.lighthouserc.json || {
+            echo "❌ Lighthouse accessibility audit failed"
+            exit 1
+          }
+          
+          echo "✅ Lighthouse accessibility audit passed (≥90 score)"
+
+      - name: Parse and assert WCAG validation
+        run: |
+          OUTPUT_DIR="test-output/${{ matrix.inspiration.name }}-system"
+          cd "$OUTPUT_DIR"
+          
+          echo "📋 Parsing WCAG validation results"
+          
+          # Find Lighthouse reports
+          LIGHTHOUSE_REPORTS=$(find .lighthouseci -name "*.json" 2>/dev/null || echo "")
+          
+          if [ -z "$LIGHTHOUSE_REPORTS" ]; then
+            echo "⚠️ No Lighthouse reports found for WCAG validation"
+            exit 0
+          fi
+          
+          # Parse accessibility scores
+          for report in $LIGHTHOUSE_REPORTS; do
+            if [ -f "$report" ]; then
+              ACCESSIBILITY_SCORE=$(cat "$report" | jq -r '.categories.accessibility.score // 0')
+              
+              if [ "$ACCESSIBILITY_SCORE" != "null" ]; then
+                SCORE_PERCENTAGE=$(echo "$ACCESSIBILITY_SCORE * 100" | bc -l | cut -d. -f1)
+                echo "📊 Accessibility score: $SCORE_PERCENTAGE%"
+                
+                if [ "$SCORE_PERCENTAGE" -ge 90 ]; then
+                  echo "✅ WCAG validation passed ($SCORE_PERCENTAGE% ≥ 90%)"
+                else
+                  echo "❌ WCAG validation failed ($SCORE_PERCENTAGE% < 90%)"
+                  exit 1
+                fi
+              fi
+            fi
+          done
+
+      - name: Upload generated Storybook as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: storybook-${{ matrix.inspiration.name }}-${{ github.run_number }}
+          path: test-output/${{ matrix.inspiration.name }}-system/storybook-static/
+          retention-days: 7
+
+      - name: Upload generation logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generation-logs-${{ matrix.inspiration.name }}-${{ github.run_number }}
+          path: |
+            test-output/${{ matrix.inspiration.name }}-system/.supercomponents/
+            test-output/${{ matrix.inspiration.name }}-system/design/
+            test-output/${{ matrix.inspiration.name }}-system/tokens/
+          retention-days: 7
+
+  e2e-summary:
+    runs-on: ubuntu-latest
+    needs: e2e-generation
+    if: always()
+    
+    steps:
+      - name: Check E2E results
+        run: |
+          echo "🎯 E2E Generation Testing Summary"
+          
+          # This step will succeed if all matrix jobs succeeded
+          if [ "${{ needs.e2e-generation.result }}" == "success" ]; then
+            echo "✅ All E2E generation tests passed"
+            echo "✅ CLI generation successful for all inspirations"
+            echo "✅ Storybook builds successful for all outputs"
+            echo "✅ Lighthouse accessibility validation passed (≥90 score)"
+            echo "✅ WCAG validation assertions passed"
+          else
+            echo "❌ E2E generation tests failed"
+            echo "Check the individual job logs for details"
+            exit 1
+          fi

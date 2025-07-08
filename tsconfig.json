@@ -2,26 +2,35 @@
   "compilerOptions": {
     /* Language and Environment */
     "target": "ES2022",                                  /* Node 22 supports ES2022 */
-    "lib": ["ES2022", "DOM"],                           /* Include ES2022 and DOM library features */
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],           /* Include ES2022, DOM and DOM.Iterable library features */
 
     /* Modules */
-    "module": "ESNext",                                  /* Latest ECMAScript module syntax */
-    "moduleResolution": "node",                          /* Node.js module resolution */
+    "module": "Node16",                                  /* Use Node16 for better ESM support */
+    "moduleResolution": "Node16",                        /* Node16 module resolution for ESM */
     "rootDir": "./src",                                  /* Source files location */
     "resolveJsonModule": true,                           /* Enable importing .json files */
 
     /* Emit */
-    "outDir": "./dist",                                 /* Output directory */
+    "outDir": "./dist",                                  /* Output directory */
     "sourceMap": true,                                   /* Create source map files */
+    "declaration": true,                                 /* Generate .d.ts files */
+    "declarationMap": true,                              /* Create declaration map files */
 
     /* Interop Constraints */
     "esModuleInterop": true,                             /* CommonJS interop */
+    "allowSyntheticDefaultImports": true,                /* Allow default imports from modules with no default export */
     "forceConsistentCasingInFileNames": true,            /* Ensure consistent casing */
 
     /* Type Checking */
     "strict": true,                                      /* Enable strict type checking */
-    "skipLibCheck": true                                 /* Skip type checking of .d.ts files */
+    "skipLibCheck": true,                                /* Skip type checking of .d.ts files */
+
+    /* React */
+    "jsx": "react-jsx",                                  /* React JSX transform */
+
+    /* Types */
+    "types": ["node", "jest", "@testing-library/jest-dom"]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "build"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests", "**/__tests__/**", "**/*.test.ts"]
 }

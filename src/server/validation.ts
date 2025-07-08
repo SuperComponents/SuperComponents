@@ -283,7 +283,7 @@ export class ResponseValidator implements Validator {
           new ValidationError(
             `Response validation failed: ${err.message} at path: ${err.path.join('.')}`,
             MCPErrorCode.InternalError,
-            { path: err.path }
+            { path: err.path, received: (err as any).received }
           )
         );
       } else {
@@ -504,7 +504,7 @@ export function createValidationError(
   code: MCPErrorCode = MCPErrorCode.InvalidParams,
   data?: unknown
 ): ValidationError {
-  return new ValidationError(message, data || {});
+  return new ValidationError(message, code, data as Record<string, any>);
 }
 
 export function isValidationError(error: unknown): error is ValidationError {
