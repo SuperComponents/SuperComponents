@@ -33,12 +33,14 @@ function createServer(): Server {
     const { initializeProjectTool } = await import('./tools/initializeProject.js');
     const { createTokenStoriesTool } = await import('./tools/createTokenStories.js');
     const { analyzeComponentsTool } = await import('./tools/analyzeComponents.js');
+    const { generateInstructionTool } = await import('./tools/generateInstruction.js');
     
     return {
       parseDesignAndGenerateTokensTool,
       initializeProjectTool,
       createTokenStoriesTool,
       analyzeComponentsTool,
+      generateInstructionTool,
     };
   };
 
@@ -100,6 +102,11 @@ function createServer(): Server {
           description: tools.analyzeComponentsTool.definition.description,
           inputSchema: tools.analyzeComponentsTool.definition.inputSchema,
         },
+        {
+          name: tools.generateInstructionTool.definition.name,
+          description: tools.generateInstructionTool.definition.description,
+          inputSchema: tools.generateInstructionTool.definition.inputSchema,
+        },
       ],
     };
   });
@@ -139,6 +146,10 @@ function createServer(): Server {
         
         case tools.analyzeComponentsTool.definition.name:
           result = await tools.analyzeComponentsTool.handler(args);
+          break;
+        
+        case tools.generateInstructionTool.definition.name:
+          result = await tools.generateInstructionTool.handler(args);
           break;
         
         default:
