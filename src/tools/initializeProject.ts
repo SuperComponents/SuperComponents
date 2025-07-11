@@ -1,9 +1,10 @@
 /**
  * Clones the SCAFFOLD_REPO_BRANCH of the SCAFFOLD_REPO_URL and copies the 
- * SCAFFOLD_REPO_SUBDIR to the target path, then runs the supercomponents-setup script
- * in that template's package.json
+ * SCAFFOLD_REPO_SUBDIR to a ./supercomponents/ subdirectory within the target path,
+ * then runs the supercomponents-setup script in that template's package.json
  *
- * the branch should contain a scaffold from our project
+ * This creates a safe, isolated playground environment without overwriting user files.
+ * The branch should contain a scaffold from our project.
  */
 
 // src/tools/initializeProject.ts
@@ -22,7 +23,7 @@ const SCAFFOLD_REPO_BRANCH = 'scaffolding-repo';
 const SCAFFOLD_REPO_SUBDIR = 'supercomponents-template'
 
 const inputSchema = z.object({
-  path: z.string().optional().default('').describe("Project path where SuperComponents scaffolding will be initialized (defaults to caller's current directory)")
+  path: z.string().optional().default('').describe("Project path where SuperComponents ./supercomponents/ subdirectory will be created (defaults to caller's current directory)")
 });
 
 /**
@@ -98,7 +99,7 @@ function fetchScaffold(targetPath: string) {
 export const initializeProjectTool: Tool = {
   definition: {
     name: "initializeProject",
-    description: "Initialize a new SuperComponents project by fetching scaffolding from the SuperComponents repository.",
+    description: "Initialize a new SuperComponents project by fetching scaffolding from the SuperComponents repository into a ./supercomponents/ subdirectory.",
     inputSchema: zodToJsonSchema(inputSchema)
   },
   handler: async (args) => {
@@ -141,14 +142,20 @@ export const initializeProjectTool: Tool = {
         throw new Error(`Project directory ${path} does not exist`);
       }
 
+      // Create supercomponents subdirectory
+      const supercomponentsPath = join(path, 'supercomponents');
+      if (!existsSync(supercomponentsPath)) {
+        mkdirSync(supercomponentsPath, { recursive: true });
+      }
+
       let results: string[] = [];
       
       try {
-        fetchScaffold(path);
+        fetchScaffold(supercomponentsPath);
         results.push("✅ SuperComponents scaffolding fetched successfully");
         
         execSync('npm run supercomponents-setup', { 
-          cwd: path, 
+          cwd: supercomponentsPath, 
           stdio: 'inherit',
           // DEV env so devDependencies are installed
           env: { ...process.env, NODE_ENV: 'development' }
@@ -167,11 +174,16 @@ export const initializeProjectTool: Tool = {
         path: path,
         results: results,
         next_steps: [
-          "🚀 Your SuperComponents project is ready! Follow these steps:",
+          "🚀 Your SuperComponents playground is ready! Follow these steps:",
           "",
-          "📋 STEP 1: Open TWO separate terminals in your project directory:",
-          "   Terminal 1: For the development server",
-          "   Terminal 2: For Storybook",
+          "📁 SETUP: SuperComponents created a ./supercomponents/ subdirectory",
+          "   - This contains your visual playground environment",
+          "   - Add 'supercomponents/' to .gitignore if you don't want to commit it",
+          "   - All SuperComponents files are safely isolated in this folder",
+          "",
+          "📋 STEP 1: Open TWO separate terminals and navigate to the supercomponents directory:",
+          "   Terminal 1: cd supercomponents",
+          "   Terminal 2: cd supercomponents", 
           "   ⚠️  Both commands run continuously - keep both terminals open!",
           "",
           "🖥️  STEP 2: In Terminal 1, run:",
@@ -185,7 +197,7 @@ export const initializeProjectTool: Tool = {
           "   💡 Keep this terminal running to view your component library",
           "",
           "✨ STEP 4: Start building your component library!",
-          "   - Check the README.md for more information",
+          "   - Check the supercomponents/README.md for more information",
           "   - Use SuperComponents MCP tools to generate design tokens and components",
           "   - Visit http://localhost:5173 to see your React app",
           "   - Visit http://localhost:6006 to see your Storybook",
@@ -196,7 +208,8 @@ export const initializeProjectTool: Tool = {
           "   - analyze_components: Analyze your component structure", 
           "   - generateInstruction: Generate implementation instructions",
           "",
-          "🤖 NOTE: These are manual steps for you to run. The AI cannot manage multiple terminals."
+          "🤖 NOTE: These are manual steps for you to run. The AI cannot manage multiple terminals.",
+          "💡 TIP: When AI runs other SuperComponents tools, it will automatically work in the ./supercomponents/ directory."
         ]
       };
     } catch (error) {
