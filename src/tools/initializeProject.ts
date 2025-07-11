@@ -35,7 +35,7 @@ function checkNodeVersion(): void {
   if (majorVersion < 20) {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      `Node.js 20 or higher is required for Storybook. Current version: ${nodeVersion}. Please upgrade Node.js and try again.`
+      `🚨 INCOMPATIBLE NODE.JS VERSION: SuperComponents requires Node.js 20 or higher. Current version: ${nodeVersion}. The scaffolding template uses modern JavaScript features that require Node.js 20+.`
     );
   }
 }
@@ -108,6 +108,30 @@ export const initializeProjectTool: Tool = {
 
     try {
       logger.info('Starting SuperComponents project initialization...');
+      
+      // ⚠️ CRITICAL: Check Node.js version FIRST - this must be the primary error
+      // This will throw an McpError that should bubble up immediately
+      try {
+        checkNodeVersion();
+      } catch (error) {
+        // If it's a Node.js version error, let it bubble up as the primary error
+        if (error instanceof McpError) {
+          return {
+            success: false,
+            message: `❌ ${error.message}`,
+            path: path || 'unknown',
+            fix_instructions: [
+              "🔧 To fix this issue:",
+              "1. Install Node.js 20 or higher from https://nodejs.org/",
+              "2. Or use nvm: 'nvm install 20 && nvm use 20'",
+              "3. Verify with: 'node --version'",
+              "4. Then try initializing SuperComponents again"
+            ]
+          };
+        }
+        // If it's not an McpError, re-throw it
+        throw error;
+      }
     
       // Handle different input formats
       const input = parseInput(args)
