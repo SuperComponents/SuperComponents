@@ -1,0 +1,44 @@
+# Task ID: 2
+# Title: Define Core Schemas
+# Status: done
+# Dependencies: 1
+# Priority: medium
+# Description: Create Zod schemas for Design, Component, and Instruction data models and export inferred TypeScript types.
+# Details:
+src/schemas/design.ts  -> export const DesignSchema = z.object({id: z.string(),tokens: z.any(),components: z.array(z.any())})
+src/schemas/component.ts -> export const ComponentSchema = z.object({name:z.string(),props:z.record(z.string(),z.any()),path:z.string()})
+src/schemas/instruction.ts -> export const InstructionSchema = z.object({steps:z.array(z.string()),files:z.record(z.string(),z.string())})
+• index.ts aggregates and re-exports.
+• Use z.infer<typeof DesignSchema> for typed outputs.
+
+# Test Strategy:
+Unit tests with jest:
+- Validate good fixture passes parse.
+- Validate malformed input throws ZodError.
+- Snapshot generated TypeScript types with ts-json-schema-generator for regression.
+
+# Subtasks:
+## 1. Create Individual Schema Files [done]
+### Dependencies: None
+### Description: Separate schema definitions into individual files organized by domain/feature, creating a modular schema structure with proper exports and imports.
+### Details:
+Create separate schema files for different entities (e.g., user.schema.ts, product.schema.ts, order.schema.ts). Organize schemas by feature domains, implement proper file naming conventions, and set up barrel exports for easy importing. Include base schemas for common types and establish schema composition patterns.
+
+## 2. Setup Type Inference System [done]
+### Dependencies: 2.1
+### Description: Configure TypeScript type inference from Zod schemas to automatically generate types and ensure type safety across the application.
+### Details:
+Set up Zod's type inference using z.infer<> to automatically generate TypeScript types from schemas. Create utility types for common patterns, establish type exports alongside schema exports, and configure TypeScript compiler options for optimal type checking. Include helper types for partial updates, creation payloads, and API responses.
+
+## 3. Implement Schema Validation Testing [done]
+### Dependencies: 2.1, 2.2
+### Description: Create comprehensive test suites for schema validation covering valid inputs, edge cases, error scenarios, and performance testing.
+### Details:
+Write unit tests for each schema covering valid data validation, invalid data rejection, edge cases, and error message accuracy. Include integration tests for schema composition, performance tests for large datasets, and regression tests for schema changes. Set up test utilities for schema testing and mock data generation.
+
+## 4. Create Schema Documentation with Examples [done]
+### Dependencies: 2.1, 2.2, 2.3
+### Description: Generate comprehensive documentation for all schemas including usage examples, validation rules, and integration guidelines.
+### Details:
+Create detailed documentation for each schema including purpose, validation rules, example valid/invalid inputs, and usage patterns. Include API documentation showing request/response schemas, integration examples with forms and APIs, troubleshooting guides for common validation errors, and migration guides for schema updates.
+

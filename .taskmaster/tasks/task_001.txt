@@ -1,0 +1,52 @@
+# Task ID: 1
+# Title: Setup Project Repository
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Initialize Git repo, Node.js 18+ workspace, TypeScript tool-chain and core dependencies to host the SuperComponents Server.
+# Details:
+• mkdir supercomponents-server && git init
+• npm init -y && npm i -D typescript ts-node @types/node jest ts-jest esbuild nodemon
+• npm i @modelcontextprotocol/sdk zod fast-glob gray-matter @babel/parser openai dotenv
+• npx tsc --init: set target=ES2021, module=CommonJS, outDir=dist, rootDir=src, strict=true
+• Add scripts: dev (nodemon src/index.ts), build (tsc -p .), test (jest)
+• Configure Jest via jest.config.js (preset ts-jest)
+• Pre-commit hooks with husky + lint-staged (optional)
+
+
+# Test Strategy:
+1. Run `npm run build` – expect no TypeScript errors.
+2. Run `npm run test` – executes sample test to return exit code 0.
+3. CI step: GitHub Action running install/build/test on each push.
+
+# Subtasks:
+## 1. Repository Initialization [done]
+### Dependencies: None
+### Description: Initialize Git repository and set up basic project structure with README, .gitignore, and initial directory structure
+### Details:
+Create new Git repository, add .gitignore file for Node.js/TypeScript projects, create README.md with project description, set up basic folder structure (src/, dist/, tests/)
+
+## 2. Package Management Setup [done]
+### Dependencies: 1.1
+### Description: Initialize npm package.json and install core dependencies and development dependencies
+### Details:
+Run npm init to create package.json, install TypeScript as dev dependency, install necessary build tools and utilities, configure package.json scripts section
+
+## 3. TypeScript Configuration [done]
+### Dependencies: 1.2
+### Description: Set up TypeScript compiler configuration and type definitions
+### Details:
+Create tsconfig.json with appropriate compiler options, configure source and output directories, set up type checking rules, install @types packages for dependencies
+
+## 4. Build Scripts Setup [done]
+### Dependencies: 1.3
+### Description: Configure build automation scripts and development workflow
+### Details:
+Set up npm scripts for build, dev, clean, and watch modes, configure TypeScript compilation pipeline, set up source maps and development server if needed
+
+## 5. Testing Framework Configuration [done]
+### Dependencies: 1.3
+### Description: Install and configure Jest testing framework with TypeScript support
+### Details:
+Install Jest and related TypeScript packages, create jest.config.js with TypeScript preset, set up test scripts in package.json, create sample test file structure
+

@@ -1,0 +1,64 @@
+# Task ID: 18
+# Title: Rename /supercomponents to /.supercomponents Hidden Directory
+# Status: pending
+# Dependencies: 6, 17
+# Priority: low
+# Description: Rename the /supercomponents directory to /.supercomponents (hidden directory) and update all references throughout the codebase, documentation, and tool configurations to use the new hidden directory structure.
+# Details:
+Implement a comprehensive directory restructuring with the following components:
+
+1. **Directory Renaming and File Migration**:
+   - Create new /.supercomponents directory structure maintaining all existing subdirectories
+   - Move all files from /supercomponents to /.supercomponents preserving file permissions and timestamps
+   - Update .gitignore patterns to handle hidden directory appropriately: `!/.supercomponents/` to ensure tracking
+   - Verify no files are lost during migration with checksum validation
+
+2. **Codebase Reference Updates**:
+   - Scan all source files for hardcoded paths referencing /supercomponents: `grep -r "supercomponents" src/`
+   - Update import statements and file path references in TypeScript/JavaScript files
+   - Modify configuration files (package.json, tsconfig.json, webpack.config.js) that reference the old directory
+   - Update tool handlers that interact with component files to use new hidden directory path
+
+3. **Tool Configuration Updates**:
+   - Update analyzeComponent.ts glob patterns to scan /.supercomponents instead of /supercomponents
+   - Modify file generation tools to output to /.supercomponents directory structure
+   - Update any build scripts or automation that references the old directory path
+   - Ensure MCP server tool handlers correctly resolve paths to hidden directory
+
+4. **Documentation and README Updates**:
+   - Update all documentation references to use /.supercomponents path
+   - Modify setup instructions and usage examples in README files
+   - Update any CLI help text or user-facing messages that mention directory structure
+   - Ensure installation and configuration guides reflect new hidden directory approach
+
+5. **Cross-Platform Compatibility**:
+   - Test directory visibility and access on different operating systems (Windows, macOS, Linux)
+   - Ensure development tools and IDEs can properly access hidden directory
+   - Verify file system permissions are correctly maintained after rename
+
+# Test Strategy:
+Comprehensive validation of directory restructuring:
+
+1. **File Migration Verification**:
+   - Compare file counts and checksums between old and new directory structures
+   - Verify all subdirectories and nested files are properly migrated
+   - Test that file permissions and timestamps are preserved
+   - Ensure no duplicate or missing files after migration
+
+2. **Codebase Reference Testing**:
+   - Run comprehensive grep search to ensure no remaining references to old path: `grep -r "/supercomponents" . --exclude-dir=node_modules`
+   - Execute full build process to catch any broken import statements or path references
+   - Test all MCP tools to ensure they can locate and process files in new hidden directory
+   - Verify TypeScript compilation passes without path resolution errors
+
+3. **Functional Testing**:
+   - Test analyzeComponent tool can scan components in /.supercomponents directory
+   - Verify file generation tools create outputs in correct hidden directory location
+   - Test component preview and development features work with new directory structure
+   - Ensure Storybook integration (if applicable) can locate components in hidden directory
+
+4. **Cross-Platform Validation**:
+   - Test directory access and visibility on Windows, macOS, and Linux environments
+   - Verify development tools (VS Code, IDEs) can properly index and search hidden directory
+   - Test npm/npx package installation works correctly with hidden directory structure
+   - Ensure git tracking and version control operations work properly with hidden directory

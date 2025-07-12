@@ -1,0 +1,76 @@
+# Task ID: 13
+# Title: Package Repository as NPM/NPX Installable MCP Server
+# Status: pending
+# Dependencies: 1, 8
+# Priority: high
+# Description: Create a distributable npm package that allows users to install and run the SuperComponents MCP server globally or locally, with proper binary configuration and seamless project integration.
+# Details:
+Implement comprehensive npm packaging for the SuperComponents MCP server:
+
+1. **Package.json Configuration**:
+   - Update package.json with proper metadata: name, version, description, keywords, author, license
+   - Add "bin" field pointing to executable entry point: `"bin": {"supercomponents-mcp": "./dist/bin/cli.js"}`
+   - Configure "files" array to include only necessary distribution files: ["dist", "README.md", "LICENSE"]
+   - Set "main" and "types" fields for programmatic usage
+   - Add "engines" constraint for Node.js 18+
+
+2. **Binary Setup** (src/bin/cli.ts):
+   - Create CLI entry point with shebang `#!/usr/bin/env node`
+   - Implement command-line argument parsing using commander.js or yargs
+   - Support modes: `--server` (start MCP server), `--init` (initialize project), `--help`
+   - Handle process signals and graceful shutdown
+   - Provide clear error messages and usage instructions
+
+3. **Build Configuration**:
+   - Update tsconfig.json to include bin directory in compilation
+   - Modify build script to ensure executable permissions on CLI binary
+   - Add prebuild script to clean dist directory
+   - Configure esbuild or webpack for optimized bundling if needed
+
+4. **Global Installation Support**:
+   - Test npm link workflow for local development
+   - Ensure proper PATH registration for global installs
+   - Handle cross-platform compatibility (Windows, macOS, Linux)
+   - Add postinstall script if needed for setup tasks
+
+5. **Project Integration**:
+   - Create installation detection logic to avoid conflicts
+   - Support both global (`npx supercomponents-mcp`) and local installation
+   - Implement project-specific configuration discovery
+   - Add uninstall cleanup procedures
+
+6. **Documentation**:
+   - Update README.md with installation and usage instructions
+   - Add examples for different installation methods
+   - Document CLI options and configuration
+
+# Test Strategy:
+Comprehensive packaging validation:
+
+1. **Local Package Testing**:
+   - Run `npm pack` to create tarball and inspect contents
+   - Install package locally: `npm install ./supercomponents-mcp-*.tgz`
+   - Verify binary is executable and accessible in PATH
+   - Test CLI commands: `supercomponents-mcp --help`, `supercomponents-mcp --server`
+
+2. **Global Installation Testing**:
+   - Test `npm install -g` in clean environment
+   - Verify `npx supercomponents-mcp` works from any directory
+   - Test uninstallation: `npm uninstall -g supercomponents-mcp`
+   - Validate no leftover files or PATH entries
+
+3. **Cross-Platform Validation**:
+   - Test installation on Windows, macOS, and Linux environments
+   - Verify executable permissions and shebang handling
+   - Test in different shell environments (bash, zsh, PowerShell)
+
+4. **Integration Testing**:
+   - Create test project and install package
+   - Run MCP server and verify tool availability
+   - Test project initialization workflow
+   - Validate configuration file discovery and loading
+
+5. **NPM Registry Simulation**:
+   - Use verdaccio or npm-registry-mock for local registry testing
+   - Publish to test registry and install from there
+   - Verify package metadata and download functionality

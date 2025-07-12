@@ -1,6 +1,6 @@
 /**
  * Clones the SCAFFOLD_REPO_BRANCH of the SCAFFOLD_REPO_URL and copies the 
- * SCAFFOLD_REPO_SUBDIR to a ./supercomponents/ subdirectory within the target path,
+ * SCAFFOLD_REPO_SUBDIR to a ./.supercomponents/ subdirectory within the target path,
  * then runs the supercomponents-setup script in that template's package.json
  *
  * This creates a safe, isolated playground environment without overwriting user files.
@@ -23,7 +23,8 @@ const SCAFFOLD_REPO_BRANCH = 'scaffolding-repo';
 const SCAFFOLD_REPO_SUBDIR = 'supercomponents-template'
 
 const inputSchema = z.object({
-  path: z.string().optional().default('').describe("Project path where SuperComponents ./supercomponents/ subdirectory will be created (defaults to caller's current directory)")
+  path: z.string().optional().default('').describe("Project path where SuperComponents ./.supercomponents/ subdirectory will be created (defaults to caller's current directory)"),
+  force: z.boolean().optional().default(false).describe("Force overwrite existing .supercomponents directory without prompting")
 });
 
 /**
@@ -99,7 +100,7 @@ function fetchScaffold(targetPath: string) {
 export const initializeProjectTool: Tool = {
   definition: {
     name: "initializeProject",
-    description: "Initialize a new SuperComponents project by fetching scaffolding from the SuperComponents repository into a ./supercomponents/ subdirectory.",
+    description: "Initialize a new SuperComponents project by fetching scaffolding from the SuperComponents repository into a ./.supercomponents/ subdirectory with safety checks for existing directories.",
     inputSchema: zodToJsonSchema(inputSchema)
   },
   handler: async (args) => {
@@ -142,13 +143,38 @@ export const initializeProjectTool: Tool = {
         throw new Error(`Project directory ${path} does not exist`);
       }
 
-      // Create supercomponents subdirectory
-      const supercomponentsPath = join(path, 'supercomponents');
-      if (!existsSync(supercomponentsPath)) {
-        mkdirSync(supercomponentsPath, { recursive: true });
-      }
-
       let results: string[] = [];
+
+      // Create .supercomponents subdirectory with safety checks
+      const supercomponentsPath = join(path, '.supercomponents');
+      
+      // Check if directory exists and handle accordingly
+      if (existsSync(supercomponentsPath)) {
+        if (!input.force) {
+          return {
+            success: false,
+            message: `⚠️  SuperComponents playground already exists at ${supercomponentsPath}`,
+            path: path,
+            existing_directory: supercomponentsPath,
+            options: [
+              "🔧 Options to proceed:",
+              "1. Use a different directory for your new playground",
+              "2. Delete the existing .supercomponents directory if you want to start fresh",
+              "3. Run the tool again with force: true to overwrite (this will delete existing files)",
+              "",
+              "💡 The .supercomponents directory contains your playground files.",
+              "💡 If you've made changes there, back them up before overwriting."
+            ]
+          };
+        } else {
+          // Force mode - remove existing directory
+          execSync(`rm -rf ${supercomponentsPath}`, { stdio: 'inherit' });
+          results.push("🗑️  Removed existing .supercomponents directory");
+        }
+      }
+      
+      // Create the directory
+      mkdirSync(supercomponentsPath, { recursive: true });
       
       try {
         fetchScaffold(supercomponentsPath);
@@ -176,14 +202,15 @@ export const initializeProjectTool: Tool = {
         next_steps: [
           "🚀 Your SuperComponents playground is ready! Follow these steps:",
           "",
-          "📁 SETUP: SuperComponents created a ./supercomponents/ subdirectory",
-          "   - This contains your visual playground environment",
-          "   - Add 'supercomponents/' to .gitignore if you don't want to commit it",
+          "📁 SETUP: SuperComponents created a ./.supercomponents/ subdirectory",
+          "   - This contains your visual playground environment (hidden directory)",
+          "   - Add '.supercomponents/' to .gitignore if you don't want to commit it",
           "   - All SuperComponents files are safely isolated in this folder",
+          "   - Use 'ls -la' to see the hidden directory",
           "",
-          "📋 STEP 1: Open TWO separate terminals and navigate to the supercomponents directory:",
-          "   Terminal 1: cd supercomponents",
-          "   Terminal 2: cd supercomponents", 
+          "📋 STEP 1: Open TWO separate terminals and navigate to the .supercomponents directory:",
+          "   Terminal 1: cd .supercomponents",
+          "   Terminal 2: cd .supercomponents", 
           "   ⚠️  Both commands run continuously - keep both terminals open!",
           "",
           "🖥️  STEP 2: In Terminal 1, run:",
@@ -197,7 +224,7 @@ export const initializeProjectTool: Tool = {
           "   💡 Keep this terminal running to view your component library",
           "",
           "✨ STEP 4: Start building your component library!",
-          "   - Check the supercomponents/README.md for more information",
+          "   - Check the .supercomponents/README.md for more information",
           "   - Use SuperComponents MCP tools to generate design tokens and components",
           "   - Visit http://localhost:5173 to see your React app",
           "   - Visit http://localhost:6006 to see your Storybook",
@@ -209,7 +236,7 @@ export const initializeProjectTool: Tool = {
           "   - generateInstruction: Generate implementation instructions",
           "",
           "🤖 NOTE: These are manual steps for you to run. The AI cannot manage multiple terminals.",
-          "💡 TIP: When AI runs other SuperComponents tools, it will automatically work in the ./supercomponents/ directory."
+          "💡 TIP: When AI runs other SuperComponents tools, it will automatically work in the ./.supercomponents/ directory."
         ]
       };
     } catch (error) {

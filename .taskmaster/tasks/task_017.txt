@@ -1,0 +1,66 @@
+# Task ID: 17
+# Title: Remove Deprecated Code and Clean Up Legacy Tools
+# Status: pending
+# Dependencies: 5, 6
+# Priority: low
+# Description: Systematically remove deprecated tools like parseDesign.ts and other legacy code, clean up unused imports, update documentation, and ensure the codebase is maintainable and follows current patterns.
+# Details:
+Implement a comprehensive codebase cleanup process with the following components:
+
+1. **Legacy Tool Identification and Removal**:
+   - Audit existing tools directory to identify deprecated implementations like parseDesign.ts
+   - Remove legacy parseDesign.ts since it's been replaced by parseDesignAndGenerateTokens.ts (Task 5)
+   - Clean up any remaining references to old tool handlers in MCP server configuration
+   - Remove deprecated utility functions that are no longer used
+
+2. **Import Cleanup and Dependency Analysis**:
+   - Use tools like `depcheck` or `unimport` to identify unused imports across the codebase
+   - Remove unused import statements from all TypeScript/JavaScript files
+   - Clean up package.json dependencies that are no longer referenced
+   - Update import paths to use consistent patterns and remove circular dependencies
+
+3. **Code Structure Modernization**:
+   - Consolidate duplicate utility functions into shared modules
+   - Remove commented-out code blocks and TODO comments that are no longer relevant
+   - Update function signatures to use consistent TypeScript patterns
+   - Refactor any remaining callback-style code to use async/await patterns
+
+4. **Documentation Updates**:
+   - Update README.md to remove references to deprecated tools and features
+   - Clean up inline code comments that reference removed functionality
+   - Update API documentation to reflect current tool implementations
+   - Remove outdated examples and usage patterns from documentation
+
+5. **Configuration Cleanup**:
+   - Update MCP server tool registry to remove deprecated tool handlers
+   - Clean up TypeScript configuration files to remove unused compiler options
+   - Update build scripts to exclude deprecated files from compilation
+   - Remove unused environment variables and configuration options
+
+# Test Strategy:
+Comprehensive validation of codebase cleanup:
+
+1. **Build and Compilation Verification**:
+   - Run `npm run build` to ensure no compilation errors after cleanup
+   - Verify TypeScript strict mode passes without unused variable warnings
+   - Test that all remaining imports resolve correctly without missing dependencies
+
+2. **Tool Functionality Validation**:
+   - Run integration tests for all remaining MCP tools to ensure they still function correctly
+   - Verify that parseDesignAndGenerateTokens tool works without any references to old parseDesign implementation
+   - Test that analyzeComponent and other tools don't have broken import paths
+
+3. **Dependency Analysis**:
+   - Run `npm audit` to check for unused dependencies in package.json
+   - Use `depcheck` to verify no unused npm packages remain
+   - Confirm that all import statements resolve to existing files
+
+4. **Documentation Accuracy**:
+   - Manually review updated documentation for accuracy and completeness
+   - Verify that all code examples in documentation use current API patterns
+   - Test that installation and setup instructions work with cleaned codebase
+
+5. **Performance Impact Assessment**:
+   - Measure bundle size reduction after cleanup
+   - Verify that build times haven't increased due to cleanup changes
+   - Test that MCP server startup time remains optimal

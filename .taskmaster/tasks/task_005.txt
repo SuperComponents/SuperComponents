@@ -1,0 +1,84 @@
+# Task ID: 5
+# Title: Implement parseDesignAndGenerateTokens Tool
+# Status: done
+# Dependencies: 2, 3, 4
+# Priority: medium
+# Description: Convert design inputs (text, image placeholder, code snippets) into structured Design JSON AND complete token system (Tailwind configs, CSS variables). This combined tool provides a cohesive UX where users input design data once and receive both structured analysis and complete design tokens.
+# Details:
+src/tools/parseDesignAndGenerateTokens.ts
+export const parseDesignAndGenerateTokensHandler=async(input:{markdown:string})=>{
+ const designPrompt=`You are a design parser... OUTPUT JSON conforming to ${DesignSchema}`;
+ const tokenPrompt=`Extract design tokens and generate Tailwind config...`;
+ const designJson=await complete(designPrompt+input.markdown,{temperature:0});
+ const parsedDesign=DesignSchema.parse(JSON.parse(designJson));
+ const tokens=await generateTokensFromDesign(parsedDesign);
+ return {design:parsedDesign,tokens,tailwindConfig,cssVariables};
+};
+• Initially support markdown/description. Stub image OCR for future.
+• Generate complete Tailwind config files and CSS variables
+• Output both DesignSchema JSON and token system files
+• Write README examples for combined workflow.
+
+# Test Strategy:
+e2e:
+- Feed sample markdown, expect both design tokens array length>0 AND valid Tailwind config.
+- Invalid LLM output -> assert Zod error bubbles to MCP error.
+- Verify CSS variables generation matches design tokens.
+- Performance: <8s/1k token prompt (combined processing).
+- Test token consistency between design analysis and generated configs.
+
+# Subtasks:
+## 1. Input Processing [done]
+### Dependencies: None
+### Description: Implement comprehensive input processing for markdown and prepare infrastructure for future image OCR
+### Details:
+Build robust markdown parsing to handle various formats including headers, lists, code blocks, tables, and design descriptions. Implement input sanitization and validation. Create placeholder infrastructure for future image OCR integration with proper abstraction layers.
+<info added on 2025-07-08T05:37:27.754Z>
+Updated approach eliminates OCR infrastructure since modern LLMs have native vision capabilities. Focus on input format handling for text, markdown, and images with proper validation and sanitization. Prepare data for direct LLM processing supporting multiple input types seamlessly. The system will leverage the LLM's built-in ability to process images directly alongside text and markdown content, removing the need for separate OCR abstraction layers.
+</info added on 2025-07-08T05:37:27.754Z>
+<info added on 2025-07-08T05:43:07.304Z>
+Implementation completed successfully. Built comprehensive input processing system that handles text, markdown, and images by leveraging the LLM's native vision capabilities. Integrated with existing supercomponents LLM utility and implemented robust prompt engineering for design analysis. Added proper error handling and response parsing. The solution eliminates the need for separate OCR infrastructure by utilizing the LLM's built-in ability to process images directly alongside text content.
+</info added on 2025-07-08T05:43:07.304Z>
+
+## 2. LLM-based Design Analysis [done]
+### Dependencies: 5.1
+### Description: Develop the core LLM interaction system for converting raw design inputs into structured Design JSON
+### Details:
+Design and optimize prompts for consistent design analysis. Implement LLM response handling with streaming support, retry logic, and quality assessment. Create structured prompts that ensure JSON output conforming to DesignSchema. Handle partial responses and response chunking.
+
+## 3. Design Token Extraction [done]
+### Dependencies: 5.2
+### Description: Extract comprehensive design tokens from the LLM-analyzed design structure
+### Details:
+Implement token extraction for colors, typography, spacing, shadows, borders, and other design properties from the structured Design JSON. Create token categorization, semantic naming conventions, and hierarchical organization. Support design system relationships and token inheritance.
+
+## 4. Token Validation & Processing [done]
+### Dependencies: 5.3
+### Description: Validate and process extracted design tokens to ensure consistency and correctness
+### Details:
+Implement comprehensive validation for extracted tokens including color format validation, typography scale consistency, spacing system coherence. Create token normalization, duplicate detection, and conflict resolution. Ensure tokens are production-ready and follow design system best practices.
+
+## 5. Tailwind Config Generation [done]
+### Dependencies: 5.4
+### Description: Generate complete Tailwind CSS configuration files from validated design tokens
+### Details:
+Transform validated design tokens into proper Tailwind config format. Handle theme extensions, custom utilities, and plugin configurations. Ensure generated configs are production-ready, follow Tailwind best practices, and maintain consistency with the original design analysis.
+
+## 6. CSS Variables Generation [done]
+### Dependencies: 5.4
+### Description: Create CSS custom properties from design tokens for broader framework compatibility
+### Details:
+Generate CSS variables with proper naming conventions and organization. Support light/dark mode variables, semantic naming, and CSS-in-JS compatibility. Include fallback values, browser compatibility considerations, and proper scoping strategies.
+
+## 7. Combined Output Orchestration [done]
+### Dependencies: 5.5, 5.6
+### Description: Orchestrate the complete workflow to deliver both design analysis and token system in a unified response
+### Details:
+Implement the main handler that coordinates the entire pipeline from input processing through token generation. Ensure consistency between design analysis and generated tokens. Handle the combined response format, validate all outputs, and provide comprehensive error context.
+
+## 8. Error Handling & Performance [done]
+### Dependencies: 5.7
+### Description: Implement comprehensive error handling and performance optimization for the complete pipeline
+### Details:
+Build graceful error handling for all pipeline stages including network timeouts, invalid responses, parsing errors, and token generation failures. Implement performance optimization with caching, parallel processing where applicable, and monitoring. Create circuit breaker patterns and fallback strategies.
+

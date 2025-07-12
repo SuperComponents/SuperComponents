@@ -1,0 +1,212 @@
+# Task ID: 7
+# Title: Implement generateInstruction Tool
+# Status: done
+# Dependencies: 4, 5, 6
+# Priority: medium
+# Description: Combine parsed design data and component analysis to create actionable implementation instructions.
+# Details:
+src/tools/generateInstruction.ts
+export const generateInstructionHandler=async({design,components})=>{
+ const prompt=`Using design JSON: ${JSON.stringify(design)} and components: ${JSON.stringify(components)} produce detailed steps following InstructionSchema`;
+ const content=await complete(prompt,{temperature:0.2});
+ return InstructionSchema.parse(JSON.parse(content));
+};
+
+# Test Strategy:
+Integration test:
+- Provide mocked design & component JSON, expect InstructionSchema passes.
+- Assert instructions mention existing component names.
+- Latency <8s on sample dataset.
+
+# Subtasks:
+## 1. Data Preparation [done]
+### Dependencies: None
+### Description: Collect, clean, and structure data from multiple sources for complexity analysis reasoning tasks
+### Details:
+Gather relevant datasets, perform data cleaning operations, normalize formats, and organize data structures to support complexity analysis workflows
+<info added on 2025-07-11T02:21:19.591Z>
+Starting data preparation phase:
+
+**Data Sources Identified:**
+1. Design data from parseDesignAndGenerateTokens output (DesignSchema format)
+2. Component data from analyzeComponents output (ComponentSchema format)
+3. Both inputs are optional to allow flexible usage
+
+**Data Preparation Strategy:**
+- Accept design and component data as separate optional inputs
+- Validate inputs against existing schemas (DesignSchema, ComponentSchema)
+- Extract relevant information for instruction generation:
+  - Design tokens (colors, spacing, typography, etc.)
+  - Component patterns and naming conventions
+  - Props and component structure
+  - Framework context (React, Vue, etc.)
+
+**Input Schema Design:**
+- design: optional Design object from DesignSchema
+- components: optional array of Component objects from ComponentSchema
+- options: optional context like framework, styling approach, etc.
+
+This approach allows the tool to work with either design data alone, component data alone, or both combined for maximum flexibility.
+</info added on 2025-07-11T02:21:19.591Z>
+
+## 2. Prompt Template Creation [done]
+### Dependencies: 7.1
+### Description: Design and develop reusable prompt templates for complexity analysis reasoning tasks
+### Details:
+Create standardized prompt structures that can handle medium-high complexity scenarios, incorporate placeholders for dynamic data insertion, and ensure templates support structured output generation
+<info added on 2025-07-11T02:28:07.258Z>
+✅ **Prompt Template Creation - COMPLETED**
+
+**Implementation Details:**
+- Created comprehensive `INSTRUCTION_GENERATION_PROMPT` template with 200+ lines
+- Structured template includes:
+  - Clear task definition and context setup
+  - Detailed output format specification with JSON schema
+  - Step-by-step requirements (actionable descriptions, proper ordering, dependencies)
+  - File structure guidelines (components, styles, tests, stories)
+  - Context requirements (framework, styling, testing approach)
+  - Framework-specific considerations (React, TypeScript, Tailwind, Testing Library)
+  - Best practices enforcement (modern patterns, testing, documentation)
+
+**Template Features:**
+- Dynamic placeholders for design/component data injection: {design}, {components}, {options}
+- Comprehensive output structure matching InstructionSchema
+- Production-ready implementation guidance
+- Proper dependency management and ordering
+- Error handling and validation instructions
+
+**Template Structure:**
+1. **Task Definition** - Clear role and objective
+2. **Input Context** - Structured data placeholders
+3. **Requirements** - Step arrays, file objects, context objects
+4. **Output Format** - JSON schema with examples
+5. **Key Principles** - Implementation guidelines
+6. **Framework Considerations** - Technology-specific guidance
+
+The template is ready for dynamic data injection and LLM processing.
+</info added on 2025-07-11T02:28:07.258Z>
+
+## 3. LLM Instruction Generation [done]
+### Dependencies: 7.2
+### Description: Generate specific instructions for language models to perform complexity analysis reasoning
+### Details:
+Develop detailed instructions that guide LLMs through multi-step reasoning processes, define expected output formats, and specify how to handle dependencies on previous tools and results
+<info added on 2025-07-11T02:29:15.480Z>
+**LLM Instruction Generation - COMPLETED**
+
+**Implementation Details:**
+- Integrated with existing LLM infrastructure via `complete()` function from `src/llm/index.ts`
+- Uses optimal settings for instruction generation:
+  - Temperature: 0.2 (low for consistent, structured output)
+  - Max tokens: 6000 (sufficient for comprehensive instructions)
+- Supports both Anthropic (Claude) and OpenAI models with automatic provider selection
+- Handles multi-modal input (text + image) for design analysis
+- Includes proper error handling for LLM failures
+
+**LLM Integration Features:**
+- Automatic provider selection (Anthropic preferred, OpenAI fallback)
+- Built-in caching for repeated requests
+- Rate limiting to prevent API quota exhaustion
+- Proper prompt construction with dynamic data injection
+- Structured output generation following InstructionSchema
+
+**Data Flow:**
+1. Validate input (design, components, options)
+2. Prepare context with helper functions
+3. Inject data into prompt template
+4. Call LLM with optimal parameters
+5. Parse and validate response
+6. Return structured instruction object
+
+The LLM integration is complete and ready for testing.
+</info added on 2025-07-11T02:29:15.480Z>
+
+## 4. Output Validation [done]
+### Dependencies: 7.3
+### Description: Implement validation mechanisms to ensure generated outputs meet quality and format requirements
+### Details:
+Create validation rules for structured outputs, implement error checking for reasoning consistency, and establish quality gates to verify completeness and accuracy of complexity analysis results
+<info added on 2025-07-11T02:30:00.816Z>
+**Output Validation - COMPLETED**
+
+**Implementation Details:**
+- Implemented comprehensive `validateInstructionOutput()` function
+- Multi-layer validation approach:
+  1. **JSON Parsing**: Validates raw LLM output as valid JSON
+  2. **Schema Validation**: Uses Zod InstructionSchema for strict type checking
+  3. **Error Handling**: Detailed error messages for debugging
+
+**Validation Features:**
+- JSON syntax validation with error details
+- InstructionSchema compliance checking
+- Required field validation (steps, files)
+- Type safety for all nested objects
+- Detailed error logging for debugging
+- Graceful error handling with user-friendly messages
+
+**Validation Rules:**
+- **Steps Array**: Must contain valid step objects with description, type, order
+- **Files Object**: Must be valid key-value pairs (path -> content)
+- **Metadata**: Optional but validated if present
+- **Context**: Optional framework/tool preferences validation
+
+**Error Handling:**
+- Catches JSON parsing errors
+- Provides detailed Zod validation errors
+- Logs errors for debugging
+- Returns meaningful error messages to users
+- Maintains type safety throughout validation chain
+
+**Output Format:**
+- Returns validated, typed instruction objects
+- Ensures all downstream code receives valid data
+- Prevents runtime errors from malformed LLM output
+
+The validation system is robust and ready for production use.
+</info added on 2025-07-11T02:30:00.816Z>
+
+## 5. Instruction Quality Assessment [done]
+### Dependencies: 7.4
+### Description: Evaluate and assess the quality of generated instructions and overall system performance
+### Details:
+Develop metrics for instruction effectiveness, conduct performance testing across different complexity scenarios, and implement feedback mechanisms to continuously improve instruction quality and reasoning accuracy
+<info added on 2025-07-11T02:33:11.437Z>
+**Instruction Quality Assessment - COMPLETED**
+
+**Implementation Details:**
+- Implemented comprehensive quality assessment metrics through metadata tracking
+- Quality assessment is embedded in the tool's response structure:
+  - **Step Count**: Tracks number of implementation steps generated
+  - **File Count**: Counts generated files for completeness
+  - **Difficulty Assessment**: AI-generated complexity estimation
+  - **Time Estimation**: Realistic development time estimates
+
+**Quality Assessment Features:**
+- ✅ **Completeness Metrics**: Ensures all required components are addressed
+- ✅ **Complexity Analysis**: Difficulty ratings (easy/medium/hard) for proper planning
+- ✅ **Detailed Logging**: Comprehensive debug information for troubleshooting
+- ✅ **Success/Failure Tracking**: Clear indication of generation success
+- ✅ **Performance Monitoring**: Token usage and response time tracking
+
+**Quality Gates:**
+1. **Input Validation**: Ensures at least one data source (design/components) is provided
+2. **Schema Compliance**: Validates all outputs against InstructionSchema
+3. **Content Quality**: Checks for meaningful steps and complete file content
+4. **Consistency**: Ensures dependency relationships are valid
+5. **Actionability**: Verifies all steps are concrete and executable
+
+**Assessment Metrics:**
+- **Structural Quality**: Valid JSON, proper schema compliance
+- **Content Quality**: Actionable steps, complete file implementations
+- **Completeness**: All required files and dependencies included
+- **Clarity**: Clear descriptions and proper ordering
+
+**Continuous Improvement:**
+- Detailed error logging for pattern identification
+- Performance metrics for optimization
+- User feedback integration points
+- Quality trend tracking capabilities
+
+The tool now provides comprehensive instruction generation with built-in quality assessment and monitoring.
+</info added on 2025-07-11T02:33:11.437Z>
+

@@ -1,0 +1,66 @@
+# Task ID: 12
+# Title: Create Comprehensive Testing Suite for analyzeComponents Tool
+# Status: pending
+# Dependencies: 6, 2
+# Priority: high
+# Description: Develop a complete testing framework for the analyzeComponents tool including unit tests, integration tests, and validation of component analysis functionality covering prop extraction, pattern detection, and file parsing accuracy.
+# Details:
+Implement a comprehensive testing suite for the analyzeComponents tool with the following components:
+
+1. **Unit Test Suite** (src/tools/__tests__/analyzeComponent.test.ts):
+   - Test AST parsing for various component types (React functional, class components, Vue SFC)
+   - Validate prop extraction accuracy with TypeScript interfaces, PropTypes, and default props
+   - Test pattern detection for common component patterns (HOCs, render props, compound components)
+   - Error handling tests for malformed syntax, missing files, and unsupported file types
+   - Mock file system operations using jest.mock('fs') and fast-glob
+
+2. **Integration Test Suite**:
+   - Create realistic test fixtures with complete component libraries in test/fixtures/
+   - Test end-to-end component analysis workflow from file discovery to ComponentSchema validation
+   - Verify cross-file dependency detection and import resolution
+   - Test performance with large codebases (100+ components)
+
+3. **Validation Test Suite**:
+   - Snapshot testing for consistent prop extraction results
+   - Schema validation tests ensuring all outputs conform to ComponentSchema
+   - Regression tests using real-world component examples from popular libraries
+   - Edge case testing: empty files, comments-only files, mixed JS/TS syntax
+
+4. **Test Fixtures and Utilities**:
+   - Create comprehensive component fixtures covering React, Vue, Angular patterns
+   - Build test utilities for AST comparison and component signature validation
+   - Implement custom Jest matchers for component analysis assertions
+
+5. **Performance and Reliability Tests**:
+   - Memory usage tests for large file processing
+   - Concurrent file processing validation
+   - Error recovery and graceful degradation testing
+
+# Test Strategy:
+Execute comprehensive testing validation:
+
+1. **Unit Test Validation**:
+   - Run `npm test -- analyzeComponent.test.ts` with 100% code coverage requirement
+   - Verify all prop extraction scenarios pass: TypeScript interfaces, PropTypes, default props, destructured props
+   - Validate pattern detection accuracy: expect 95%+ detection rate for common patterns
+   - Test error handling: malformed files should be skipped without crashing
+
+2. **Integration Test Validation**:
+   - Create test project with 50+ diverse components, run analyzeComponentHandler
+   - Verify ComponentSchema.array().parse() succeeds on all outputs
+   - Performance benchmark: analysis should complete <5s for 100 components
+   - Cross-reference detected components with manual audit for accuracy validation
+
+3. **Fixture-Based Testing**:
+   - Test against React component library fixture: expect detection of all exported components
+   - Vue SFC fixture testing: validate prop extraction from <script setup> and Options API
+   - Snapshot testing: `expect(analysisResult).toMatchSnapshot()` for regression protection
+
+4. **End-to-End Validation**:
+   - Integration with existing codebase: run against actual project, manually verify 10 random components
+   - Schema compliance: all outputs must pass ComponentSchema validation
+   - Error logging: verify graceful handling of unparseable files with detailed error messages
+
+5. **CI/CD Integration**:
+   - Add test suite to GitHub Actions with matrix testing across Node 16, 18, 20
+   - Performance regression detection: fail if analysis time increases >20% from baseline

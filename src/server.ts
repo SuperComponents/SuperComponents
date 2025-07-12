@@ -61,8 +61,8 @@ function createServer(): Server {
               },
               outputDir: {
                 type: "string",
-                description: "Output directory for generated files (default: ./supercomponents)",
-                default: "./supercomponents"
+                description: "Output directory for generated files (default: ./.supercomponents)",
+                default: "./.supercomponents"
               },
               includeCSS: {
                 type: "boolean", 
@@ -87,6 +87,11 @@ function createServer(): Server {
               path: {
                 type: "string",
                 description: "Project directory path (default: caller's current directory)"
+              },
+              force: {
+                type: "boolean",
+                description: "Force overwrite existing .supercomponents directory without prompting",
+                default: false
               }
             },
             required: []

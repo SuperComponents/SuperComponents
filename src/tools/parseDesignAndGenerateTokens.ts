@@ -28,7 +28,7 @@ const inputSchema = z.object({
       mimeType: z.string().describe("MIME type of the image (e.g., image/jpeg, image/png)")
     }).describe("Image input for visual design analysis")
   ]).describe("Design input - either text/description or image data for analysis"),
-  outputDir: z.string().optional().default("./supercomponents").describe("Directory to save generated files (defaults to ./supercomponents)"),
+  outputDir: z.string().optional().default("./.supercomponents").describe("Directory to save generated files (defaults to ./.supercomponents)"),
   includeCSS: z.boolean().optional().default(true).describe("Generate CSS variables file"),
   includeTailwind: z.boolean().optional().default(true).describe("Generate Tailwind config file"),
 });

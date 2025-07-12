@@ -1,0 +1,73 @@
+# Task ID: 16
+# Title: Implement Background Storybook Server Management
+# Status: pending
+# Dependencies: 3, 8, 10
+# Priority: medium
+# Description: Create a persistent background process management system for Storybook server that maintains availability during development sessions, with integration to MCP tools and state persistence.
+# Details:
+Implement a comprehensive background Storybook server management system with the following components:
+
+1. **Background Process Manager** (src/services/storybookManager.ts):
+   - Create `StorybookProcessManager` class with lifecycle management: `start()`, `stop()`, `restart()`, `getStatus()`
+   - Implement process spawning with detached mode: `spawn('npm', ['run', 'storybook'], {detached: true, stdio: 'pipe'})`
+   - Add process health monitoring with periodic ping checks to Storybook dev server endpoint
+   - Implement graceful shutdown handling with SIGTERM/SIGINT signal management
+   - Store process PID and port information in persistent state file
+
+2. **Persistent State Management** (src/services/storybookState.ts):
+   - Create state persistence layer using JSON file storage: `~/.supercomponents/storybook-state.json`
+   - Track server status, port, PID, last started time, and project path
+   - Implement state recovery on MCP server restart to reconnect to existing Storybook processes
+   - Add state validation and cleanup for orphaned processes
+
+3. **MCP Tool Integration** (src/tools/storybookServer.ts):
+   - Create `startStorybookServer` tool that launches background process and returns connection details
+   - Implement `getStorybookStatus` tool for checking server availability and health
+   - Add `stopStorybookServer` tool for graceful shutdown
+   - Create `restartStorybookServer` tool for process cycling
+   - Integrate with existing tools (createTokenStories, generateInstruction) to ensure server availability
+
+4. **Port Management and Conflict Resolution**:
+   - Implement dynamic port allocation with conflict detection
+   - Add port scanning to find available ports starting from default 6006
+   - Store allocated port in persistent state for reconnection
+   - Handle port conflicts gracefully with automatic fallback
+
+5. **Cross-Platform Process Management**:
+   - Implement platform-specific process management for Windows/Unix systems
+   - Use `tree-kill` package for reliable process tree termination
+   - Add process monitoring with automatic restart on unexpected termination
+   - Implement lock file mechanism to prevent multiple server instances
+
+# Test Strategy:
+Comprehensive testing approach for background Storybook server management:
+
+1. **Process Lifecycle Testing**:
+   - Unit tests for StorybookProcessManager: start/stop/restart operations
+   - Verify process spawning creates detached background process
+   - Test graceful shutdown with SIGTERM handling and cleanup
+   - Validate process health monitoring detects server failures
+
+2. **State Persistence Testing**:
+   - Test state file creation and recovery across MCP server restarts
+   - Verify orphaned process cleanup when PID no longer exists
+   - Test state corruption handling with fallback to clean state
+   - Validate cross-session state persistence and recovery
+
+3. **Integration Testing**:
+   - Test MCP tool integration: startStorybookServer returns valid connection details
+   - Verify existing tools (createTokenStories) work with background server
+   - Test server availability checks during active development sessions
+   - Validate port conflict resolution and dynamic allocation
+
+4. **End-to-End Testing**:
+   - Launch background Storybook server, verify accessibility at allocated port
+   - Test server persistence across multiple chat sessions
+   - Verify automatic restart on unexpected process termination
+   - Test graceful handling of system shutdown and restart scenarios
+
+5. **Performance and Reliability Testing**:
+   - Measure server startup time and resource usage
+   - Test long-running server stability over extended periods
+   - Validate memory leak prevention and resource cleanup
+   - Test concurrent access from multiple MCP clients

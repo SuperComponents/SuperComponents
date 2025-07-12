@@ -1,9 +1,9 @@
 {
 	"meta": {
-		"generatedAt": "2025-07-08T01:40:32.611Z",
-		"tasksAnalyzed": 10,
-		"totalTasks": 10,
-		"analysisCount": 10,
+		"generatedAt": "2025-07-12T01:47:51.151Z",
+		"tasksAnalyzed": 8,
+		"totalTasks": 17,
+		"analysisCount": 18,
 		"thresholdScore": 5,
 		"projectName": "Taskmaster",
 		"usedResearch": false
@@ -88,6 +88,70 @@
 			"recommendedSubtasks": 4,
 			"expansionPrompt": "Divide into token data reading, story template generation, component rendering logic, and Storybook integration testing.",
 			"reasoning": "Medium complexity involving template generation and Storybook integration. Relatively straightforward but requires understanding of Storybook story format."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Fix createTokenStories File Discovery and Parameter Passing",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the createTokenStories enhancement into: 1) File discovery system implementation with fast-glob integration, 2) Parameter restructuring and handler signature updates, 3) Cascading fallback strategy implementation, 4) Comprehensive error handling with descriptive messages, 5) Design data integration and parsing logic",
+			"reasoning": "High complexity due to file system operations, parameter restructuring, fallback logic, and integration with existing systems. Multiple interdependent components requiring careful coordination."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Create Comprehensive Testing Suite for analyzeComponents Tool",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Divide the testing suite creation into: 1) Unit test implementation for AST parsing and prop extraction, 2) Integration test suite with realistic fixtures, 3) Validation and schema compliance testing, 4) Test fixtures and utilities creation, 5) Performance and reliability testing, 6) CI/CD integration and automation setup",
+			"reasoning": "Very high complexity involving multiple testing paradigms, AST manipulation, performance benchmarking, and comprehensive fixture creation. Requires deep understanding of component analysis internals."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Package Repository as NPM/NPX Installable MCP Server",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Structure the npm packaging into: 1) Package.json configuration and metadata setup, 2) Binary CLI creation with command-line interface, 3) Build configuration and cross-platform compatibility, 4) Documentation and installation testing across environments",
+			"reasoning": "Moderate-high complexity involving npm packaging standards, CLI development, cross-platform considerations, and distribution logistics. Well-defined scope but requires attention to packaging details."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Integrate generateInstruction Tool with Super Prompt System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the integration into: 1) Enhanced prompt template system creation, 2) Integration layer development with preprocessing, 3) Workflow pattern integration with existing AI systems, 4) Configuration system for prompt management, 5) Enhanced output processing and validation",
+			"reasoning": "High complexity due to AI integration, prompt engineering, workflow orchestration, and multiple system dependencies. Requires sophisticated prompt management and quality assurance."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Implement SuperDev HTML Features Tool",
+			"complexityScore": 9,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Divide the HTML features tool into: 1) HTML generation engine with template system, 2) Component preview system with interactive capabilities, 3) Interactive development tools and live editing, 4) Visual feedback system with diff visualization, 5) Integration layer with existing tools, 6) Export and sharing features, 7) Performance optimization and caching",
+			"reasoning": "Very high complexity involving real-time HTML generation, interactive development features, visual feedback systems, and extensive integration requirements. Multiple sophisticated subsystems requiring coordination."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Implement Background Storybook Server Management",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Structure the server management into: 1) Background process manager with lifecycle controls, 2) Persistent state management and recovery, 3) MCP tool integration for server operations, 4) Port management and conflict resolution, 5) Cross-platform process handling, 6) Health monitoring and automatic restart capabilities",
+			"reasoning": "Very high complexity involving process management, state persistence, cross-platform compatibility, and robust error handling. Critical system component requiring high reliability."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Remove Deprecated Code and Clean Up Legacy Tools",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Organize the cleanup into: 1) Legacy tool identification and systematic removal, 2) Import cleanup and dependency analysis with automated tools, 3) Documentation updates and configuration cleanup",
+			"reasoning": "Moderate complexity involving systematic code analysis and cleanup. Well-defined scope with clear success criteria, but requires careful attention to avoid breaking existing functionality."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Rename /supercomponents to /.supercomponents Hidden Directory",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the directory restructuring into: 1) Directory migration and file preservation, 2) Codebase reference updates across all files, 3) Tool configuration updates for new paths, 4) Cross-platform compatibility testing and validation",
+			"reasoning": "Moderate complexity involving systematic file operations and reference updates. Risk of breaking existing functionality requires careful validation, but the scope is well-defined and methodical."
 		}
 	]
 }

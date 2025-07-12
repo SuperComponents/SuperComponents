@@ -671,11 +671,590 @@
             "testStrategy": ""
           }
         ]
+      },
+      {
+        "id": 11,
+        "title": "Fix createTokenStories File Discovery and Parameter Passing",
+        "description": "Enhance the createTokenStories tool to properly locate design.json files in the /supercomponents directory and improve parameter passing for design data file discovery.",
+        "details": "Update src/tools/createTokenStories.ts to implement robust file discovery:\n\n1. **Enhanced File Discovery**: Replace hardcoded paths with dynamic file search using fast-glob or fs.existsSync to locate design.json in /supercomponents directory and subdirectories.\n\n2. **Parameter Restructuring**: Modify handler signature from `{tokensDir}` to `{projectPath, designFile?}` where:\n   - projectPath: root directory to search from\n   - designFile: optional explicit path to design.json, defaults to auto-discovery\n\n3. **Fallback Strategy**: Implement cascading file discovery:\n   - Check explicit designFile parameter if provided\n   - Search /supercomponents/design.json\n   - Search /supercomponents/*/design.json (subdirectories)\n   - Fall back to tokensDir/tailwind.theme.cjs if design.json not found\n\n4. **Error Handling**: Add comprehensive error handling for missing files with descriptive error messages indicating search paths attempted.\n\n5. **Design Data Integration**: Parse design.json to extract tokens and merge with existing Tailwind theme data, ensuring compatibility with both data sources.\n\nCode structure:\n```typescript\nexport const createTokenStoriesHandler = async({projectPath, designFile}: {projectPath: string, designFile?: string}) => {\n  const designPath = designFile || await findDesignFile(projectPath);\n  const designData = JSON.parse(fs.readFileSync(designPath, 'utf8'));\n  const tokens = designData.tokens || require(`${projectPath}/tailwind.theme.cjs`).theme;\n  // Generate stories using discovered design data\n};\n```",
+        "testStrategy": "Comprehensive testing approach:\n\n1. **File Discovery Tests**: Create test fixtures with design.json in various locations (/supercomponents, /supercomponents/tokens, etc.) and verify correct file discovery.\n\n2. **Parameter Validation**: Test both explicit designFile parameter and auto-discovery modes, ensuring proper fallback behavior.\n\n3. **Error Handling Tests**: Verify descriptive error messages when design.json is missing, including list of searched paths.\n\n4. **Integration Tests**: Run with actual project structure created by initializeProject tool, ensuring seamless integration with existing workflow.\n\n5. **Backward Compatibility**: Verify existing tokensDir parameter still works for projects without design.json files.\n\n6. **Story Generation**: Validate that stories are generated correctly using design.json data, comparing token counts and structure against expected output.\n\n7. **Performance**: Ensure file discovery completes within 2 seconds for typical project structures.",
+        "status": "pending",
+        "dependencies": [
+          10,
+          5,
+          8
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "File discovery system implementation with fast-glob integration",
+            "description": "Implement a robust file discovery system using fast-glob to efficiently locate and enumerate token story files across the project structure",
+            "dependencies": [],
+            "details": "Set up fast-glob integration for pattern-based file discovery, implement recursive directory traversal, add file filtering and validation logic, and create caching mechanisms for improved performance",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Parameter restructuring and handler signature updates",
+            "description": "Restructure function parameters and update handler signatures to support the enhanced createTokenStories functionality",
+            "dependencies": [
+              1
+            ],
+            "details": "Refactor existing parameter structures, update function signatures to accommodate new file discovery results, modify handler interfaces, and ensure backward compatibility where possible",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Cascading fallback strategy implementation",
+            "description": "Implement a comprehensive cascading fallback strategy to handle missing or invalid token story files gracefully",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Design fallback hierarchy logic, implement default value mechanisms, create fallback file resolution, and establish priority-based selection criteria for token stories",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Comprehensive error handling with descriptive messages",
+            "description": "Develop comprehensive error handling system with detailed, user-friendly error messages for all failure scenarios",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create error classification system, implement detailed error messaging, add logging and debugging capabilities, and establish error recovery mechanisms for common failure cases",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Design data integration and parsing logic",
+            "description": "Implement design data integration and parsing logic to process and validate token story content",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Create data parsing utilities, implement validation schemas, integrate with existing design systems, and establish data transformation pipelines for token story processing",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Create Comprehensive Testing Suite for analyzeComponents Tool",
+        "description": "Develop a complete testing framework for the analyzeComponents tool including unit tests, integration tests, and validation of component analysis functionality covering prop extraction, pattern detection, and file parsing accuracy.",
+        "details": "Implement a comprehensive testing suite for the analyzeComponents tool with the following components:\n\n1. **Unit Test Suite** (src/tools/__tests__/analyzeComponent.test.ts):\n   - Test AST parsing for various component types (React functional, class components, Vue SFC)\n   - Validate prop extraction accuracy with TypeScript interfaces, PropTypes, and default props\n   - Test pattern detection for common component patterns (HOCs, render props, compound components)\n   - Error handling tests for malformed syntax, missing files, and unsupported file types\n   - Mock file system operations using jest.mock('fs') and fast-glob\n\n2. **Integration Test Suite**:\n   - Create realistic test fixtures with complete component libraries in test/fixtures/\n   - Test end-to-end component analysis workflow from file discovery to ComponentSchema validation\n   - Verify cross-file dependency detection and import resolution\n   - Test performance with large codebases (100+ components)\n\n3. **Validation Test Suite**:\n   - Snapshot testing for consistent prop extraction results\n   - Schema validation tests ensuring all outputs conform to ComponentSchema\n   - Regression tests using real-world component examples from popular libraries\n   - Edge case testing: empty files, comments-only files, mixed JS/TS syntax\n\n4. **Test Fixtures and Utilities**:\n   - Create comprehensive component fixtures covering React, Vue, Angular patterns\n   - Build test utilities for AST comparison and component signature validation\n   - Implement custom Jest matchers for component analysis assertions\n\n5. **Performance and Reliability Tests**:\n   - Memory usage tests for large file processing\n   - Concurrent file processing validation\n   - Error recovery and graceful degradation testing",
+        "testStrategy": "Execute comprehensive testing validation:\n\n1. **Unit Test Validation**:\n   - Run `npm test -- analyzeComponent.test.ts` with 100% code coverage requirement\n   - Verify all prop extraction scenarios pass: TypeScript interfaces, PropTypes, default props, destructured props\n   - Validate pattern detection accuracy: expect 95%+ detection rate for common patterns\n   - Test error handling: malformed files should be skipped without crashing\n\n2. **Integration Test Validation**:\n   - Create test project with 50+ diverse components, run analyzeComponentHandler\n   - Verify ComponentSchema.array().parse() succeeds on all outputs\n   - Performance benchmark: analysis should complete <5s for 100 components\n   - Cross-reference detected components with manual audit for accuracy validation\n\n3. **Fixture-Based Testing**:\n   - Test against React component library fixture: expect detection of all exported components\n   - Vue SFC fixture testing: validate prop extraction from <script setup> and Options API\n   - Snapshot testing: `expect(analysisResult).toMatchSnapshot()` for regression protection\n\n4. **End-to-End Validation**:\n   - Integration with existing codebase: run against actual project, manually verify 10 random components\n   - Schema compliance: all outputs must pass ComponentSchema validation\n   - Error logging: verify graceful handling of unparseable files with detailed error messages\n\n5. **CI/CD Integration**:\n   - Add test suite to GitHub Actions with matrix testing across Node 16, 18, 20\n   - Performance regression detection: fail if analysis time increases >20% from baseline",
+        "status": "pending",
+        "dependencies": [
+          6,
+          2
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Unit test implementation for AST parsing and prop extraction",
+            "description": "Develop comprehensive unit tests for Abstract Syntax Tree parsing functionality and component prop extraction mechanisms, covering edge cases and error handling scenarios.",
+            "dependencies": [],
+            "details": "Create isolated unit tests for AST parser modules, prop extraction algorithms, type inference logic, and component analysis utilities. Include tests for malformed code, complex prop types, nested components, and TypeScript/JavaScript variations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Test fixtures and utilities creation",
+            "description": "Build a comprehensive library of test fixtures including realistic component examples, mock data generators, and testing utilities for consistent test execution.",
+            "dependencies": [],
+            "details": "Create diverse component fixtures covering various frameworks (React, Vue, Angular), prop patterns, edge cases, and real-world scenarios. Develop utility functions for test data generation, assertion helpers, and mock setup.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Integration test suite with realistic fixtures",
+            "description": "Implement end-to-end integration tests using realistic component fixtures to validate the complete analysis pipeline from code input to structured output.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Design integration tests that process complete component files through the entire analysis pipeline. Test cross-module dependencies, file system interactions, and multi-component analysis scenarios using the created fixtures.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Validation and schema compliance testing",
+            "description": "Create comprehensive tests to ensure output data structures comply with defined schemas and validation rules, including boundary condition testing.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement schema validation tests for all output formats, data structure integrity checks, and compliance with API contracts. Include tests for data serialization, deserialization, and format consistency across different input types.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Performance and reliability testing",
+            "description": "Develop performance benchmarks and reliability tests to ensure the system handles large codebases efficiently and maintains consistent performance under various load conditions.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create performance test suites measuring parsing speed, memory usage, and scalability with large component libraries. Implement stress tests, memory leak detection, and reliability metrics for continuous performance monitoring.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "CI/CD integration and automation setup",
+            "description": "Configure continuous integration pipelines to automatically execute all test suites, generate coverage reports, and ensure quality gates are maintained across development cycles.",
+            "dependencies": [
+              3,
+              4,
+              5
+            ],
+            "details": "Set up automated testing workflows in CI/CD systems, configure test result reporting, coverage thresholds, performance regression detection, and automated quality checks. Include test parallelization and result aggregation.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Package Repository as NPM/NPX Installable MCP Server",
+        "description": "Create a distributable npm package that allows users to install and run the SuperComponents MCP server globally or locally, with proper binary configuration and seamless project integration.",
+        "details": "Implement comprehensive npm packaging for the SuperComponents MCP server:\n\n1. **Package.json Configuration**:\n   - Update package.json with proper metadata: name, version, description, keywords, author, license\n   - Add \"bin\" field pointing to executable entry point: `\"bin\": {\"supercomponents-mcp\": \"./dist/bin/cli.js\"}`\n   - Configure \"files\" array to include only necessary distribution files: [\"dist\", \"README.md\", \"LICENSE\"]\n   - Set \"main\" and \"types\" fields for programmatic usage\n   - Add \"engines\" constraint for Node.js 18+\n\n2. **Binary Setup** (src/bin/cli.ts):\n   - Create CLI entry point with shebang `#!/usr/bin/env node`\n   - Implement command-line argument parsing using commander.js or yargs\n   - Support modes: `--server` (start MCP server), `--init` (initialize project), `--help`\n   - Handle process signals and graceful shutdown\n   - Provide clear error messages and usage instructions\n\n3. **Build Configuration**:\n   - Update tsconfig.json to include bin directory in compilation\n   - Modify build script to ensure executable permissions on CLI binary\n   - Add prebuild script to clean dist directory\n   - Configure esbuild or webpack for optimized bundling if needed\n\n4. **Global Installation Support**:\n   - Test npm link workflow for local development\n   - Ensure proper PATH registration for global installs\n   - Handle cross-platform compatibility (Windows, macOS, Linux)\n   - Add postinstall script if needed for setup tasks\n\n5. **Project Integration**:\n   - Create installation detection logic to avoid conflicts\n   - Support both global (`npx supercomponents-mcp`) and local installation\n   - Implement project-specific configuration discovery\n   - Add uninstall cleanup procedures\n\n6. **Documentation**:\n   - Update README.md with installation and usage instructions\n   - Add examples for different installation methods\n   - Document CLI options and configuration",
+        "testStrategy": "Comprehensive packaging validation:\n\n1. **Local Package Testing**:\n   - Run `npm pack` to create tarball and inspect contents\n   - Install package locally: `npm install ./supercomponents-mcp-*.tgz`\n   - Verify binary is executable and accessible in PATH\n   - Test CLI commands: `supercomponents-mcp --help`, `supercomponents-mcp --server`\n\n2. **Global Installation Testing**:\n   - Test `npm install -g` in clean environment\n   - Verify `npx supercomponents-mcp` works from any directory\n   - Test uninstallation: `npm uninstall -g supercomponents-mcp`\n   - Validate no leftover files or PATH entries\n\n3. **Cross-Platform Validation**:\n   - Test installation on Windows, macOS, and Linux environments\n   - Verify executable permissions and shebang handling\n   - Test in different shell environments (bash, zsh, PowerShell)\n\n4. **Integration Testing**:\n   - Create test project and install package\n   - Run MCP server and verify tool availability\n   - Test project initialization workflow\n   - Validate configuration file discovery and loading\n\n5. **NPM Registry Simulation**:\n   - Use verdaccio or npm-registry-mock for local registry testing\n   - Publish to test registry and install from there\n   - Verify package metadata and download functionality",
+        "status": "pending",
+        "dependencies": [
+          1,
+          8
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Package.json configuration and metadata setup",
+            "description": "Configure package.json with proper metadata, dependencies, scripts, and npm publishing settings including version management, keywords, author information, and repository links",
+            "dependencies": [],
+            "details": "Set up package.json with name, version, description, main entry point, keywords for discoverability, author and contributor information, license, repository URL, bug tracker, homepage, engines compatibility, and proper dependency categorization (dependencies vs devDependencies vs peerDependencies)",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Binary CLI creation with command-line interface",
+            "description": "Develop executable CLI binary with command parsing, help system, argument validation, and proper exit codes for npm bin distribution",
+            "dependencies": [
+              1
+            ],
+            "details": "Create CLI entry point with shebang line, implement command-line argument parsing using libraries like commander.js or yargs, add help documentation, version flag, error handling with appropriate exit codes, and configure bin field in package.json for global installation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Build configuration and cross-platform compatibility",
+            "description": "Set up build pipeline with bundling, minification, and ensure compatibility across Windows, macOS, and Linux environments including proper file permissions and path handling",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Configure build tools (webpack/rollup/esbuild), set up cross-platform file path handling, ensure proper executable permissions on Unix systems, handle Windows-specific considerations, create build scripts for different environments, and implement proper error handling for platform-specific operations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Documentation and installation testing across environments",
+            "description": "Create comprehensive documentation including README, API docs, usage examples, and test installation process across different operating systems and Node.js versions",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Write detailed README with installation instructions, usage examples, API documentation, troubleshooting guide, create automated tests for installation process, test on multiple Node.js versions and operating systems, verify global and local installation scenarios, and document platform-specific requirements or limitations",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Integrate generateInstruction Tool with Super Prompt System",
+        "description": "Create a streamlined integration layer that connects the generateInstruction tool with enhanced prompt templates and existing AI workflow patterns for improved instruction generation.",
+        "details": "Implement a comprehensive integration system that enhances the generateInstruction tool with super prompt capabilities:\n\n1. **Enhanced Prompt Templates** (src/prompts/superPrompts.ts):\n   - Create structured prompt templates with role-based instructions, context injection, and output formatting\n   - Implement prompt composition patterns: `const SUPER_INSTRUCTION_PROMPT = createSuperPrompt({role: 'expert-developer', context: 'design-to-code', format: 'structured-steps'})`\n   - Add prompt versioning and A/B testing capabilities for optimization\n\n2. **Integration Layer** (src/integrations/superPromptIntegration.ts):\n   - Extend generateInstructionHandler with super prompt preprocessing: `export const enhancedGenerateInstruction = async ({design, components, promptConfig}) => { const superPrompt = buildSuperPrompt(design, components, promptConfig); return generateInstructionHandler({design, components, prompt: superPrompt}); }`\n   - Implement prompt context enrichment with project metadata, component relationships, and design system patterns\n   - Add intelligent prompt selection based on design complexity and component types\n\n3. **Workflow Pattern Integration**:\n   - Connect with existing AI workflow patterns from the LLM integration layer (Task 4)\n   - Implement streaming support for large instruction sets using streamComplete\n   - Add retry logic with exponential backoff for failed instruction generation\n   - Integrate with caching layer to avoid regenerating identical instructions\n\n4. **Configuration System**:\n   - Create configuration schema for super prompt settings: temperature, max tokens, prompt templates\n   - Implement environment-based prompt selection (development vs production prompts)\n   - Add user-customizable prompt templates and instruction formats\n\n5. **Enhanced Output Processing**:\n   - Post-process generated instructions with validation against InstructionSchema\n   - Add instruction quality scoring and automatic refinement triggers\n   - Implement instruction chunking for complex multi-step processes",
+        "testStrategy": "Comprehensive integration testing approach:\n\n1. **Super Prompt Template Testing**:\n   - Unit tests for prompt template generation with various design/component combinations\n   - Validate prompt structure includes all required context: design tokens, component props, relationships\n   - Test prompt versioning and template selection logic\n\n2. **Integration Layer Testing**:\n   - Integration tests comparing standard vs super prompt instruction quality\n   - Mock LLM responses to test prompt preprocessing and output post-processing\n   - Verify enhanced instructions maintain InstructionSchema compliance\n   - Performance testing: enhanced generation should complete within 12s (vs 8s baseline)\n\n3. **Workflow Pattern Testing**:\n   - Test streaming instruction generation for large design files (>100 components)\n   - Verify caching integration prevents duplicate super prompt processing\n   - Test retry logic with simulated API failures and rate limiting\n\n4. **End-to-End Validation**:\n   - Create test fixtures with complex design systems and verify instruction quality improvements\n   - A/B test instruction clarity and completeness: super prompt vs standard prompt\n   - Validate generated instructions can be successfully executed by downstream tools\n\n5. **Configuration Testing**:\n   - Test environment-based prompt selection (dev/prod configurations)\n   - Verify custom prompt template loading and validation\n   - Test configuration schema validation and error handling",
+        "status": "pending",
+        "dependencies": [
+          7,
+          4,
+          2
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Enhanced Prompt Template System Creation",
+            "description": "Design and implement a sophisticated prompt template system with dynamic variable injection, conditional logic, and template inheritance capabilities for AI model interactions.",
+            "dependencies": [],
+            "details": "Create template engine with support for variables, conditionals, loops, and template composition. Implement template validation, versioning, and A/B testing capabilities. Include support for different AI model formats and prompt optimization techniques.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Integration Layer Development with Preprocessing",
+            "description": "Build a robust integration layer that handles data preprocessing, prompt preparation, and communication with various AI systems while ensuring data consistency and error handling.",
+            "dependencies": [
+              1
+            ],
+            "details": "Develop middleware for data transformation, input validation, prompt assembly using templates from subtask 1. Implement retry logic, rate limiting, and connection pooling for AI service calls. Create adapters for different AI providers and model types.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Workflow Pattern Integration with Existing AI Systems",
+            "description": "Implement workflow orchestration patterns that seamlessly integrate with current AI systems, enabling complex multi-step processes and conditional execution paths.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Design workflow engine supporting sequential, parallel, and conditional execution patterns. Integrate with existing AI systems using the integration layer from subtask 2. Implement workflow state management, checkpointing, and recovery mechanisms.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Configuration System for Prompt Management",
+            "description": "Develop a comprehensive configuration management system for prompt templates, AI model settings, and workflow parameters with role-based access control and audit trails.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create configuration interface for managing prompt templates, model parameters, and system settings. Implement role-based permissions, configuration versioning, and deployment pipelines. Include configuration validation and rollback capabilities.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Enhanced Output Processing and Validation",
+            "description": "Implement sophisticated output processing pipeline with quality validation, format standardization, and intelligent error detection for AI-generated responses.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Build output validation engine with configurable rules, format converters, and quality scoring. Implement response filtering, content moderation, and structured data extraction. Create feedback loops for continuous improvement and anomaly detection.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Implement SuperDev HTML Features Tool",
+        "description": "Create a comprehensive HTML generation tool that provides component preview capabilities, interactive development features, and real-time visual feedback for enhanced development experience.",
+        "details": "Implement a comprehensive SuperDev HTML features tool with the following components:\n\n1. **HTML Generation Engine** (src/tools/superdevHTML.ts):\n   - Create `generateHTMLPreview` function that converts component data into standalone HTML files\n   - Implement template system with hot-reload capabilities: `const htmlTemplate = createTemplate({head: tailwindCSS, body: componentMarkup, scripts: interactiveFeatures})`\n   - Support multiple output formats: standalone HTML, iframe-embeddable, and live preview modes\n   - Generate responsive preview grids showing components at different breakpoints\n\n2. **Component Preview System**:\n   - Build interactive component gallery with live prop editing capabilities\n   - Implement real-time component rendering using design tokens from Task 5\n   - Create component isolation sandbox with proper CSS scoping\n   - Add component state management for interactive previews (hover, focus, active states)\n\n3. **Interactive Development Tools**:\n   - Implement live design token editor with instant visual feedback\n   - Create component prop inspector with real-time value modification\n   - Add accessibility testing overlay showing ARIA attributes and contrast ratios\n   - Build responsive design testing tools with device simulation\n\n4. **Visual Feedback System**:\n   - Implement real-time component diff visualization when props change\n   - Create visual regression testing capabilities with screenshot comparison\n   - Add component performance metrics display (render time, bundle size impact)\n   - Build interactive style guide with copy-paste code snippets\n\n5. **Integration Layer**:\n   - Connect with existing component analysis from Task 6 for automatic preview generation\n   - Integrate with Storybook setup from Task 8 for seamless development workflow\n   - Use design tokens from Task 5 for consistent theming across previews\n   - Implement MCP tool registration following patterns from Task 3\n\n6. **Export and Sharing Features**:\n   - Generate shareable preview URLs with embedded component state\n   - Create exportable HTML packages for stakeholder review\n   - Implement component documentation generation with interactive examples",
+        "testStrategy": "Comprehensive testing approach for SuperDev HTML features:\n\n1. **HTML Generation Testing**:\n   - Unit tests for template generation with various component configurations\n   - Validate generated HTML is valid and includes all required assets (CSS, JS)\n   - Test responsive preview generation across multiple breakpoints\n   - Verify hot-reload functionality updates previews without full page refresh\n\n2. **Component Preview Validation**:\n   - Integration tests for component gallery rendering with real component data\n   - Test prop editing interface updates component previews in real-time\n   - Validate component isolation prevents CSS bleeding between previews\n   - Test state management for interactive component demonstrations\n\n3. **Interactive Tools Testing**:\n   - Test design token editor updates all affected components simultaneously\n   - Validate prop inspector accurately reflects component interface\n   - Test accessibility overlay shows correct ARIA information and contrast ratios\n   - Verify responsive testing tools accurately simulate different device sizes\n\n4. **Visual Feedback System Testing**:\n   - Test component diff visualization highlights actual changes\n   - Validate screenshot comparison detects visual regressions\n   - Test performance metrics display accurate render times and bundle sizes\n   - Verify code snippet generation produces working, copy-paste ready code\n\n5. **End-to-End Integration Testing**:\n   - Test complete workflow: analyze components → generate tokens → create interactive previews\n   - Validate Storybook integration works seamlessly with existing setup\n   - Test MCP tool registration and proper error handling\n   - Verify export functionality generates working standalone HTML packages\n\n6. **Performance and Usability Testing**:\n   - Measure preview generation time for projects with 50+ components\n   - Test memory usage during extended development sessions\n   - Validate preview loading time is under 2 seconds for typical components\n   - Test cross-browser compatibility for generated HTML previews",
+        "status": "pending",
+        "dependencies": [
+          3,
+          5,
+          6,
+          8
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "HTML Generation Engine with Template System",
+            "description": "Develop a robust HTML generation engine that supports dynamic template processing, variable substitution, conditional rendering, and component composition with reusable template fragments.",
+            "dependencies": [],
+            "details": "Build template parser, variable injection system, conditional logic handlers, loop constructs, component registry, template inheritance, and output sanitization mechanisms.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Component Preview System with Interactive Capabilities",
+            "description": "Create a real-time preview system that renders HTML components with interactive elements, event handling, and responsive design testing across different viewport sizes.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement iframe-based preview renderer, interactive element handlers, responsive breakpoint testing, component isolation, and real-time update mechanisms.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Interactive Development Tools and Live Editing",
+            "description": "Build comprehensive development tools including code editor with syntax highlighting, live HTML/CSS editing, auto-completion, error detection, and real-time compilation.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Integrate code editor (Monaco/CodeMirror), implement syntax highlighting, auto-completion engine, error validation, live reload system, and hot module replacement.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Visual Feedback System with Diff Visualization",
+            "description": "Develop visual feedback mechanisms including change highlighting, diff visualization, version comparison, and visual regression detection for HTML output changes.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create diff algorithm for HTML comparison, visual change indicators, side-by-side comparison views, change timeline, and visual regression testing tools.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Integration Layer with Existing Tools",
+            "description": "Build integration capabilities with popular development tools, version control systems, build processes, and external APIs for seamless workflow integration.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Develop API connectors, webhook handlers, Git integration, build tool plugins, import/export utilities, and third-party service integrations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Export and Sharing Features",
+            "description": "Implement comprehensive export functionality supporting multiple formats, sharing mechanisms, collaboration features, and project packaging for distribution.",
+            "dependencies": [
+              1,
+              2,
+              4
+            ],
+            "details": "Build export engines for HTML/CSS/JS, sharing link generation, collaboration tools, project packaging, cloud storage integration, and version management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Performance Optimization and Caching",
+            "description": "Implement performance optimization strategies including intelligent caching, lazy loading, code splitting, and resource optimization for fast rendering and responsive user experience.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Develop caching layers, implement lazy loading mechanisms, code splitting strategies, resource bundling, memory management, and performance monitoring tools.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Implement Background Storybook Server Management",
+        "description": "Create a persistent background process management system for Storybook server that maintains availability during development sessions, with integration to MCP tools and state persistence.",
+        "details": "Implement a comprehensive background Storybook server management system with the following components:\n\n1. **Background Process Manager** (src/services/storybookManager.ts):\n   - Create `StorybookProcessManager` class with lifecycle management: `start()`, `stop()`, `restart()`, `getStatus()`\n   - Implement process spawning with detached mode: `spawn('npm', ['run', 'storybook'], {detached: true, stdio: 'pipe'})`\n   - Add process health monitoring with periodic ping checks to Storybook dev server endpoint\n   - Implement graceful shutdown handling with SIGTERM/SIGINT signal management\n   - Store process PID and port information in persistent state file\n\n2. **Persistent State Management** (src/services/storybookState.ts):\n   - Create state persistence layer using JSON file storage: `~/.supercomponents/storybook-state.json`\n   - Track server status, port, PID, last started time, and project path\n   - Implement state recovery on MCP server restart to reconnect to existing Storybook processes\n   - Add state validation and cleanup for orphaned processes\n\n3. **MCP Tool Integration** (src/tools/storybookServer.ts):\n   - Create `startStorybookServer` tool that launches background process and returns connection details\n   - Implement `getStorybookStatus` tool for checking server availability and health\n   - Add `stopStorybookServer` tool for graceful shutdown\n   - Create `restartStorybookServer` tool for process cycling\n   - Integrate with existing tools (createTokenStories, generateInstruction) to ensure server availability\n\n4. **Port Management and Conflict Resolution**:\n   - Implement dynamic port allocation with conflict detection\n   - Add port scanning to find available ports starting from default 6006\n   - Store allocated port in persistent state for reconnection\n   - Handle port conflicts gracefully with automatic fallback\n\n5. **Cross-Platform Process Management**:\n   - Implement platform-specific process management for Windows/Unix systems\n   - Use `tree-kill` package for reliable process tree termination\n   - Add process monitoring with automatic restart on unexpected termination\n   - Implement lock file mechanism to prevent multiple server instances",
+        "testStrategy": "Comprehensive testing approach for background Storybook server management:\n\n1. **Process Lifecycle Testing**:\n   - Unit tests for StorybookProcessManager: start/stop/restart operations\n   - Verify process spawning creates detached background process\n   - Test graceful shutdown with SIGTERM handling and cleanup\n   - Validate process health monitoring detects server failures\n\n2. **State Persistence Testing**:\n   - Test state file creation and recovery across MCP server restarts\n   - Verify orphaned process cleanup when PID no longer exists\n   - Test state corruption handling with fallback to clean state\n   - Validate cross-session state persistence and recovery\n\n3. **Integration Testing**:\n   - Test MCP tool integration: startStorybookServer returns valid connection details\n   - Verify existing tools (createTokenStories) work with background server\n   - Test server availability checks during active development sessions\n   - Validate port conflict resolution and dynamic allocation\n\n4. **End-to-End Testing**:\n   - Launch background Storybook server, verify accessibility at allocated port\n   - Test server persistence across multiple chat sessions\n   - Verify automatic restart on unexpected process termination\n   - Test graceful handling of system shutdown and restart scenarios\n\n5. **Performance and Reliability Testing**:\n   - Measure server startup time and resource usage\n   - Test long-running server stability over extended periods\n   - Validate memory leak prevention and resource cleanup\n   - Test concurrent access from multiple MCP clients",
+        "status": "pending",
+        "dependencies": [
+          3,
+          8,
+          10
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Background Process Manager with Lifecycle Controls",
+            "description": "Implement a robust background process manager that handles server lifecycle operations including start, stop, pause, resume, and graceful shutdown with proper signal handling and process state tracking.",
+            "dependencies": [],
+            "details": "Create process spawning mechanisms, implement lifecycle state machine, handle process signals (SIGTERM, SIGKILL, SIGINT), manage process groups, implement graceful shutdown procedures, and provide process control APIs for external management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Persistent State Management and Recovery",
+            "description": "Design and implement persistent state storage system that maintains server configurations, runtime state, and enables automatic recovery after system restarts or crashes.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create state serialization/deserialization mechanisms, implement file-based or database storage for server states, design recovery procedures for interrupted processes, maintain configuration persistence, and handle state corruption scenarios.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "MCP Tool Integration for Server Operations",
+            "description": "Integrate Model Context Protocol (MCP) tools to provide standardized interfaces for server management operations, enabling external tools and systems to interact with the server management layer.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement MCP protocol handlers, create tool definitions for server operations (start/stop/status/logs), establish secure communication channels, provide standardized API endpoints, and ensure compatibility with MCP client implementations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Port Management and Conflict Resolution",
+            "description": "Implement intelligent port allocation system that detects port conflicts, manages port reservations, and provides automatic port assignment with conflict resolution capabilities.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create port scanning and availability detection, implement port reservation system, design conflict resolution algorithms, provide port range management, handle dynamic port allocation, and maintain port usage tracking across multiple server instances.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Cross-Platform Process Handling",
+            "description": "Develop cross-platform process management layer that abstracts operating system differences for Windows, macOS, and Linux, ensuring consistent behavior across all supported platforms.",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Abstract OS-specific process APIs, implement platform-specific signal handling, manage file permissions and execution rights, handle path separators and environment variables, create unified process monitoring interfaces, and ensure consistent behavior across platforms.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Health Monitoring and Automatic Restart Capabilities",
+            "description": "Build comprehensive health monitoring system that tracks server performance, detects failures, and implements automatic restart mechanisms with configurable policies and failure thresholds.",
+            "dependencies": [
+              1,
+              2,
+              5
+            ],
+            "details": "Implement health check mechanisms (ping, HTTP endpoints, resource usage), create failure detection algorithms, design restart policies with backoff strategies, monitor system resources (CPU, memory, disk), implement alerting systems, and provide health status reporting interfaces.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Remove Deprecated Code and Clean Up Legacy Tools",
+        "description": "Systematically remove deprecated tools like parseDesign.ts and other legacy code, clean up unused imports, update documentation, and ensure the codebase is maintainable and follows current patterns.",
+        "details": "Implement a comprehensive codebase cleanup process with the following components:\n\n1. **Legacy Tool Identification and Removal**:\n   - Audit existing tools directory to identify deprecated implementations like parseDesign.ts\n   - Remove legacy parseDesign.ts since it's been replaced by parseDesignAndGenerateTokens.ts (Task 5)\n   - Clean up any remaining references to old tool handlers in MCP server configuration\n   - Remove deprecated utility functions that are no longer used\n\n2. **Import Cleanup and Dependency Analysis**:\n   - Use tools like `depcheck` or `unimport` to identify unused imports across the codebase\n   - Remove unused import statements from all TypeScript/JavaScript files\n   - Clean up package.json dependencies that are no longer referenced\n   - Update import paths to use consistent patterns and remove circular dependencies\n\n3. **Code Structure Modernization**:\n   - Consolidate duplicate utility functions into shared modules\n   - Remove commented-out code blocks and TODO comments that are no longer relevant\n   - Update function signatures to use consistent TypeScript patterns\n   - Refactor any remaining callback-style code to use async/await patterns\n\n4. **Documentation Updates**:\n   - Update README.md to remove references to deprecated tools and features\n   - Clean up inline code comments that reference removed functionality\n   - Update API documentation to reflect current tool implementations\n   - Remove outdated examples and usage patterns from documentation\n\n5. **Configuration Cleanup**:\n   - Update MCP server tool registry to remove deprecated tool handlers\n   - Clean up TypeScript configuration files to remove unused compiler options\n   - Update build scripts to exclude deprecated files from compilation\n   - Remove unused environment variables and configuration options",
+        "testStrategy": "Comprehensive validation of codebase cleanup:\n\n1. **Build and Compilation Verification**:\n   - Run `npm run build` to ensure no compilation errors after cleanup\n   - Verify TypeScript strict mode passes without unused variable warnings\n   - Test that all remaining imports resolve correctly without missing dependencies\n\n2. **Tool Functionality Validation**:\n   - Run integration tests for all remaining MCP tools to ensure they still function correctly\n   - Verify that parseDesignAndGenerateTokens tool works without any references to old parseDesign implementation\n   - Test that analyzeComponent and other tools don't have broken import paths\n\n3. **Dependency Analysis**:\n   - Run `npm audit` to check for unused dependencies in package.json\n   - Use `depcheck` to verify no unused npm packages remain\n   - Confirm that all import statements resolve to existing files\n\n4. **Documentation Accuracy**:\n   - Manually review updated documentation for accuracy and completeness\n   - Verify that all code examples in documentation use current API patterns\n   - Test that installation and setup instructions work with cleaned codebase\n\n5. **Performance Impact Assessment**:\n   - Measure bundle size reduction after cleanup\n   - Verify that build times haven't increased due to cleanup changes\n   - Test that MCP server startup time remains optimal",
+        "status": "pending",
+        "dependencies": [
+          5,
+          6
+        ],
+        "priority": "low",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Legacy Tool Identification and Systematic Removal",
+            "description": "Identify and systematically remove legacy tools, unused utilities, and deprecated code components from the codebase",
+            "dependencies": [],
+            "details": "Conduct comprehensive audit of existing tools and utilities, identify deprecated or unused components, create removal plan with impact assessment, and systematically remove legacy tools while ensuring no breaking changes to active functionality",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Import Cleanup and Dependency Analysis with Automated Tools",
+            "description": "Analyze and clean up import statements and dependencies using automated tools to remove unused imports and optimize dependency structure",
+            "dependencies": [
+              1
+            ],
+            "details": "Run automated dependency analysis tools, identify unused imports and redundant dependencies, clean up import statements across all modules, optimize dependency tree, and validate that all necessary dependencies remain intact",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Documentation Updates and Configuration Cleanup",
+            "description": "Update documentation to reflect cleanup changes and clean up configuration files to remove references to removed components",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Update project documentation to reflect removed tools and cleaned dependencies, clean up configuration files and remove obsolete settings, update README and setup instructions, and ensure all documentation accurately reflects the cleaned codebase structure",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Rename /supercomponents to /.supercomponents Hidden Directory",
+        "description": "Rename the /supercomponents directory to /.supercomponents (hidden directory) and update all references throughout the codebase, documentation, and tool configurations to use the new hidden directory structure.",
+        "details": "Implement a comprehensive directory restructuring with the following components:\n\n1. **Directory Renaming and File Migration**:\n   - Create new /.supercomponents directory structure maintaining all existing subdirectories\n   - Move all files from /supercomponents to /.supercomponents preserving file permissions and timestamps\n   - Update .gitignore patterns to handle hidden directory appropriately: `!/.supercomponents/` to ensure tracking\n   - Verify no files are lost during migration with checksum validation\n\n2. **Codebase Reference Updates**:\n   - Scan all source files for hardcoded paths referencing /supercomponents: `grep -r \"supercomponents\" src/`\n   - Update import statements and file path references in TypeScript/JavaScript files\n   - Modify configuration files (package.json, tsconfig.json, webpack.config.js) that reference the old directory\n   - Update tool handlers that interact with component files to use new hidden directory path\n\n3. **Tool Configuration Updates**:\n   - Update analyzeComponent.ts glob patterns to scan /.supercomponents instead of /supercomponents\n   - Modify file generation tools to output to /.supercomponents directory structure\n   - Update any build scripts or automation that references the old directory path\n   - Ensure MCP server tool handlers correctly resolve paths to hidden directory\n\n4. **Documentation and README Updates**:\n   - Update all documentation references to use /.supercomponents path\n   - Modify setup instructions and usage examples in README files\n   - Update any CLI help text or user-facing messages that mention directory structure\n   - Ensure installation and configuration guides reflect new hidden directory approach\n\n5. **Cross-Platform Compatibility**:\n   - Test directory visibility and access on different operating systems (Windows, macOS, Linux)\n   - Ensure development tools and IDEs can properly access hidden directory\n   - Verify file system permissions are correctly maintained after rename",
+        "testStrategy": "Comprehensive validation of directory restructuring:\n\n1. **File Migration Verification**:\n   - Compare file counts and checksums between old and new directory structures\n   - Verify all subdirectories and nested files are properly migrated\n   - Test that file permissions and timestamps are preserved\n   - Ensure no duplicate or missing files after migration\n\n2. **Codebase Reference Testing**:\n   - Run comprehensive grep search to ensure no remaining references to old path: `grep -r \"/supercomponents\" . --exclude-dir=node_modules`\n   - Execute full build process to catch any broken import statements or path references\n   - Test all MCP tools to ensure they can locate and process files in new hidden directory\n   - Verify TypeScript compilation passes without path resolution errors\n\n3. **Functional Testing**:\n   - Test analyzeComponent tool can scan components in /.supercomponents directory\n   - Verify file generation tools create outputs in correct hidden directory location\n   - Test component preview and development features work with new directory structure\n   - Ensure Storybook integration (if applicable) can locate components in hidden directory\n\n4. **Cross-Platform Validation**:\n   - Test directory access and visibility on Windows, macOS, and Linux environments\n   - Verify development tools (VS Code, IDEs) can properly index and search hidden directory\n   - Test npm/npx package installation works correctly with hidden directory structure\n   - Ensure git tracking and version control operations work properly with hidden directory",
+        "status": "pending",
+        "dependencies": [
+          6,
+          17
+        ],
+        "priority": "low",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Directory migration and file preservation",
+            "description": "Systematically move files and directories to new structure while preserving file integrity, permissions, and metadata",
+            "dependencies": [],
+            "details": "Create new directory structure, move files using safe copy operations, verify file integrity with checksums, preserve file permissions and timestamps, create backup of original structure before migration",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Codebase reference updates across all files",
+            "description": "Update all import statements, file paths, and references throughout the codebase to match new directory structure",
+            "dependencies": [
+              1
+            ],
+            "details": "Scan all source files for path references, update import statements and require calls, modify relative path references, update documentation links, use find-and-replace tools for systematic updates",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Tool configuration updates for new paths",
+            "description": "Update build tools, IDEs, and development environment configurations to work with restructured directories",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Update build scripts and makefiles, modify IDE project files and workspace settings, update linter and formatter configurations, adjust deployment scripts, update package.json or equivalent dependency files",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Cross-platform compatibility testing and validation",
+            "description": "Thoroughly test the restructured project across different operating systems and environments to ensure functionality",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Test build process on Windows, macOS, and Linux, verify all file paths work correctly, run comprehensive test suite, validate deployment processes, check for case-sensitivity issues, ensure no broken links or missing files",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-08T01:37:31.690Z",
-      "updated": "2025-07-11T02:36:15.077Z",
+      "updated": "2025-07-11T05:52:54.400Z",
       "description": "Tasks for master context"
     }
   },

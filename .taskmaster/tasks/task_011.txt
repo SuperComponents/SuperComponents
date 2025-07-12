@@ -1,0 +1,51 @@
+# Task ID: 11
+# Title: Fix createTokenStories File Discovery and Parameter Passing
+# Status: pending
+# Dependencies: 10, 5, 8
+# Priority: high
+# Description: Enhance the createTokenStories tool to properly locate design.json files in the /supercomponents directory and improve parameter passing for design data file discovery.
+# Details:
+Update src/tools/createTokenStories.ts to implement robust file discovery:
+
+1. **Enhanced File Discovery**: Replace hardcoded paths with dynamic file search using fast-glob or fs.existsSync to locate design.json in /supercomponents directory and subdirectories.
+
+2. **Parameter Restructuring**: Modify handler signature from `{tokensDir}` to `{projectPath, designFile?}` where:
+   - projectPath: root directory to search from
+   - designFile: optional explicit path to design.json, defaults to auto-discovery
+
+3. **Fallback Strategy**: Implement cascading file discovery:
+   - Check explicit designFile parameter if provided
+   - Search /supercomponents/design.json
+   - Search /supercomponents/*/design.json (subdirectories)
+   - Fall back to tokensDir/tailwind.theme.cjs if design.json not found
+
+4. **Error Handling**: Add comprehensive error handling for missing files with descriptive error messages indicating search paths attempted.
+
+5. **Design Data Integration**: Parse design.json to extract tokens and merge with existing Tailwind theme data, ensuring compatibility with both data sources.
+
+Code structure:
+```typescript
+export const createTokenStoriesHandler = async({projectPath, designFile}: {projectPath: string, designFile?: string}) => {
+  const designPath = designFile || await findDesignFile(projectPath);
+  const designData = JSON.parse(fs.readFileSync(designPath, 'utf8'));
+  const tokens = designData.tokens || require(`${projectPath}/tailwind.theme.cjs`).theme;
+  // Generate stories using discovered design data
+};
+```
+
+# Test Strategy:
+Comprehensive testing approach:
+
+1. **File Discovery Tests**: Create test fixtures with design.json in various locations (/supercomponents, /supercomponents/tokens, etc.) and verify correct file discovery.
+
+2. **Parameter Validation**: Test both explicit designFile parameter and auto-discovery modes, ensuring proper fallback behavior.
+
+3. **Error Handling Tests**: Verify descriptive error messages when design.json is missing, including list of searched paths.
+
+4. **Integration Tests**: Run with actual project structure created by initializeProject tool, ensuring seamless integration with existing workflow.
+
+5. **Backward Compatibility**: Verify existing tokensDir parameter still works for projects without design.json files.
+
+6. **Story Generation**: Validate that stories are generated correctly using design.json data, comparing token counts and structure against expected output.
+
+7. **Performance**: Ensure file discovery completes within 2 seconds for typical project structures.

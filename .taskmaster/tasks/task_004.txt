@@ -1,0 +1,54 @@
+# Task ID: 4
+# Title: Build LLM Integration Layer
+# Status: done
+# Dependencies: 1
+# Priority: medium
+# Description: Abstract communication with OpenAI or compatible providers, add caching & rate-limit guard.
+# Details:
+src/llm/index.ts:
+export async function complete(prompt:string,opts){
+ if(cache.has(prompt)) return cache.get(prompt);
+ const resp=await openai.chat.completions.create({model:"gpt-4o",messages:[{role:"user",content:prompt}],...opts});
+ cache.set(prompt,resp.choices[0].message.content);
+ return resp.choices[0].message.content;
+}
+• Read OPENAI_API_KEY from env.
+• Expose streamComplete for large payloads.
+
+# Test Strategy:
+Mock OpenAI via nock:
+- Expect POST => returns stub.
+- Verify caching returns identical value without second HTTP call.
+- Throttle test: 20 rapid calls constrained to 1 QPS.
+
+# Subtasks:
+## 1. OpenAI Client Setup [done]
+### Dependencies: None
+### Description: Initialize and configure OpenAI client with proper authentication, API key management, and basic connection setup
+### Details:
+Set up OpenAI Python client library, configure API key from environment variables, establish base client configuration with proper headers and authentication, create connection validation methods
+
+## 2. Caching Implementation [done]
+### Dependencies: 4.1
+### Description: Implement intelligent caching system for API responses to reduce costs and improve performance
+### Details:
+Design cache key strategy based on request parameters, implement Redis or in-memory caching, add cache expiration policies, create cache hit/miss metrics, handle cache invalidation scenarios
+
+## 3. Rate Limiting [done]
+### Dependencies: 4.1
+### Description: Implement rate limiting mechanisms to comply with OpenAI API limits and prevent quota exhaustion
+### Details:
+Create token bucket or sliding window rate limiter, implement request queuing system, add backoff strategies for rate limit hits, monitor and log rate limit usage, handle concurrent request limiting
+
+## 4. Streaming Support [done]
+### Dependencies: 4.1, 4.3
+### Description: Add support for streaming responses from OpenAI API for real-time data processing
+### Details:
+Implement streaming response handlers, create async generators for streaming data, add proper connection management for long-running streams, handle stream interruption and reconnection, optimize memory usage for large streams
+
+## 5. Error Handling for API Failures [done]
+### Dependencies: 4.1, 4.2, 4.3, 4.4
+### Description: Implement comprehensive error handling for various API failure scenarios and edge cases
+### Details:
+Create custom exception classes for different error types, implement retry logic with exponential backoff, handle network timeouts and connection errors, add logging and monitoring for failures, create fallback mechanisms for critical failures
+

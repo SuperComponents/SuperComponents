@@ -1,0 +1,45 @@
+# Task ID: 10
+# Title: Implement createTokenStories Tool
+# Status: done
+# Dependencies: 5, 8
+# Priority: medium
+# Description: Generate Storybook stories that visualize design tokens for colors, typography, and spacing.
+# Details:
+src/tools/createTokenStories.ts
+export const createTokenStoriesHandler=async({tokensDir})=>{
+ const tokens=require(`${tokensDir}/tailwind.theme.cjs`).theme;
+ const story=`import React from 'react';\nexport default {title:'Design Tokens/Colors'};\nexport const Colors=()=><>${Object.entries(tokens.colors).map(([k,v])=>`<div style={{background:'${v}'}}>${k}</div>`).join('')}</>`;
+ fs.writeFileSync('.storybook/stories/tokens/colors.stories.tsx',story);
+ return {storyPath:'colors.stories.tsx'};
+};
+
+# Test Strategy:
+Run Storybook CI snapshot testing with @storybook/testing-library:
+- Render Colors story; expect visible swatches count === Object.keys(tokens.colors).length.
+- Chromatic visual diff to guard against regressions.
+
+# Subtasks:
+## 1. Token Data Reading [done]
+### Dependencies: None
+### Description: Implement functionality to read and parse design token data from various sources (JSON, YAML, or token files) and structure it for story generation
+### Details:
+Create utilities to extract token values, categories, and metadata. Handle different token formats and ensure proper data validation and error handling.
+
+## 2. Story Template Generation [done]
+### Dependencies: 10.1
+### Description: Develop template generation logic to create Storybook story files based on design tokens and component specifications
+### Details:
+Build template engine that can generate story files with proper controls, args, and documentation. Include support for different story formats and customizable templates.
+
+## 3. Component Rendering Logic [done]
+### Dependencies: 10.1, 10.2
+### Description: Implement the core rendering logic that applies design tokens to components and handles dynamic property binding
+### Details:
+Create rendering system that can apply token values to component properties, handle theme switching, and manage component state updates based on token changes.
+
+## 4. Storybook Integration Testing [done]
+### Dependencies: 10.1, 10.2, 10.3
+### Description: Develop comprehensive testing suite for Storybook integration including story generation, rendering, and token application verification
+### Details:
+Create automated tests to verify story generation accuracy, component rendering with tokens, and integration with Storybook's addon system. Include visual regression testing and cross-browser compatibility checks.
+
