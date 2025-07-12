@@ -526,7 +526,7 @@ const ColorPalette = ({ colors }: { colors: Array<{ name: string; value: string 
 );
 
 const meta: Meta<typeof ColorPalette> = {
-  title: 'Design System/Colors',
+  title: 'Design Tokens/Colors',
   component: ColorPalette,
   parameters: {
     layout: 'fullscreen',
@@ -551,11 +551,10 @@ ${colorSwatches}
    */
   private generateTypographyCSF(typography: Record<string, Record<string, any>>): string {
     const typographyEntries = Object.entries(typography).map(([category, values]) => {
-      const items = Object.entries(values).map(([key, value]) => {
-        return `    { category: "${category}", name: "${key}", value: "${value}" }`;
-      }).join(",\n");
-      return items;
-    }).join(",\n");
+      return Object.entries(values).map(([key, value]) => {
+        return `      { category: "${category}", name: "${key}", value: "${value}" }`;
+      });
+    }).flat().join(",\n");
 
     return `import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -596,7 +595,7 @@ const TypographyShowcase = ({ typography }: { typography: Array<{ category: stri
 );
 
 const meta: Meta<typeof TypographyShowcase> = {
-  title: 'Design System/Typography',
+  title: 'Design Tokens/Typography',
   component: TypographyShowcase,
   parameters: {
     layout: 'fullscreen',
@@ -661,7 +660,7 @@ const SpacingShowcase = ({ spacing }: { spacing: Array<{ name: string; value: nu
 );
 
 const meta: Meta<typeof SpacingShowcase> = {
-  title: 'Design System/Spacing',
+  title: 'Design Tokens/Spacing',
   component: SpacingShowcase,
   parameters: {
     layout: 'fullscreen',
@@ -691,7 +690,7 @@ ${spacingEntries}
 
     return `import { Meta, Story, Canvas } from '@storybook/addon-docs';
 
-<Meta title="Design System/Colors" />
+<Meta title="Design Tokens/Colors" />
 
 # Color Tokens
 
@@ -740,7 +739,7 @@ export const ColorSwatch = ({ name, value }) => (
 
     return `import { Meta, Story, Canvas } from '@storybook/addon-docs';
 
-<Meta title="Design System/Typography" />
+<Meta title="Design Tokens/Typography" />
 
 # Typography Tokens
 
@@ -786,7 +785,7 @@ This page showcases all the typography tokens available in the design system.
 
     return `import { Meta, Story, Canvas } from '@storybook/addon-docs';
 
-<Meta title="Design System/Spacing" />
+<Meta title="Design Tokens/Spacing" />
 
 # Spacing Tokens
 
@@ -828,7 +827,7 @@ export const createTokenStoriesTool: Tool = {
     const projectPath = validatedInput.projectPath || ".";
     const designFile = validatedInput.designFile;
     const tokensDir = validatedInput.tokensDir;
-    const storybookDir = validatedInput.storybookDir || ".storybook";
+    const storybookDir = validatedInput.storybookDir || ".supercomponents/.storybook";
     const outputDir = validatedInput.outputDir || "stories/tokens";
     const includeTypes = validatedInput.includeTypes || ["colors", "color", "typography", "spacing"];
     const storyFormat = validatedInput.storyFormat || "csf";
