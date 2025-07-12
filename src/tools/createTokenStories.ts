@@ -2,14 +2,17 @@ import { z } from "zod";
 import { Tool } from "../types.js";
 import { zodToJsonSchema } from "../utils/validation.js";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { join, dirname } from "path";
+import { join, dirname, resolve } from "path";
 import { getLogger } from "../utils/logger.js";
+import fg from "fast-glob";
 
 const logger = getLogger();
 
-// Input schema for the createTokenStories tool
+// Input schema for the createTokenStories tool  
 const inputSchema = z.object({
-  tokensDir: z.string().describe("Directory containing design tokens (JSON files or Tailwind config)"),
+  projectPath: z.string().default(".").describe("Root directory to search for design files"),
+  designFile: z.string().optional().describe("Explicit path to design.json file (optional, auto-discovery used if not provided)"),
+  tokensDir: z.string().optional().describe("Legacy: Directory containing design tokens (fallback if design.json not found)"),
   storybookDir: z.string().default(".storybook").describe("Storybook directory path"),
   outputDir: z.string().default("stories/tokens").describe("Output directory for token stories (relative to storybookDir)"),
   includeTypes: z.array(z.enum(["colors", "typography", "spacing", "radius", "elevation", "opacity", "durations", "zIndex", "easing"]))
@@ -41,21 +44,182 @@ interface StoryTemplate {
   parameters: Record<string, any>;
 }
 
+// Design token interface from design.json
+interface DesignToken {
+  name: string;
+  value: string | number | object;
+  type: string;
+  category?: string;
+}
+
+// Design file structure
+interface DesignFile {
+  id?: string;
+  tokens: DesignToken[];
+  metadata?: Record<string, any>;
+}
+
 /**
- * Token Data Reader - Subtask 10.1
- * Reads and parses design token data from various sources
+ * Enhanced file discovery system for design tokens
+ */
+async function findDesignFiles(projectPath: string, designFile?: string): Promise<string | null> {
+  const resolvedProjectPath = resolve(projectPath);
+  
+  // Priority 1: Explicit designFile parameter
+  if (designFile) {
+    const explicitPath = resolve(resolvedProjectPath, designFile);
+    if (existsSync(explicitPath)) {
+      logger.debug(`Found explicit design file: ${explicitPath}`);
+      return explicitPath;
+    }
+    logger.warn(`Explicit design file not found: ${explicitPath}`);
+  }
+
+  // Priority 2: .supercomponents/design.json (hidden directory)
+  const hiddenDesignPath = join(resolvedProjectPath, '.supercomponents', 'design.json');
+  if (existsSync(hiddenDesignPath)) {
+    logger.debug(`Found design file in hidden directory: ${hiddenDesignPath}`);
+    return hiddenDesignPath;
+  }
+
+  // Priority 3: supercomponents/design.json (visible directory)
+  const visibleDesignPath = join(resolvedProjectPath, 'supercomponents', 'design.json');
+  if (existsSync(visibleDesignPath)) {
+    logger.debug(`Found design file in visible directory: ${visibleDesignPath}`);
+    return visibleDesignPath;
+  }
+
+  // Priority 4: Search subdirectories with fast-glob
+  try {
+    const patterns = [
+      '**/design.json',
+      '**/.supercomponents/design.json',
+      '**/supercomponents/design.json'
+    ];
+    
+    const foundFiles = await fg(patterns, {
+      cwd: resolvedProjectPath,
+      absolute: true,
+      ignore: ['node_modules/**', '.git/**', 'dist/**', 'build/**'],
+      onlyFiles: true
+    });
+
+    if (foundFiles.length > 0) {
+      logger.debug(`Found design files via glob search: ${foundFiles}`);
+      return foundFiles[0]; // Return first match
+    }
+  } catch (error) {
+    logger.warn(`Fast-glob search failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  logger.debug('No design.json files found');
+  return null;
+}
+
+/**
+ * Parse design.json file and convert to TokenStructure format
+ */
+function parseDesignJson(filePath: string): TokenStructure {
+  try {
+    const content = readFileSync(filePath, 'utf8');
+    const designData: DesignFile = JSON.parse(content);
+    
+    if (!designData.tokens || !Array.isArray(designData.tokens)) {
+      throw new Error('Invalid design.json format: missing or invalid tokens array');
+    }
+
+    const tokenStructure: TokenStructure = {};
+
+    // Group tokens by type
+    designData.tokens.forEach(token => {
+      const { type, name, value } = token;
+      
+      if (!tokenStructure[type]) {
+        tokenStructure[type] = {};
+      }
+
+      // Clean token name (remove type prefix if present)
+      const cleanName = name.startsWith(`${type}-`) ? name.substring(type.length + 1) : name;
+      
+      tokenStructure[type][cleanName] = value;
+    });
+
+    logger.debug(`Parsed ${designData.tokens.length} tokens from design.json`);
+    return tokenStructure;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse design.json: ${errorMessage}`);
+  }
+}
+
+/**
+ * Enhanced Token Data Reader with design.json support
+ * Reads and parses design token data from various sources including design.json
  */
 class TokenDataReader {
-  private tokensDir: string;
+  private projectPath: string;
+  private designFile?: string;
+  private tokensDir?: string;
 
-  constructor(tokensDir: string) {
+  constructor(projectPath: string, designFile?: string, tokensDir?: string) {
+    this.projectPath = projectPath;
+    this.designFile = designFile;
     this.tokensDir = tokensDir;
   }
 
   /**
-   * Read tokens from multiple possible sources
+   * Read tokens with enhanced discovery and fallback strategy
    */
   async readTokens(): Promise<TokenStructure> {
+    // Step 1: Try to find design.json files
+    const designFilePath = await findDesignFiles(this.projectPath, this.designFile);
+    
+    if (designFilePath) {
+      logger.info(`Using design file: ${designFilePath}`);
+      return parseDesignJson(designFilePath);
+    }
+
+    // Step 2: Fallback to legacy token directory approach
+    if (this.tokensDir) {
+      logger.info(`Falling back to legacy token directory: ${this.tokensDir}`);
+      return await this.readLegacyTokens();
+    }
+
+    // Step 3: Try default token locations in project
+    const defaultTokensDir = join(this.projectPath, '.supercomponents');
+    if (existsSync(defaultTokensDir)) {
+      logger.info(`Trying default tokens directory: ${defaultTokensDir}`);
+      this.tokensDir = defaultTokensDir;
+      return await this.readLegacyTokens();
+    }
+
+    // Create detailed error message with search paths
+    const searchedPaths = [
+      this.designFile ? resolve(this.projectPath, this.designFile) : null,
+      join(this.projectPath, '.supercomponents', 'design.json'),
+      join(this.projectPath, 'supercomponents', 'design.json'),
+      this.tokensDir ? join(this.tokensDir, 'tokens.json') : null,
+      join(this.projectPath, '.supercomponents', 'tokens.json'),
+    ].filter(Boolean);
+
+    throw new Error(
+      `No design tokens found. Searched the following locations:\n` +
+      searchedPaths.map(path => `  - ${path}`).join('\n') + '\n\n' +
+      `To fix this issue:\n` +
+      `  1. Ensure design.json exists in .supercomponents/ directory\n` +
+      `  2. Or provide explicit designFile parameter\n` +
+      `  3. Or ensure legacy token files exist in specified tokensDir`
+    );
+  }
+
+  /**
+   * Read tokens from legacy token files (original implementation)
+   */
+  private async readLegacyTokens(): Promise<TokenStructure> {
+    if (!this.tokensDir) {
+      throw new Error('No tokens directory specified for legacy fallback');
+    }
+
     const possibleFiles = [
       join(this.tokensDir, "tokens.json"),
       join(this.tokensDir, "tailwind.config.js"),
@@ -66,7 +230,7 @@ class TokenDataReader {
 
     for (const filePath of possibleFiles) {
       if (existsSync(filePath)) {
-        logger.debug(`Reading tokens from: ${filePath}`);
+        logger.debug(`Reading legacy tokens from: ${filePath}`);
         return await this.readTokensFromFile(filePath);
       }
     }
@@ -594,13 +758,20 @@ export const createTokenStoriesTool: Tool = {
   },
 
   async handler(input) {
-    const { tokensDir, storybookDir, outputDir, includeTypes, storyFormat } = input;
+    const { projectPath, designFile, tokensDir, storybookDir, outputDir, includeTypes, storyFormat } = input;
 
     try {
-      logger.info(`Creating token stories from ${tokensDir}...`);
+      logger.info(`Creating token stories from project: ${projectPath}...`);
+      
+      // Log search strategy
+      if (designFile) {
+        logger.info(`Using explicit design file: ${designFile}`);
+      } else {
+        logger.info(`Auto-discovering design files in: ${projectPath}`);
+      }
 
-      // Step 1: Read token data
-      const tokenReader = new TokenDataReader(tokensDir);
+      // Step 1: Read token data with enhanced discovery
+      const tokenReader = new TokenDataReader(projectPath, designFile, tokensDir);
       const rawTokens = await tokenReader.readTokens();
       const tokens = tokenReader.validateTokens(rawTokens);
 
@@ -658,14 +829,34 @@ export const createTokenStoriesTool: Tool = {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(`Failed to create token stories: ${errorMessage}`);
       
+      // Provide helpful error response with context
+      const response = {
+        success: false,
+        error: errorMessage,
+        message: "Failed to create token stories",
+        context: {
+          projectPath,
+          designFile: designFile || 'auto-discovery',
+          tokensDir: tokensDir || 'not specified',
+          searchPaths: [
+            designFile ? resolve(projectPath, designFile) : null,
+            join(projectPath, '.supercomponents', 'design.json'),
+            join(projectPath, 'supercomponents', 'design.json'),
+            tokensDir ? join(tokensDir, 'tokens.json') : null,
+          ].filter(Boolean)
+        },
+        troubleshooting: [
+          "Ensure design.json exists in .supercomponents/ directory",
+          "Check file permissions and accessibility",
+          "Verify JSON format is valid in design files",
+          "Consider using explicit designFile parameter for debugging"
+        ]
+      };
+      
       return {
         content: [{
           type: "text",
-          text: JSON.stringify({
-            success: false,
-            error: errorMessage,
-            message: "Failed to create token stories"
-          }, null, 2)
+          text: JSON.stringify(response, null, 2)
         }],
         isError: true
       };
