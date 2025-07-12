@@ -10,15 +10,16 @@ const logger = getLogger();
 
 // Input schema for the createTokenStories tool  
 const inputSchema = z.object({
-  projectPath: z.string().default(".").describe("Root directory to search for design files"),
+  projectPath: z.string().default(".").describe("Root directory to search for design files").optional(),
   designFile: z.string().optional().describe("Explicit path to design.json file (optional, auto-discovery used if not provided)"),
   tokensDir: z.string().optional().describe("Legacy: Directory containing design tokens (fallback if design.json not found)"),
-  storybookDir: z.string().default(".storybook").describe("Storybook directory path"),
-  outputDir: z.string().default("stories/tokens").describe("Output directory for token stories (relative to storybookDir)"),
-  includeTypes: z.array(z.enum(["colors", "typography", "spacing", "radius", "elevation", "opacity", "durations", "zIndex", "easing"]))
-    .default(["colors", "typography", "spacing"])
-    .describe("Token types to generate stories for"),
-  storyFormat: z.enum(["csf", "mdx"]).default("csf").describe("Story format - CSF or MDX"),
+  storybookDir: z.string().default(".storybook").describe("Storybook directory path").optional(),
+  outputDir: z.string().default("stories/tokens").describe("Output directory for token stories (relative to storybookDir)").optional(),
+  includeTypes: z.array(z.enum(["colors", "color", "typography", "spacing", "radius", "elevation", "opacity", "durations", "zIndex", "easing"]))
+    .default(["colors", "color", "typography", "spacing"])
+    .describe("Token types to generate stories for")
+    .optional(),
+  storyFormat: z.enum(["csf", "mdx"]).default("csf").describe("Story format - CSF or MDX").optional(),
 });
 
 // Token structure interface
@@ -63,6 +64,10 @@ interface DesignFile {
  * Enhanced file discovery system for design tokens
  */
 async function findDesignFiles(projectPath: string, designFile?: string): Promise<string | null> {
+  // Ensure projectPath is defined
+  if (!projectPath) {
+    throw new Error('projectPath is required for findDesignFiles');
+  }
   const resolvedProjectPath = resolve(projectPath);
   
   // Priority 1: Explicit designFile parameter
@@ -144,7 +149,19 @@ function parseDesignJson(filePath: string): TokenStructure {
       tokenStructure[type][cleanName] = value;
     });
 
+    // Debug: Log token types found
+    const tokenTypes = Object.keys(tokenStructure);
     logger.debug(`Parsed ${designData.tokens.length} tokens from design.json`);
+    logger.debug(`Token types found: ${tokenTypes.join(', ')}`);
+    
+    // Debug: Log color tokens specifically
+    if (tokenStructure.color) {
+      logger.debug(`Found ${Object.keys(tokenStructure.color).length} color tokens`);
+      logger.debug(`Color tokens: ${Object.keys(tokenStructure.color).join(', ')}`);
+    } else {
+      logger.debug('No color tokens found in parsed structure');
+    }
+    
     return tokenStructure;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -357,16 +374,19 @@ class TokenDataReader {
   validateTokens(tokens: TokenStructure): TokenStructure {
     const validatedTokens: TokenStructure = {};
     
-    // Validate colors
-    if (tokens.colors) {
-      validatedTokens.colors = {};
-      Object.entries(tokens.colors).forEach(([key, value]) => {
+    // Validate colors (handle both "color" and "colors" for compatibility)
+    const colorData = tokens.colors || tokens.color;
+    if (colorData) {
+      // Store as "color" to match the design.json parsing
+      validatedTokens.color = {};
+      Object.entries(colorData).forEach(([key, value]) => {
         if (typeof value === "string" || (typeof value === "object" && value !== null)) {
-          validatedTokens.colors![key] = value;
+          validatedTokens.color![key] = value;
         } else {
           logger.warn(`Invalid color value for ${key}: ${value}`);
         }
       });
+      logger.debug(`Validated ${Object.keys(validatedTokens.color).length} color tokens`);
     }
     
     // Validate spacing
@@ -708,7 +728,16 @@ export const ColorSwatch = ({ name, value }) => (
    * Generate MDX format for typography
    */
   private generateTypographyMDX(typography: Record<string, Record<string, any>>): string {
-    // Implementation similar to CSF but in MDX format
+    const { sizes, weights, lineHeights } = typography;
+    
+    const sizeExamples = sizes ? Object.entries(sizes).map(([name, size]) => 
+      `<div style={{ fontSize: '${size}px', marginBottom: '8px' }}>{name}: ${size}px - The quick brown fox jumps over the lazy dog</div>`
+    ).join('\n      ') : '';
+    
+    const weightExamples = weights ? Object.entries(weights).map(([name, weight]) => 
+      `<div style={{ fontWeight: '${weight}', marginBottom: '8px' }}>{name}: ${weight} - The quick brown fox jumps over the lazy dog</div>`
+    ).join('\n      ') : '';
+
     return `import { Meta, Story, Canvas } from '@storybook/addon-docs';
 
 <Meta title="Design System/Typography" />
@@ -717,9 +746,23 @@ export const ColorSwatch = ({ name, value }) => (
 
 This page showcases all the typography tokens available in the design system.
 
+## Font Sizes
+
 <Canvas>
-  <Story name="Typography">
-    <div>Typography tokens will be displayed here</div>
+  <Story name="Font Sizes">
+    <div>
+      ${sizeExamples}
+    </div>
+  </Story>
+</Canvas>
+
+## Font Weights
+
+<Canvas>
+  <Story name="Font Weights">
+    <div>
+      ${weightExamples}
+    </div>
   </Story>
 </Canvas>
 `;
@@ -729,7 +772,18 @@ This page showcases all the typography tokens available in the design system.
    * Generate MDX format for spacing
    */
   private generateSpacingMDX(spacing: Record<string, number>): string {
-    // Implementation similar to CSF but in MDX format
+    const spacingExamples = Object.entries(spacing).map(([name, value]) => {
+      return `<div style={{ marginBottom: '16px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{name}: ${value}px</div>
+        <div style={{ 
+          width: '${value}px', 
+          height: '20px', 
+          backgroundColor: '#3B82F6', 
+          borderRadius: '2px' 
+        }}></div>
+      </div>`;
+    }).join('\n      ');
+
     return `import { Meta, Story, Canvas } from '@storybook/addon-docs';
 
 <Meta title="Design System/Spacing" />
@@ -740,7 +794,9 @@ This page showcases all the spacing tokens available in the design system.
 
 <Canvas>
   <Story name="Spacing">
-    <div>Spacing tokens will be displayed here</div>
+    <div>
+      ${spacingExamples}
+    </div>
   </Story>
 </Canvas>
 `;
@@ -758,7 +814,24 @@ export const createTokenStoriesTool: Tool = {
   },
 
   async handler(input) {
-    const { projectPath, designFile, tokensDir, storybookDir, outputDir, includeTypes, storyFormat } = input;
+    logger.debug(`Handler called with input: ${JSON.stringify(input, null, 2)}`);
+    
+    // Handle dummy parameter case (when called via MCP with random_string)
+    const processedInput = typeof input === 'object' && 'random_string' in input ? {} : input;
+    logger.debug(`Processed input: ${JSON.stringify(processedInput, null, 2)}`);
+    
+    // Parse and validate input with defaults
+    const validatedInput = inputSchema.parse(processedInput || {});
+    logger.debug(`Validated input: ${JSON.stringify(validatedInput, null, 2)}`);
+    
+    // Extract parameters with proper defaults
+    const projectPath = validatedInput.projectPath || ".";
+    const designFile = validatedInput.designFile;
+    const tokensDir = validatedInput.tokensDir;
+    const storybookDir = validatedInput.storybookDir || ".storybook";
+    const outputDir = validatedInput.outputDir || "stories/tokens";
+    const includeTypes = validatedInput.includeTypes || ["colors", "color", "typography", "spacing"];
+    const storyFormat = validatedInput.storyFormat || "csf";
 
     try {
       logger.info(`Creating token stories from project: ${projectPath}...`);
@@ -773,7 +846,25 @@ export const createTokenStoriesTool: Tool = {
       // Step 1: Read token data with enhanced discovery
       const tokenReader = new TokenDataReader(projectPath, designFile, tokensDir);
       const rawTokens = await tokenReader.readTokens();
+      
+      // Debug: Log raw token structure
+      logger.info(`Raw tokens keys: ${Object.keys(rawTokens).join(', ')}`);
+      if (rawTokens.color) {
+        logger.info(`Raw color tokens found: ${Object.keys(rawTokens.color).length} tokens`);
+        logger.info(`First few color tokens: ${Object.keys(rawTokens.color).slice(0, 5).join(', ')}`);
+      } else {
+        logger.info(`No color tokens found in raw structure`);
+      }
+      
       const tokens = tokenReader.validateTokens(rawTokens);
+      
+      // Debug: Log processed token structure  
+      logger.info(`Processed tokens keys: ${Object.keys(tokens).join(', ')}`);
+      if (tokens.color) {
+        logger.info(`Validated color tokens found: ${Object.keys(tokens.color).length} tokens`);
+      } else {
+        logger.info(`No color tokens found in validated structure`);
+      }
 
       // Step 2: Initialize story template generator
       const storyGenerator = new StoryTemplateGenerator(storyFormat);
@@ -787,8 +878,10 @@ export const createTokenStoriesTool: Tool = {
       // Step 4: Generate stories based on requested types
       const generatedStories: string[] = [];
 
-      if (includeTypes.includes("colors") && tokens.colors) {
-        const colorStory = storyGenerator.generateColorStories(tokens.colors);
+      // Handle both "colors" and "color" for backward compatibility
+      if ((includeTypes.includes("colors") || includeTypes.includes("color")) && (tokens.colors || tokens.color)) {
+        const colorData = tokens.colors || tokens.color;
+        const colorStory = storyGenerator.generateColorStories(colorData);
         const colorFilePath = join(fullOutputDir, `colors.stories.${storyFormat === "csf" ? "tsx" : "mdx"}`);
         writeFileSync(colorFilePath, colorStory);
         generatedStories.push(colorFilePath);
@@ -819,7 +912,17 @@ export const createTokenStoriesTool: Tool = {
             success: true,
             generatedStories,
             tokensFound: Object.keys(tokens),
-            message: `Successfully generated ${generatedStories.length} token stories`
+            message: `Successfully generated ${generatedStories.length} token stories`,
+            timestamp: new Date().toISOString(),
+            cacheVersion: "v2.0-FIXED", // Cache buster
+            debugInfo: {
+              hasColorTokens: !!(tokens.colors || tokens.color),
+              colorTokenCount: tokens.colors ? Object.keys(tokens.colors).length : (tokens.color ? Object.keys(tokens.color).length : 0),
+              totalTokenTypes: Object.keys(tokens).length,
+              rawTokenKeys: Object.keys(rawTokens).join(', '),
+              rawColorTokens: rawTokens.color ? Object.keys(rawTokens.color).length : 0,
+              validatedColorTokens: tokens.color ? Object.keys(tokens.color).length : 0
+            }
           }, null, 2)
         }],
         isError: false

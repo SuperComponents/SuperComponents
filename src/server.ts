@@ -14,7 +14,7 @@ initializeLogger({ logLevel: 'info', nodeEnv: 'production' });
 /**
  * Create and configure the MCP server
  */
-function createServer(): Server {
+async function createServer(): Promise<Server> {
   const server = new Server(
     {
       name: "supercomponents-server",
@@ -27,20 +27,31 @@ function createServer(): Server {
     }
   );
 
-  // Lazy load tool implementations to ensure logger is initialized first
+  // Initialize development mode for automatic cache busting
+  const { initializeDevMode, smartRequire, getDevModeStats } = await import('./utils/devMode.js');
+  await initializeDevMode();
+
+  // Lazy load tool implementations with smart caching in dev mode
   const loadTools = async () => {
-    const { parseDesignAndGenerateTokensTool } = await import('./tools/parseDesignAndGenerateTokens.js');
-    const { initializeProjectTool } = await import('./tools/initializeProject.js');
-    const { createTokenStoriesTool } = await import('./tools/createTokenStories.js');
-    const { analyzeComponentsTool } = await import('./tools/analyzeComponents.js');
-    const { generateInstructionTool } = await import('./tools/generateInstruction.js');
+    // Use smartRequire in development mode for automatic cache invalidation
+    const { parseDesignAndGenerateTokensTool } = await smartRequire('./tools/parseDesignAndGenerateTokens.ts');
+    const { initializeProjectTool } = await smartRequire('./tools/initializeProject.ts');
+    const { createTokenStoriesTool } = await smartRequire('./tools/createTokenStories.ts');
+    const { createTokenStoriesFixedTool } = await smartRequire('./tools/createTokenStoriesFixed.ts');
+    const { analyzeComponentsTool } = await smartRequire('./tools/analyzeComponents.ts');
+    const { generateInstructionTool } = await smartRequire('./tools/generateInstruction.ts');
+    const { testTool } = await smartRequire('./tools/testTool.ts');
+    const { devCacheManagerTool } = await smartRequire('./tools/devCacheManager.ts');
     
     return {
       parseDesignAndGenerateTokensTool,
       initializeProjectTool,
       createTokenStoriesTool,
+      createTokenStoriesFixedTool,
       analyzeComponentsTool,
       generateInstructionTool,
+      testTool,
+      devCacheManagerTool,
     };
   };
 
@@ -103,6 +114,11 @@ function createServer(): Server {
           inputSchema: tools.createTokenStoriesTool.definition.inputSchema,
         },
         {
+          name: tools.createTokenStoriesFixedTool.definition.name,
+          description: tools.createTokenStoriesFixedTool.definition.description,
+          inputSchema: tools.createTokenStoriesFixedTool.definition.inputSchema,
+        },
+        {
           name: tools.analyzeComponentsTool.definition.name,
           description: tools.analyzeComponentsTool.definition.description,
           inputSchema: tools.analyzeComponentsTool.definition.inputSchema,
@@ -111,6 +127,16 @@ function createServer(): Server {
           name: tools.generateInstructionTool.definition.name,
           description: tools.generateInstructionTool.definition.description,
           inputSchema: tools.generateInstructionTool.definition.inputSchema,
+        },
+        {
+          name: tools.testTool.definition.name,
+          description: tools.testTool.definition.description,
+          inputSchema: tools.testTool.definition.inputSchema,
+        },
+        {
+          name: tools.devCacheManagerTool.definition.name,
+          description: tools.devCacheManagerTool.definition.description,
+          inputSchema: tools.devCacheManagerTool.definition.inputSchema,
         },
       ],
     };
@@ -121,9 +147,11 @@ function createServer(): Server {
     const tools = await loadTools();
 
     try {
-      // Add debugging for parameter passing
-      console.log(`[MCP] Tool called: ${name}`);
-      console.log(`[MCP] Raw arguments:`, JSON.stringify(args, null, 2));
+      // Add debugging for parameter passing (only in dev mode)
+      if (process.env.NODE_ENV === 'development') {
+        process.stderr.write(`[MCP] Tool called: ${name}\n`);
+        process.stderr.write(`[MCP] Raw arguments: ${JSON.stringify(args, null, 2)}\n`);
+      }
       
       let result;
       
@@ -149,6 +177,10 @@ function createServer(): Server {
           result = await tools.createTokenStoriesTool.handler(args);
           break;
         
+        case tools.createTokenStoriesFixedTool.definition.name:
+          result = await tools.createTokenStoriesFixedTool.handler(args);
+          break;
+        
         case tools.analyzeComponentsTool.definition.name:
           result = await tools.analyzeComponentsTool.handler(args);
           break;
@@ -157,11 +189,21 @@ function createServer(): Server {
           result = await tools.generateInstructionTool.handler(args);
           break;
         
+        case tools.testTool.definition.name:
+          result = await tools.testTool.handler(args);
+          break;
+        
+        case tools.devCacheManagerTool.definition.name:
+          result = await tools.devCacheManagerTool.handler(args);
+          break;
+        
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
 
-      console.log(`[MCP] Tool result:`, result);
+      if (process.env.NODE_ENV === 'development') {
+        process.stderr.write(`[MCP] Tool result: ${JSON.stringify(result, null, 2)}\n`);
+      }
 
       return {
         content: [
@@ -172,7 +214,9 @@ function createServer(): Server {
         ],
       };
     } catch (error) {
-      console.error(`[MCP] Error in tool ${name}:`, error);
+      if (process.env.NODE_ENV === 'development') {
+        process.stderr.write(`[MCP] Error in tool ${name}: ${error instanceof Error ? error.message : String(error)}\n`);
+      }
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         content: [
@@ -193,16 +237,20 @@ function createServer(): Server {
  * Main function to start the server
  */
 async function main() {
-  const server = createServer();
+  const server = await createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("SuperComponents MCP server running on stdio");
+  
+  // Only log startup message in development mode to avoid polluting MCP stdio
+  if (process.env.NODE_ENV === 'development') {
+    process.stderr.write("SuperComponents MCP server running on stdio\n");
+  }
 }
 
 // Run the server
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    console.error("Server error:", error);
+    process.stderr.write(`Server error: ${error instanceof Error ? error.message : String(error)}\n`);
     process.exit(1);
   });
 }
