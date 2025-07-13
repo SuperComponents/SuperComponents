@@ -120,6 +120,14 @@ Provide SuperComponents-specific context:
 The following components are available in the library:
 {availableComponents}
 
+## Available Icon Libraries
+**@icons-pack/react-simple-icons**: 3300+ brand icons as React components (Apple, Google, GitHub, etc.)
+- Import: \`import { SiApple, SiGoogle, SiGithub } from '@icons-pack/react-simple-icons'\`
+- Usage: \`<SiApple size={24} color="#000000" />\`
+- Brand colors: \`<SiGoogle color="default" size={24} />\` (uses official brand color)
+- Hex constants: \`<SiApple color={SiAppleHex} size={24} />\` (using hex constant)
+- Theming: \`<SiGithub size={20} color="currentColor" />\` (inherits text color)
+
 ## SuperComponents Structure
 \`\`\`
 .supercomponents/
@@ -147,6 +155,30 @@ The following components are available in the library:
 - \`className="bg-primary-500"\` (doesn't exist)
 - \`className="text-gray-900"\` (use semantic variables instead)
 - \`className="bg-orange-600"\` (use design system variables)
+
+## Icon Usage Examples
+✅ **Social login with brand icons**:
+\`\`\`tsx
+import { SiGoogle, SiApple, SiGithub } from '@icons-pack/react-simple-icons';
+
+// Simple usage with brand colors
+<Button variant="outline" className="w-full">
+  <SiGoogle size={20} color="default" className="mr-2" />
+  Continue with Google
+</Button>
+
+// Using theme colors
+<Button variant="outline" className="w-full">
+  <SiApple size={20} color="currentColor" className="mr-2" />
+  Continue with Apple
+</Button>
+
+// Custom colors
+<Button variant="outline" className="w-full">
+  <SiGithub size={20} color="#333" className="mr-2" />
+  Continue with GitHub
+</Button>
+\`\`\`
 
 ## Output Format
 Return ONLY a raw JSON object with implementation instructions (no markdown formatting, no backticks).

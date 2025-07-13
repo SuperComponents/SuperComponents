@@ -10,7 +10,7 @@
 // src/tools/initializeProject.ts
 import { z } from "zod";
 import { execSync } from "child_process";
-import { mkdirSync, existsSync } from "fs";
+import { mkdirSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { Tool } from "../types.js";
 import { zodToJsonSchema } from "../utils/validation.js";
@@ -51,6 +51,45 @@ function parseInput(args: any) {
     input = args;
   }
   return inputSchema.parse(input);
+}
+
+/**
+ * Add essential dependencies to the scaffolded package.json
+ */
+function enhancePackageJson(supercomponentsPath: string): string[] {
+  const packageJsonPath = join(supercomponentsPath, 'package.json');
+  const results: string[] = [];
+  
+  try {
+    if (!existsSync(packageJsonPath)) {
+      throw new Error('package.json not found in scaffolding');
+    }
+    
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    
+    // Add essential dependencies for SuperComponents
+    const enhancedDependencies = {
+      '@icons-pack/react-simple-icons': '^10.0.0',  // React components for 3300+ brand icons
+      // Add other common dependencies here as the project evolves
+    };
+    
+    // Merge new dependencies
+    packageJson.dependencies = {
+      ...packageJson.dependencies,
+      ...enhancedDependencies
+    };
+    
+    // Write the enhanced package.json
+    writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    
+    results.push("✅ Enhanced package.json with essential dependencies");
+    results.push(`📦 Added: ${Object.keys(enhancedDependencies).join(', ')}`);
+    
+    return results;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to enhance package.json: ${errorMessage}`);
+  }
 }
 
 /**
@@ -179,6 +218,10 @@ export const initializeProjectTool: Tool = {
       try {
         fetchScaffold(supercomponentsPath);
         results.push("✅ SuperComponents scaffolding fetched successfully");
+        
+        // Enhance package.json with essential dependencies
+        const enhancementResults = enhancePackageJson(supercomponentsPath);
+        results.push(...enhancementResults);
         
         // Run the supercomponents-setup script first
         execSync('npm run supercomponents-setup', { 
