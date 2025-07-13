@@ -180,6 +180,7 @@ export const initializeProjectTool: Tool = {
         fetchScaffold(supercomponentsPath);
         results.push("✅ SuperComponents scaffolding fetched successfully");
         
+        // Run the supercomponents-setup script first
         execSync('npm run supercomponents-setup', { 
           cwd: supercomponentsPath, 
           stdio: 'inherit',
@@ -188,6 +189,16 @@ export const initializeProjectTool: Tool = {
         });
         
         results.push("✅ SuperComponents setup completed successfully");
+        
+        // Then run npm install to install all dependencies
+        // Use --legacy-peer-deps to handle React version compatibility issues
+        execSync('npm install --legacy-peer-deps', { 
+          cwd: supercomponentsPath, 
+          stdio: 'inherit',
+          env: { ...process.env, NODE_ENV: 'development' }
+        });
+        
+        results.push("✅ Dependencies installed successfully");
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

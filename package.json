@@ -27,8 +27,8 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run clean && npm run build",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "cd .supercomponents && storybook dev -p 6006",
+    "build-storybook": "cd .supercomponents && storybook build"
   },
   "keywords": [
     "mcp",

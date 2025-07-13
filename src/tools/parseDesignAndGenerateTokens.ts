@@ -402,83 +402,249 @@ function generateTailwindConfig(tokens: TokenStructure): string {
 module.exports = ${JSON.stringify(config, null, 2)};`;
 }
 
-// Generate CSS variables
+// Generate CSS variables in shadcn/ui format
 function generateCSSVariables(tokens: TokenStructure): string {
   let css = `:root {\n`;
   
-  // Add spacing variables
-  if (tokens.spacing) {
-    Object.entries(tokens.spacing).forEach(([key, value]) => {
-      css += `  --spacing-${key}: ${value}px;\n`;
-    });
-  }
-  
-  // Add color variables
+  // Add core shadcn/ui color variables
   if (tokens.colors) {
+    // Map core colors to shadcn/ui naming convention
+    const colorMapping: Record<string, string> = {
+      // Core semantic colors
+      'surface': '--background',
+      'surfaceAlt': '--card', 
+      'textPrimary': '--foreground',
+      'textInverse': '--card-foreground',
+      'brand': '--primary',
+      'brandAccent': '--primary-foreground',
+      'textSecondary': '--secondary',
+      'muted': '--muted',
+      'danger': '--destructive',
+      'white': '--popover',
+      
+      // Fallback mappings for common names
+      'background': '--background',
+      'primary': '--primary',
+      'secondary': '--secondary',
+      'accent': '--accent',
+      'destructive': '--destructive',
+      'border': '--border',
+      'input': '--input',
+      'ring': '--ring'
+    };
+    
+    // Generate base color variables
     Object.entries(tokens.colors).forEach(([key, value]) => {
       if (typeof value === "string") {
-        css += `  --color-${key}: ${value};\n`;
-      } else if (typeof value === "object" && value !== null) {
-        Object.entries(value).forEach(([subKey, subValue]) => {
-          css += `  --color-${key}-${subKey}: ${subValue};\n`;
-        });
+        const cssVarName = colorMapping[key] || `--${key}`;
+        
+        // Convert hex colors to HSL format for shadcn/ui compatibility
+        const hslValue = hexToHsl(value);
+        css += `  ${cssVarName}: ${hslValue};\n`;
+        
+        // Add foreground variants for key colors
+        if (['primary', 'secondary', 'accent', 'muted', 'destructive'].includes(key)) {
+          const foregroundColor = getContrastColor(value);
+          const foregroundHsl = hexToHsl(foregroundColor);
+          css += `  ${cssVarName}-foreground: ${foregroundHsl};\n`;
+        }
+      }
+    });
+    
+    // Add standard shadcn/ui variables if not present
+    const standardVars = [
+      { name: '--background', fallback: 'hsl(0 0% 100%)' },
+      { name: '--foreground', fallback: 'hsl(240 10% 3.9%)' },
+      { name: '--card', fallback: 'hsl(0 0% 100%)' },
+      { name: '--card-foreground', fallback: 'hsl(240 10% 3.9%)' },
+      { name: '--popover', fallback: 'hsl(0 0% 100%)' },
+      { name: '--popover-foreground', fallback: 'hsl(240 10% 3.9%)' },
+      { name: '--primary', fallback: 'hsl(240 5.9% 10%)' },
+      { name: '--primary-foreground', fallback: 'hsl(0 0% 98%)' },
+      { name: '--secondary', fallback: 'hsl(240 4.8% 95.9%)' },
+      { name: '--secondary-foreground', fallback: 'hsl(240 5.9% 10%)' },
+      { name: '--muted', fallback: 'hsl(240 4.8% 95.9%)' },
+      { name: '--muted-foreground', fallback: 'hsl(240 3.8% 46.1%)' },
+      { name: '--accent', fallback: 'hsl(240 4.8% 95.9%)' },
+      { name: '--accent-foreground', fallback: 'hsl(240 5.9% 10%)' },
+      { name: '--destructive', fallback: 'hsl(0 84.2% 60.2%)' },
+      { name: '--destructive-foreground', fallback: 'hsl(0 0% 98%)' },
+      { name: '--border', fallback: 'hsl(240 5.9% 90%)' },
+      { name: '--input', fallback: 'hsl(240 5.9% 90%)' },
+      { name: '--ring', fallback: 'hsl(240 5.9% 10%)' }
+    ];
+    
+    standardVars.forEach(({ name, fallback }) => {
+      if (!css.includes(name + ':')) {
+        css += `  ${name}: ${fallback};\n`;
       }
     });
   }
   
-  // Add other variables
+  // Add standard variables that should always be present
+  const alwaysInclude = [
+    '--chart-1: hsl(12 76% 61%);',
+    '--chart-2: hsl(173 58% 39%);', 
+    '--chart-3: hsl(197 37% 24%);',
+    '--chart-4: hsl(43 74% 66%);',
+    '--chart-5: hsl(27 87% 67%);',
+    '--sidebar: hsl(0 0% 98%);',
+    '--sidebar-foreground: hsl(240 5.3% 26.1%);',
+    '--sidebar-primary: hsl(240 5.9% 10%);',
+    '--sidebar-primary-foreground: hsl(0 0% 98%);',
+    '--sidebar-accent: hsl(240 4.8% 95.9%);',
+    '--sidebar-accent-foreground: hsl(240 5.9% 10%);',
+    '--sidebar-border: hsl(220 13% 91%);',
+    '--sidebar-ring: hsl(217.2 91.2% 59.8%);'
+  ];
+  
+  alwaysInclude.forEach(varDef => {
+    css += `  ${varDef}\n`;
+  });
+  
+  // Add border radius (shadcn/ui uses --radius as base)
   if (tokens.radius) {
-    Object.entries(tokens.radius).forEach(([key, value]) => {
-      css += `  --radius-${key}: ${value === 9999 ? "9999px" : `${value}px`};\n`;
-    });
-  }
-  
-  if (tokens.typography) {
-    if (tokens.typography.sizes) {
-      Object.entries(tokens.typography.sizes).forEach(([key, value]) => {
-        css += `  --font-size-${key}: ${value}px;\n`;
-      });
-    }
-    
-    if (tokens.typography.weights) {
-      Object.entries(tokens.typography.weights).forEach(([key, value]) => {
-        css += `  --font-weight-${key}: ${value};\n`;
-      });
-    }
-    
-    if (tokens.typography.lineHeights) {
-      Object.entries(tokens.typography.lineHeights).forEach(([key, value]) => {
-        css += `  --line-height-${key}: ${value}px;\n`;
-      });
-    }
-  }
-  
-  if (tokens.opacity) {
-    Object.entries(tokens.opacity).forEach(([key, value]) => {
-      css += `  --opacity-${key}: ${value};\n`;
-    });
-  }
-  
-  if (tokens.durations) {
-    Object.entries(tokens.durations).forEach(([key, value]) => {
-      css += `  --duration-${key}: ${value}ms;\n`;
-    });
-  }
-  
-  if (tokens.zIndex) {
-    Object.entries(tokens.zIndex).forEach(([key, value]) => {
-      css += `  --z-index-${key}: ${value};\n`;
-    });
-  }
-  
-  if (tokens.easing) {
-    Object.entries(tokens.easing).forEach(([key, value]) => {
-      css += `  --easing-${key}: ${value};\n`;
-    });
+    const radiusBase = tokens.radius.md || tokens.radius.default || 6;
+    css += `  --radius: ${radiusBase}px;\n`;
+  } else {
+    css += `  --radius: 0.5rem;\n`;
   }
   
   css += `}\n`;
+  
   return css;
+}
+
+// Generate dark mode CSS variables
+function generateDarkModeCSS(): string {
+  let css = `\n.dark {\n`;
+  css += `  --background: hsl(240 10% 3.9%);\n`;
+  css += `  --foreground: hsl(0 0% 98%);\n`;
+  css += `  --card: hsl(240 10% 3.9%);\n`;
+  css += `  --card-foreground: hsl(0 0% 98%);\n`;
+  css += `  --popover: hsl(240 10% 3.9%);\n`;
+  css += `  --popover-foreground: hsl(0 0% 98%);\n`;
+  css += `  --primary: hsl(0 0% 98%);\n`;
+  css += `  --primary-foreground: hsl(240 5.9% 10%);\n`;
+  css += `  --secondary: hsl(240 3.7% 15.9%);\n`;
+  css += `  --secondary-foreground: hsl(0 0% 98%);\n`;
+  css += `  --muted: hsl(240 3.7% 15.9%);\n`;
+  css += `  --muted-foreground: hsl(240 5% 64.9%);\n`;
+  css += `  --accent: hsl(240 3.7% 15.9%);\n`;
+  css += `  --accent-foreground: hsl(0 0% 98%);\n`;
+  css += `  --destructive: hsl(0 62.8% 30.6%);\n`;
+  css += `  --destructive-foreground: hsl(0 0% 98%);\n`;
+  css += `  --border: hsl(240 3.7% 15.9%);\n`;
+  css += `  --input: hsl(240 3.7% 15.9%);\n`;
+  css += `  --ring: hsl(240 4.9% 83.9%);\n`;
+  css += `  --chart-1: hsl(220 70% 50%);\n`;
+  css += `  --chart-2: hsl(160 60% 45%);\n`;
+  css += `  --chart-3: hsl(30 80% 55%);\n`;
+  css += `  --chart-4: hsl(280 65% 60%);\n`;
+  css += `  --chart-5: hsl(340 75% 55%);\n`;
+  css += `  --sidebar: hsl(240 5.9% 10%);\n`;
+  css += `  --sidebar-foreground: hsl(240 4.8% 95.9%);\n`;
+  css += `  --sidebar-primary: hsl(224.3 76.3% 48%);\n`;
+  css += `  --sidebar-primary-foreground: hsl(0 0% 100%);\n`;
+  css += `  --sidebar-accent: hsl(240 3.7% 15.9%);\n`;
+  css += `  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);\n`;
+  css += `  --sidebar-border: hsl(240 3.7% 15.9%);\n`;
+  css += `  --sidebar-ring: hsl(217.2 91.2% 59.8%);\n`;
+  css += `}\n`;
+  
+  return css;
+}
+
+// Update existing index.css file with new tokens
+function updateIndexCSS(tokens: TokenStructure, indexCssPath: string): void {
+  let content = '';
+  
+  // Check if index.css exists
+  if (existsSync(indexCssPath)) {
+    content = readFileSync(indexCssPath, 'utf-8');
+  } else {
+    // Create basic structure if file doesn't exist
+    content = '@import "tailwindcss";\n@import "tw-animate-css";\n\n@custom-variant dark (&:is(.dark *));\n\n';
+  }
+  
+  // Generate new CSS variables
+  const newRootCSS = generateCSSVariables(tokens);
+  const newDarkCSS = generateDarkModeCSS();
+  
+  // Replace existing :root section
+  content = content.replace(
+    /:root\s*\{[^}]*\}/s,
+    newRootCSS.trim()
+  );
+  
+  // Replace existing .dark section
+  content = content.replace(
+    /\.dark\s*\{[^}]*\}/s,
+    newDarkCSS.trim()
+  );
+  
+  // If :root section wasn't found, add it after the imports
+  if (!content.includes(':root')) {
+    const importRegex = /(@import[^;]*;[\s\S]*?)(\n\n|$)/;
+    if (importRegex.test(content)) {
+      content = content.replace(importRegex, `$1\n\n${newRootCSS}\n${newDarkCSS}\n`);
+    } else {
+      content = `${newRootCSS}\n${newDarkCSS}\n${content}`;
+    }
+  }
+  
+  // Write updated content back
+  writeFileSync(indexCssPath, content);
+}
+
+// Helper function to convert hex to HSL
+function hexToHsl(hex: string): string {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Convert to RGB
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+  
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+  
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  
+  h = Math.round(h * 360);
+  s = Math.round(s * 100);
+  l = Math.round(l * 100);
+  
+  return `hsl(${h} ${s}% ${l}%)`;
+}
+
+// Helper function to get contrasting color
+function getContrastColor(hex: string): string {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Convert to RGB
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Return white for dark colors, black for light colors
+  return luminance > 0.5 ? '#000000' : '#ffffff';
 }
 
 export const parseDesignAndGenerateTokensTool: Tool = {
@@ -596,12 +762,11 @@ export const parseDesignAndGenerateTokensTool: Tool = {
         outputFiles.push(tailwindPath);
       }
       
-      // Generate and write CSS variables
+      // Update the main index.css file with new tokens instead of creating separate file
       if (includeCSS) {
-        const cssVariables = generateCSSVariables(analysisResult.tokens);
-        const cssPath = join(outputDir, "tokens.css");
-        writeFileSync(cssPath, cssVariables);
-        outputFiles.push(cssPath);
+        const indexCssPath = join(outputDir, "src/index.css");
+        updateIndexCSS(analysisResult.tokens, indexCssPath);
+        outputFiles.push(indexCssPath);
       }
       
       return {
@@ -609,7 +774,7 @@ export const parseDesignAndGenerateTokensTool: Tool = {
         design: validatedDesign,
         tokens: analysisResult.tokens,
         files: outputFiles,
-        message: `✅ Generated design system with ${designTokens.length} tokens and ${outputFiles.length} files:\n${outputFiles.map(f => `  - ${f}`).join('\n')}\n\n💡 Next steps:\n  - Run 'initializeProject' if you haven't already\n  - Use 'createTokenStories' to generate Storybook stories\n  - Use 'analyzeComponents' to analyze existing components`
+        message: `✅ Generated design system with ${designTokens.length} tokens and updated ${outputFiles.length} files:\n${outputFiles.map(f => `  - ${f}`).join('\n')}\n\n💡 Your Storybook should now display the color and shadow tokens correctly!\n\n🔄 Next steps:\n  - Restart Storybook to see the updated design tokens\n  - Use 'createTokenStories' to generate additional token stories\n  - Use 'analyzeComponents' to analyze existing components`
       };
       
     } catch (error) {
@@ -618,7 +783,7 @@ export const parseDesignAndGenerateTokensTool: Tool = {
       return {
         success: false,
         error: errorMessage,
-        message: `❌ Failed to parse design and generate tokens: ${errorMessage}\n\n🔧 Troubleshooting:\n  - Ensure you provide a design description or file path\n  - Check that the input is a valid text description or readable file\n  - Try running 'initializeProject' first to set up the project structure\n  - Example: "Create a modern dashboard with blue primary colors and card-based layout"`
+        message: `❌ Failed to parse design and generate tokens: ${errorMessage}\n\n🔧 Troubleshooting:\n  - Ensure you provide a design description or file path\n  - Check that the input is a valid text description or readable file\n  - Try running 'initializeProject' first to set up the project structure\n  - Example: "Create a modern dashboard with blue primary colors"`
       };
     }
   }
