@@ -22,7 +22,7 @@ const RadiusTile = ({ value }: Pick<Radius, "value">) => {
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        className="bg-card size-20 border-2"
+        className="bg-card size-50 border-2"
         style={{ borderRadius: radius }}
       />
       <p className="text-center text-xs opacity-70">{value}</p>
