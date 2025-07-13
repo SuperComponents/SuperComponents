@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { expect, userEvent, within } from 'storybook/test';
 
-import { Page } from './Page';
+import { Page } from '../../../src/components/library/Page';
 
 const meta = {
-  title: 'Example/Page',
+  title: '02-library/Page',
   component: Page,
   parameters: {
     // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout

@@ -1,11 +1,80 @@
-# React + TypeScript + Vite
+# Supercomponents Template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This template provides a complete design system workspace with React, TypeScript, Vite, Storybook, and shadcn/ui components.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** with **TypeScript** - Latest React with full type safety
+- **Vite 7.0** - Fast build tool and dev server with HMR
+- **Tailwind CSS 4.1** - Utility-first CSS framework with Vite integration
+- **Storybook 9.0** - Component development and documentation
+- **shadcn/ui** - Pre-configured beautiful components
+- **Accessibility Testing** - Built-in a11y testing with Storybook addon
+- **Vitest** - Testing framework with browser testing support
+
+## Directory Structure
+
+```
+.supercomponents/          # Design System Workspace
+├── tokens/                # Auto-generated design tokens
+├── components/  
+│   ├── library/          # 📚 Complete shadcn component library
+│   ├── generated/        # 🤖 AI-generated components (pending review)
+│   ├── approved/         # ✅ User-approved components
+│   └── rejected/         # ❌ Rejected components with reasons
+└── .storybook/stories/
+    ├── 01-tokens/        # Design token stories
+    ├── 02-library/       # Library component stories
+    ├── 03-review/        # Review pending components
+    ├── 04-approved/      # Approved component stories
+    └── 05-production/    # Production component stories
+```
+
+## Getting Started
+
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Start development server**:
+   ```bash
+   npm run dev
+   ```
+
+3. **Start Storybook**:
+   ```bash
+   npm run storybook
+   ```
+
+4. **Build for production**:
+   ```bash
+   npm run build
+   ```
+
+## Scripts
+
+- `npm run dev` - Start Vite development server
+- `npm run build` - Build for production
+- `npm run storybook` - Start Storybook development server
+- `npm run build-storybook` - Build Storybook for production
+- `npm run lint` - Run ESLint
+- `npm run supercomponents-setup` - Run setup script (used by MCP server)
+
+## Tailwind CSS v4 Configuration
+
+This template uses **Tailwind CSS v4** with CSS-first configuration:
+
+- **No `tailwind.config.js`** - Configuration is done directly in CSS
+- **`@theme` directive** - Theme customization using CSS variables
+- **`@import "tailwindcss"`** - Single import replaces multiple `@tailwind` directives
+- **shadcn/ui compatibility** - Pre-configured for shadcn/ui components
+
+### Key Changes from v3:
+- CSS variables wrapped in `hsl()` function
+- `@theme` directive for theme configuration
+- `--color-` prefix for color variables in theme
+- Built-in dark mode support
 
 ## Expanding the ESLint configuration
 
