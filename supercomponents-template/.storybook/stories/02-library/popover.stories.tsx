@@ -11,7 +11,7 @@ import { expect, userEvent, within } from "storybook/test";
  * Displays rich content in a portal, triggered by a button.
  */
 const meta = {
-  title: "ui/Popover",
+  title: "shadcn library/Popover",
   component: Popover,
   tags: ["autodocs"],
   argTypes: {},

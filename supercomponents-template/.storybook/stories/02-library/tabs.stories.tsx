@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/library/t
  * one at a time.
  */
 const meta = {
-  title: "ui/Tabs",
+  title: "shadcn library/Tabs",
   component: Tabs,
   tags: ["autodocs"],
   argTypes: {},

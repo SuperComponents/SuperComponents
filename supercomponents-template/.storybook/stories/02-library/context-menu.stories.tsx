@@ -22,7 +22,7 @@ import { expect, userEvent, within } from "storybook/test";
  * triggered by a button.
  */
 const meta = {
-  title: "ui/ContextMenu",
+  title: "shadcn library/ContextMenu",
   component: ContextMenu,
   tags: ["autodocs"],
   argTypes: {},

@@ -10,7 +10,7 @@ import { Label } from "@/components/library/label";
  * Displays a form input field or a component that looks like an input field.
  */
 const meta = {
-  title: "ui/Input",
+  title: "shadcn library/Input",
   component: Input,
   tags: ["autodocs"],
   argTypes: {},

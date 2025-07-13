@@ -40,7 +40,7 @@ const SpacingRow = ({ value, name }: Spacing) => {
 const meta: Meta<{
   scale: Spacing[];
 }> = {
-  title: "design/Spacing",
+  title: "design tokens/Spacing",
   tags: ["autodocs"],
   argTypes: {},
   render: (args) => (

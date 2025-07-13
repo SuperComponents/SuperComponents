@@ -14,7 +14,7 @@ import {
  * A carousel with motion and swipe built using Embla.
  */
 const meta: Meta<typeof Carousel> = {
-  title: "ui/Carousel",
+  title: "shadcn library/Carousel",
   component: Carousel,
   tags: ["autodocs"],
   argTypes: {},

@@ -14,7 +14,7 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
  * receives keyboard focus or the mouse hovers over it.
  */
 const meta: Meta<typeof TooltipContent> = {
-  title: "ui/Tooltip",
+  title: "shadcn library/Tooltip",
   component: TooltipContent,
   tags: ["autodocs"],
   argTypes: {

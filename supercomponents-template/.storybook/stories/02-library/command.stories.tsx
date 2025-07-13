@@ -15,7 +15,7 @@ import { expect, userEvent, within } from "storybook/test";
  * Fast, composable, unstyled command menu for React.
  */
 const meta = {
-  title: "ui/Command",
+  title: "shadcn library/Command",
   component: Command,
   tags: ["autodocs"],
   argTypes: {},

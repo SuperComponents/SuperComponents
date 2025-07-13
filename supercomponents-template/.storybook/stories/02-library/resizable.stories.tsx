@@ -10,7 +10,7 @@ import { fn } from "storybook/test";
  * Accessible resizable panel groups and layouts with keyboard support.
  */
 const meta: Meta<typeof ResizablePanelGroup> = {
-  title: "ui/ResizablePanelGroup",
+  title: "shadcn library/ResizablePanelGroup",
   component: ResizablePanelGroup,
   tags: ["autodocs"],
   argTypes: {

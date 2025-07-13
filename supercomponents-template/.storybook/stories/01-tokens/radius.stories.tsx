@@ -37,7 +37,7 @@ const RadiusTile = ({ value }: Pick<Radius, "value">) => {
 const meta: Meta<{
   radius: Radius[];
 }> = {
-  title: "design/Radius",
+  title: "design tokens/Radius",
   tags: ["autodocs"],
   argTypes: {},
   render: (args) => (

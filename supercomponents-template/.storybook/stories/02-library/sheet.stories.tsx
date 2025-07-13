@@ -17,7 +17,7 @@ import { expect, userEvent, within } from "storybook/test";
  * content of the screen.
  */
 const meta: Meta<typeof SheetContent> = {
-  title: "ui/Sheet",
+  title: "shadcn library/Sheet",
   component: Sheet,
   tags: ["autodocs"],
   argTypes: {

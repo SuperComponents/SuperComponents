@@ -6,7 +6,7 @@ import { Badge } from "@/components/library/badge";
  * Displays a badge or a component that looks like a badge.
  */
 const meta = {
-  title: "ui/Badge",
+  title: "shadcn library/Badge",
   component: Badge,
   tags: ["autodocs"],
   argTypes: {

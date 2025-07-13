@@ -7,7 +7,7 @@ import { AspectRatio } from "@/components/library/aspect-ratio";
  * Displays content within a desired ratio.
  */
 const meta: Meta<typeof AspectRatio> = {
-  title: "ui/AspectRatio",
+  title: "shadcn library/AspectRatio",
   component: AspectRatio,
   tags: ["autodocs"],
   argTypes: {},

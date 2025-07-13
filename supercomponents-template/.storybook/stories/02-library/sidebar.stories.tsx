@@ -36,7 +36,7 @@ import {
  * A composable, themeable and customizable sidebar component.
  */
 const meta = {
-  title: "ui/Sidebar",
+  title: "shadcn library/Sidebar",
   component: Sidebar,
   tags: ["autodocs"],
   argTypes: {

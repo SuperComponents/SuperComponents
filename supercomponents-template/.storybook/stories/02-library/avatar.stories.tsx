@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/library/avatar
  * An image element with a fallback for representing the user.
  */
 const meta = {
-  title: "ui/Avatar",
+  title: "shadcn library/Avatar",
   component: Avatar,
   tags: ["autodocs"],
   argTypes: {},

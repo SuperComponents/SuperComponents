@@ -7,7 +7,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/library/toggle-group"
  * A set of two-state buttons that can be toggled on or off.
  */
 const meta = {
-  title: "ui/ToggleGroup",
+  title: "shadcn library/ToggleGroup",
   component: ToggleGroup,
   tags: ["autodocs"],
   argTypes: {

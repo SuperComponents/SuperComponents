@@ -7,7 +7,7 @@ import { Button } from "@/components/library/button";
  * Displays a button or a component that looks like a button.
  */
 const meta = {
-  title: "ui/Button",
+  title: "shadcn library/Button",
   component: Button,
   tags: ["autodocs"],
   argTypes: {

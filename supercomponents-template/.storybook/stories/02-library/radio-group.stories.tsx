@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/library/radio-group";
  * the buttons can be checked at a time.
  */
 const meta = {
-  title: "ui/RadioGroup",
+  title: "shadcn library/RadioGroup",
   component: RadioGroup,
   tags: ["autodocs"],
   argTypes: {},

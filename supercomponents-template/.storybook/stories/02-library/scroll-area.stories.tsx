@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/library/scroll-area";
  * Augments native scroll functionality for custom, cross-browser styling.
  */
 const meta = {
-  title: "ui/ScrollArea",
+  title: "shadcn library/ScrollArea",
   component: ScrollArea,
   tags: ["autodocs"],
   argTypes: {

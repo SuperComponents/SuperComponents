@@ -13,7 +13,7 @@ import {
  * of content.
  */
 const meta = {
-  title: "ui/Accordion",
+  title: "shadcn library/Accordion",
   component: Accordion,
   tags: ["autodocs"],
   argTypes: {

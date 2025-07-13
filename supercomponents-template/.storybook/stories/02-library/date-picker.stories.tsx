@@ -20,7 +20,7 @@ import { action } from "storybook/actions";
  * rendering the content underneath inert.
  */
 const meta = {
-  title: "ui/DatePicker",
+  title: "shadcn library/DatePicker",
   component: Calendar,
   tags: ["autodocs"],
   argTypes: {},

@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/library/alert"
  * Displays a callout for user attention.
  */
 const meta = {
-  title: "ui/Alert",
+  title: "shadcn library/Alert",
   component: Alert,
   tags: ["autodocs"],
   argTypes: {

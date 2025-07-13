@@ -10,7 +10,7 @@ import { expect, userEvent } from "storybook/test";
  * A date field component that allows users to enter and edit date.
  */
 const meta = {
-  title: "ui/Calendar",
+  title: "shadcn library/Calendar",
   component: Calendar,
   tags: ["autodocs"],
   argTypes: {},

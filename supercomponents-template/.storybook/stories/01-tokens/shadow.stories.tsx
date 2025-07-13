@@ -37,7 +37,7 @@ const ShadowTile = ({ value }: Pick<Shadow, "value">) => {
 const meta: Meta<{
   shadow: Shadow[];
 }> = {
-  title: "design/Shadow",
+  title: "design tokens/Shadow",
   tags: ["autodocs"],
   argTypes: {},
   render: (args) => (

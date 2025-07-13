@@ -24,7 +24,7 @@ import { expect, userEvent, within } from "storybook/test";
  * quick access to a consistent set of commands.
  */
 const meta = {
-  title: "ui/Menubar",
+  title: "shadcn library/Menubar",
   component: Menubar,
   tags: ["autodocs"],
   argTypes: {},

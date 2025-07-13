@@ -9,7 +9,7 @@ import { Switch } from "@/components/library/switch";
  * A control that allows the user to toggle between checked and not checked.
  */
 const meta = {
-  title: "ui/Switch",
+  title: "shadcn library/Switch",
   component: Switch,
   tags: ["autodocs"],
   argTypes: {},

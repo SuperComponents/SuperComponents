@@ -18,7 +18,7 @@ import { userEvent, within } from "storybook/test";
  * a response.
  */
 const meta = {
-  title: "ui/AlertDialog",
+  title: "shadcn library/AlertDialog",
   component: AlertDialog,
   tags: ["autodocs"],
   argTypes: {},

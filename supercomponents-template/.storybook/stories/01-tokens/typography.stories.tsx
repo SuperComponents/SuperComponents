@@ -54,7 +54,7 @@ const meta: Meta<{
   key: keyof CSSProperties;
   property: Typography[];
 }> = {
-  title: "design/Typography",
+  title: "design tokens/Typography",
   tags: ["autodocs"],
   argTypes: {},
   args: {

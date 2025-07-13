@@ -7,7 +7,7 @@ import { Progress } from "@/components/library/progress";
  * displayed as a progress bar.
  */
 const meta = {
-  title: "ui/Progress",
+  title: "shadcn library/Progress",
   component: Progress,
   tags: ["autodocs"],
   argTypes: {},

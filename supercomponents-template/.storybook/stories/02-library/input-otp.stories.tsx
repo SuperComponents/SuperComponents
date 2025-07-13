@@ -14,7 +14,7 @@ import {
  * Accessible one-time password component with copy paste functionality.
  */
 const meta = {
-  title: "ui/InputOTP",
+  title: "shadcn library/InputOTP",
   component: InputOTP,
   tags: ["autodocs"],
   argTypes: {},

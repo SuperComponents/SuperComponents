@@ -6,7 +6,7 @@ import { Separator } from "@/components/library/separator";
  * Visually or semantically separates content.
  */
 const meta = {
-  title: "ui/Separator",
+  title: "shadcn library/Separator",
   component: Separator,
   tags: ["autodocs"],
   argTypes: {},

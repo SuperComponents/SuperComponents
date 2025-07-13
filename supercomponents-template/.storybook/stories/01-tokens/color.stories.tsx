@@ -44,7 +44,7 @@ const SwatchList = ({ colors }: { colors: Record<string, string> }) => {
 const meta: Meta<{
   swatch: Swatch[];
 }> = {
-  title: "design/Color",
+  title: "design tokens/Color",
   tags: ["autodocs"],
   argTypes: {},
   render: (args) => (

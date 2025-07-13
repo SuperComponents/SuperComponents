@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/library/skeleton";
  * Use to show a placeholder while content is loading.
  */
 const meta = {
-  title: "ui/Skeleton",
+  title: "shadcn library/Skeleton",
   component: Skeleton,
   tags: ["autodocs"],
   argTypes: {},
