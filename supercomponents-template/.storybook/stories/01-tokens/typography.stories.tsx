@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   Table,
   TableBody,
@@ -54,6 +55,7 @@ const meta: Meta<{
   property: Typography[];
 }> = {
   title: "design/Typography",
+  tags: ["autodocs"],
   argTypes: {},
   args: {
     children: "Typeface",

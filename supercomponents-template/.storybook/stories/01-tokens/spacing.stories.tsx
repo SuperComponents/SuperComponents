@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   Table,
   TableBody,
@@ -40,6 +41,7 @@ const meta: Meta<{
   scale: Spacing[];
 }> = {
   title: "design/Spacing",
+  tags: ["autodocs"],
   argTypes: {},
   render: (args) => (
     <Table>

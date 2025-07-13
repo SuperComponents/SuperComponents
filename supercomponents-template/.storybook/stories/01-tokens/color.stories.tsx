@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   Table,
   TableBody,
@@ -44,6 +45,7 @@ const meta: Meta<{
   swatch: Swatch[];
 }> = {
   title: "design/Color",
+  tags: ["autodocs"],
   argTypes: {},
   render: (args) => (
     <Table>

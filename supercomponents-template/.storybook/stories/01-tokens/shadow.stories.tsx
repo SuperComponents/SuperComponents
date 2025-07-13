@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   Table,
   TableBody,
@@ -37,6 +38,7 @@ const meta: Meta<{
   shadow: Shadow[];
 }> = {
   title: "design/Shadow",
+  tags: ["autodocs"],
   argTypes: {},
   render: (args) => (
     <Table>
