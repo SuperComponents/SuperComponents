@@ -9,10 +9,10 @@ import { ComponentSchema, ComponentAnalysisSchema } from "../schemas/component.j
 import { zodToJsonSchema } from "../utils/validation.js";
 import { getLogger } from "../utils/logger.js";
 
-// Input schema for the tool
+// Input schema for the tool - updated for SuperComponents
 const inputSchema = z.object({
-  paths: z.array(z.string()).optional().default(['.'])
-    .describe("Paths to search for components (default: current directory)"),
+  paths: z.array(z.string()).optional().default(['./.supercomponents/src/components/library'])
+    .describe("Paths to search for components (default: SuperComponents library directory)"),
   extensions: z.array(z.string()).optional().default(['.js', '.jsx', '.ts', '.tsx'])
     .describe("File extensions to analyze"),
   includePatterns: z.array(z.string()).optional().default([
@@ -35,7 +35,8 @@ const inputSchema = z.object({
   includeProps: z.boolean().optional().default(true)
     .describe("Whether to extract prop type information"),
   analyzePatterns: z.boolean().optional().default(true)
-    .describe("Whether to analyze naming patterns and conventions")
+    .describe("Whether to analyze naming patterns and conventions"),
+  random_string: z.string().optional().describe("Dummy parameter for MCP compatibility")
 });
 
 // Helper types
@@ -557,39 +558,51 @@ function analyzePatterns(components: ComponentInfo[]): string[] {
 }
 
 /**
- * Main handler for the analyzeComponents tool
+ * Main handler for the analyzeComponents tool - updated for SuperComponents
  */
 export const analyzeComponentsTool: Tool = {
   definition: {
-    name: "analyze.components",
-    description: "Analyze component structure and patterns in a codebase",
+    name: "analyze_components",
+    description: "Analyze component structure and patterns in a codebase, optimized for SuperComponents scaffolding with shadcn/ui library",
     inputSchema: zodToJsonSchema(inputSchema)
   },
   handler: async (args) => {
     const logger = getLogger();
     
     try {
+      // Handle dummy parameter case (when called via MCP with random_string)
+      const processedArgs = typeof args === 'object' && 'random_string' in args ? 
+        { ...args, random_string: undefined } : args;
+      
       // Parse and validate input
-      const input = inputSchema.parse(args);
-            getLogger().info(`🔍 Starting component analysis for paths: ${input.paths.join(', ')}`);
+      const input = inputSchema.parse(processedArgs || {});
+      
+      // Remove random_string from input if present
+      const { random_string, ...cleanInput } = input;
+      
+      getLogger().info(`🔍 Starting SuperComponents analysis for paths: ${cleanInput.paths.join(', ')}`);
 
       // Discover files
       const files = await discoverFiles(
-        input.paths,
-        input.includePatterns,
-        input.excludePatterns,
-        input.maxFiles
+        cleanInput.paths,
+        cleanInput.includePatterns,
+        cleanInput.excludePatterns,
+        cleanInput.maxFiles
       );
       
       if (files.length === 0) {
-        getLogger().warn('⚠️  No files found matching the criteria');
+        getLogger().warn('⚠️  No component files found matching the criteria');
         return {
           content: [{
             type: "text",
             text: JSON.stringify({
               components: [],
               patterns: [],
-              recommendations: ['No component files found in the specified paths'],
+              recommendations: [
+                'No component files found in the specified paths',
+                'If using SuperComponents, ensure .supercomponents/src/components/library/ exists',
+                'Run initializeProject if you haven\'t set up SuperComponents yet'
+              ],
               errors: []
             }, null, 2)
           }]
@@ -624,19 +637,20 @@ export const analyzeComponentsTool: Tool = {
       
              // Analyze patterns if requested
        let patterns = undefined;
-       if (input.analyzePatterns) {
+       if (cleanInput.analyzePatterns) {
          patterns = analyzePatterns(allComponents);
        }
       
-      // Generate recommendations
+      // Generate recommendations for SuperComponents
       const recommendations: string[] = [];
       if (totalComponents === 0) {
         recommendations.push('No React components found. Check if paths contain React code.');
+        recommendations.push('For SuperComponents, ensure the library directory exists at .supercomponents/src/components/library/');
       } else {
-        recommendations.push(`Found ${totalComponents} components across ${files.length} files`);
+        recommendations.push(`✅ Found ${totalComponents} components across ${files.length} files`);
         
         if (allErrors.length > 0) {
-          recommendations.push(`${allErrors.length} files had parsing errors and were skipped`);
+          recommendations.push(`⚠️  ${allErrors.length} files had parsing errors and were skipped`);
         }
         
         const componentTypes = allComponents.reduce((acc, c) => {
@@ -647,7 +661,19 @@ export const analyzeComponentsTool: Tool = {
         const typesSummary = Object.entries(componentTypes)
           .map(([type, count]) => `${count} ${type}`)
           .join(', ');
-        recommendations.push(`Component types: ${typesSummary}`);
+        recommendations.push(`📊 Component types: ${typesSummary}`);
+        
+        // SuperComponents-specific recommendations
+        const componentNames = allComponents.map(c => c.name);
+        const hasButton = componentNames.some(name => name.toLowerCase().includes('button'));
+        const hasCard = componentNames.some(name => name.toLowerCase().includes('card'));
+        const hasInput = componentNames.some(name => name.toLowerCase().includes('input'));
+        
+        if (hasButton && hasCard && hasInput) {
+          recommendations.push('🎨 Rich component library detected - suitable for complex UI development');
+        }
+        
+        recommendations.push('🔄 Next steps: Use generateInstruction to create custom components based on these library components');
       }
       
       // Create result
@@ -655,13 +681,20 @@ export const analyzeComponentsTool: Tool = {
         components: schemaComponents,
         patterns,
         recommendations,
-        errors: allErrors
+        errors: allErrors,
+        supercomponents: {
+          totalComponents,
+          analyzedFiles: files.length,
+          libraryComponents: schemaComponents.filter(c => c.path.includes('/library/')),
+          customComponents: schemaComponents.filter(c => c.path.includes('/custom/')),
+          message: `📚 SuperComponents analysis complete!\n\n✅ Found ${totalComponents} components\n📁 Analyzed ${files.length} files\n\n🔄 Next steps:\n  - Use these components with generateInstruction\n  - Create custom components in src/components/custom/\n  - Generate stories in .storybook/stories/03-review/`
+        }
       };
       
       // Validate result against schema
       const validatedResult = ComponentAnalysisSchema.parse(result);
       
-      getLogger().info(`✅ Analysis complete: ${totalComponents} components found`);
+      getLogger().info(`✅ SuperComponents analysis complete: ${totalComponents} components found`);
       
       return {
         content: [{
@@ -672,7 +705,7 @@ export const analyzeComponentsTool: Tool = {
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      getLogger().error(`❌ Component analysis failed: ${errorMessage}`);
+      getLogger().error(`❌ SuperComponents analysis failed: ${errorMessage}`);
       
               return {
           content: [{
@@ -680,7 +713,14 @@ export const analyzeComponentsTool: Tool = {
             text: JSON.stringify({
               components: [],
               patterns: [],
-              recommendations: [],
+              recommendations: [
+                `❌ Analysis failed: ${errorMessage}`,
+                '🔧 Troubleshooting:',
+                '  - Ensure .supercomponents directory exists',
+                '  - Run initializeProject if not set up',
+                '  - Check component library path: .supercomponents/src/components/library/',
+                '  - Verify file permissions and accessibility'
+              ],
               errors: [errorMessage]
             }, null, 2)
         }]

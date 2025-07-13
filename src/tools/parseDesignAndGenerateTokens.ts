@@ -18,7 +18,140 @@ const COMPONENT_TYPES = [
   "Textarea", "Toast", "Toggle", "Toggle Group", "Tooltip", "Typography"
 ];
 
-// Updated schema with better descriptions for MCP and image support
+// shadcn/ui defaults extracted from token stories
+const SHADCN_DEFAULTS = {
+  spacing: {
+    "0": 0, "1": 4, "2": 8, "3": 12, "4": 16, "5": 20, "6": 24, "7": 28, "8": 32,
+    "9": 36, "10": 40, "11": 44, "12": 48, "14": 56, "16": 64, "20": 80,
+    "xs": 4, "sm": 8, "md": 16, "lg": 24, "xl": 32, "2xl": 48
+  },
+  radius: {
+    "xs": "calc(var(--radius) - 4px)",
+    "sm": "calc(var(--radius) - 2px)", 
+    "md": "var(--radius)",
+    "lg": "calc(var(--radius) + 2px)",
+    "xl": "calc(var(--radius) + 4px)",
+    "2xl": "calc(var(--radius) + 8px)"
+  },
+  colors: {
+    // Functional colors
+    background: "hsl(var(--background))",
+    foreground: "hsl(var(--foreground))",
+    primary: "hsl(var(--primary))",
+    "primary-foreground": "hsl(var(--primary-foreground))",
+    secondary: "hsl(var(--secondary))",
+    "secondary-foreground": "hsl(var(--secondary-foreground))",
+    accent: "hsl(var(--accent))",
+    "accent-foreground": "hsl(var(--accent-foreground))",
+    muted: "hsl(var(--muted))",
+    "muted-foreground": "hsl(var(--muted-foreground))",
+    destructive: "hsl(var(--destructive))",
+    "destructive-foreground": "hsl(var(--destructive-foreground))",
+    // Component colors
+    border: "hsl(var(--border))",
+    input: "hsl(var(--input))",
+    ring: "hsl(var(--ring))",
+    card: "hsl(var(--card))",
+    "card-foreground": "hsl(var(--card-foreground))",
+    popover: "hsl(var(--popover))",
+    "popover-foreground": "hsl(var(--popover-foreground))",
+    // Chart colors
+    "chart-1": "hsl(var(--chart-1))",
+    "chart-2": "hsl(var(--chart-2))",
+    "chart-3": "hsl(var(--chart-3))",
+    "chart-4": "hsl(var(--chart-4))",
+    "chart-5": "hsl(var(--chart-5))",
+    // Sidebar colors
+    sidebar: "hsl(var(--sidebar))",
+    "sidebar-foreground": "hsl(var(--sidebar-foreground))",
+    "sidebar-primary": "hsl(var(--sidebar-primary))",
+    "sidebar-primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+    "sidebar-accent": "hsl(var(--sidebar-accent))",
+    "sidebar-accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+    "sidebar-border": "hsl(var(--sidebar-border))",
+    "sidebar-ring": "hsl(var(--sidebar-ring))"
+  },
+  typography: {
+    sizes: {
+      "xs": "0.75rem",      // 12px
+      "sm": "0.875rem",     // 14px
+      "base": "1rem",       // 16px
+      "lg": "1.125rem",     // 18px
+      "xl": "1.25rem",      // 20px
+      "2xl": "1.5rem",      // 24px
+      "3xl": "1.875rem",    // 30px
+      "4xl": "2.25rem",     // 36px
+      "5xl": "3rem",        // 48px
+      "6xl": "3.75rem"      // 60px
+    },
+    weights: {
+      "thin": "100",
+      "extralight": "200", 
+      "light": "300",
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700",
+      "extrabold": "800",
+      "black": "900"
+    },
+    lineHeights: {
+      "xs": "1rem",
+      "sm": "1.25rem",
+      "base": "1.5rem", 
+      "lg": "1.75rem",
+      "xl": "1.75rem",
+      "2xl": "2rem",
+      "3xl": "2.25rem",
+      "4xl": "2.5rem",
+      "5xl": "1",
+      "6xl": "1"
+    },
+    letterSpacing: {
+      "tighter": "-0.05em",
+      "tight": "-0.025em",
+      "normal": "0em",
+      "wide": "0.025em",
+      "wider": "0.05em",
+      "widest": "0.1em"
+    }
+  },
+  elevation: {
+    "2xs": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    "xs": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+    "sm": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+    "md": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+    "lg": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+    "xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+    "2xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)"
+  },
+  opacity: {
+    "0": 0, "5": 0.05, "10": 0.1, "20": 0.2, "25": 0.25, "30": 0.3, "40": 0.4,
+    "50": 0.5, "60": 0.6, "70": 0.7, "75": 0.75, "80": 0.8, "90": 0.9, "95": 0.95, "100": 1
+  },
+  durations: {
+    "75": "75ms",
+    "100": "100ms", 
+    "150": "150ms",
+    "200": "200ms",
+    "300": "300ms",
+    "500": "500ms",
+    "700": "700ms",
+    "1000": "1000ms"
+  },
+  zIndex: {
+    "0": 0, "10": 10, "20": 20, "30": 30, "40": 40, "50": 50,
+    "auto": "auto"
+  },
+  easing: {
+    "linear": "linear",
+    "in": "cubic-bezier(0.4, 0, 1, 1)",
+    "out": "cubic-bezier(0, 0, 0.2, 1)",
+    "in-out": "cubic-bezier(0.4, 0, 0.2, 1)"
+  }
+};
+
+// Updated schema with proper default path for SuperComponents
 const inputSchema = z.object({
   input: z.union([
     z.string().describe("Design description, markdown content, file path, or text input to analyze. Can be a description like 'Create a modern dashboard with blue primary colors' or a file path like './designs/mockup.md'"),
@@ -30,12 +163,11 @@ const inputSchema = z.object({
   ]).describe("Design input - either text/description or image data for analysis"),
   outputDir: z.string().optional().default("./.supercomponents").describe("Directory to save generated files (defaults to ./.supercomponents)"),
   includeCSS: z.boolean().optional().default(true).describe("Generate CSS variables file"),
-  includeTailwind: z.boolean().optional().default(true).describe("Generate Tailwind config file"),
 });
 
-const DESIGN_ANALYSIS_PROMPT = `# Parse Design Prompt
+const DESIGN_ANALYSIS_PROMPT = `# Intelligent Design Token Extraction
 
-You are a senior UI/UX designer analyzing a design to create a structured design system specification.
+You are a senior UI/UX designer analyzing a design to extract design tokens and create a structured design system specification.
 
 ## Task
 Analyze the provided design input and generate a JSON specification with the following structure:
@@ -59,117 +191,82 @@ Identify any UI components from this list that appear in the design:
 ${COMPONENT_TYPES.join(", ")}
 
 ### 3. Tokens
-Extract design tokens matching this EXACT structure:
+Extract design tokens by **carefully analyzing the design input**. Follow these guidelines:
 
+#### **Token Categories to Extract:**
+
+**COLORS** - Extract actual colors mentioned/described in the design:
+- Look for specific color names, hex codes, or descriptions
+- If colors are mentioned, create a primary palette with 50-900 scale
+- If no specific colors mentioned, return empty object {}
+
+**SPACING** - Extract spatial relationships:
+- Look for specific measurements, padding, margins, gaps
+- If spacing is mentioned, create appropriate scale
+- If no spacing mentioned, return empty object {}
+
+**TYPOGRAPHY** - Extract text styling:
+- Look for font sizes, weights, line heights mentioned
+- If typography is mentioned, extract sizes, weights, lineHeights
+- If no typography mentioned, return empty object {}
+
+**RADIUS** - Extract border radius:
+- Look for rounded corners, border radius mentions
+- If radius is mentioned, create appropriate scale
+- If no radius mentioned, return empty object {}
+
+**ELEVATION** - Extract shadows/depth:
+- Look for shadow descriptions, depth mentions
+- If elevation is mentioned, create shadow scale
+- If no elevation mentioned, return empty object {}
+
+**OTHER TOKENS** - Only include if explicitly mentioned:
+- opacity: if transparency is mentioned
+- durations: if animation timing is mentioned
+- zIndex: if layering is mentioned
+- easing: if animation curves are mentioned
+
+#### **Important Rules:**
+1. **ONLY extract tokens that are explicitly mentioned or clearly derivable from the design input**
+2. **Return empty objects {} for token categories not mentioned in the design**
+3. **Do not invent or assume tokens that aren't in the design**
+4. **Focus on what's actually described in the input**
+
+#### **Example Token Extraction:**
+
+For input: "Create a modern dashboard with blue primary colors and rounded corners"
 \`\`\`json
 {
-  "spacing": {
-    "0": 0, "1": 4, "2": 8, "3": 12, "4": 16, "5": 24, "6": 32,
-    "xs": 4, "sm": 8, "md": 16, "lg": 24, "xl": 32, "2xl": 48
+  "colors": {
+    "primary": {
+      "50": "#eff6ff", "100": "#dbeafe", "200": "#bfdbfe",
+      "300": "#93c5fd", "400": "#60a5fa", "500": "#3b82f6",
+      "600": "#2563eb", "700": "#1d4ed8", "800": "#1e40af", "900": "#1e3a8a"
+    }
   },
   "radius": {
-    "none": 0, "sm": 2, "md": 4, "lg": 8, "full": 9999
-  },
-  "colors": {
-    "brand": "#hexcolor",
-    "brandAccent": "#hexcolor",
-    "surface": "#hexcolor",
-    "surfaceAlt": "#hexcolor",
-    "overlay": "rgba(0, 0, 0, 0.8)",
-    "success": "#hexcolor",
-    "danger": "#hexcolor",
-    "warning": "#hexcolor",
-    "textPrimary": "#hexcolor",
-    "textSecondary": "#hexcolor",
-    "textInverse": "#hexcolor",
-    "white": "#FFFFFF",
-    "primary": {
-      "50": "#hexcolor", "100": "#hexcolor", "200": "#hexcolor",
-      "300": "#hexcolor", "400": "#hexcolor", "500": "#hexcolor",
-      "600": "#hexcolor", "700": "#hexcolor", "800": "#hexcolor",
-      "900": "#hexcolor"
-    },
-    "neutral": {
-      "50": "#hexcolor", "100": "#hexcolor", "200": "#hexcolor",
-      "300": "#hexcolor", "400": "#hexcolor", "500": "#hexcolor",
-      "600": "#hexcolor", "700": "#hexcolor", "800": "#hexcolor",
-      "900": "#hexcolor"
-    }
-  },
-  "typography": {
-    "sizes": {
-      "xs": 12, "sm": 14, "md": 16, "lg": 18, "xl": 24, "2xl": 32
-    },
-    "weights": {
-      "regular": "400", "medium": "500", "bold": "700"
-    },
-    "lineHeights": {
-      "xs": 16, "sm": 20, "md": 24, "lg": 28, "xl": 32, "2xl": 40
-    }
-  },
-  "elevation": {
-    "none": {
-      "shadowColor": "transparent",
-      "shadowOffset": {"width": 0, "height": 0},
-      "shadowOpacity": 0,
-      "shadowRadius": 0,
-      "elevation": 0
-    },
-    "xs": {
-      "shadowColor": "#000",
-      "shadowOffset": {"width": 0, "height": 1},
-      "shadowOpacity": 0.05,
-      "shadowRadius": 1,
-      "elevation": 1
-    },
-    "sm": {
-      "shadowColor": "#000",
-      "shadowOffset": {"width": 0, "height": 2},
-      "shadowOpacity": 0.1,
-      "shadowRadius": 2,
-      "elevation": 2
-    },
-    "md": {
-      "shadowColor": "#000",
-      "shadowOffset": {"width": 0, "height": 4},
-      "shadowOpacity": 0.15,
-      "shadowRadius": 4,
-      "elevation": 4
-    },
-    "lg": {
-      "shadowColor": "#000",
-      "shadowOffset": {"width": 0, "height": 8},
-      "shadowOpacity": 0.2,
-      "shadowRadius": 8,
-      "elevation": 8
-    }
-  },
-  "opacity": {
-    "0": 0, "10": 0.1, "20": 0.2, "30": 0.3, "40": 0.4,
-    "50": 0.5, "60": 0.6, "70": 0.7, "80": 0.8, "90": 0.9, "100": 1
-  },
-  "durations": {
-    "fast": 150, "normal": 300, "slow": 500
-  },
-  "zIndex": {
-    "base": 0, "overlay": 100, "modal": 200, "toast": 300, "tooltip": 400
-  },
-  "easing": {
-    "default": "cubic-bezier(0.4, 0, 0.2, 1)"
+    "sm": "4px", "md": "8px", "lg": "12px"
   }
 }
 \`\`\`
 
-## Instructions
-1. Extract ACTUAL colors from the design - generate a cohesive palette based on what you see
-2. For primary/neutral scales, create a proper color ramp from the base colors
-3. Infer spacing from element relationships
-4. Detect typography from text elements
-5. Identify elevation from shadows/depth
-6. Keep ALL token keys even if using defaults
+For input: "Simple white background with black text"
+\`\`\`json
+{
+  "colors": {
+    "background": "#ffffff",
+    "foreground": "#000000"
+  }
+}
+\`\`\`
+
+For input: "Add a login form"
+\`\`\`json
+{}
+\`\`\`
 
 ## Output Format
-Return ONLY valid JSON with the exact structure shown above.`;
+Return ONLY valid JSON with the exact structure shown above. Extract tokens intelligently based on what's actually described in the design input.`;
 
 // Function to process input (can be text, file path, or image data)
 function processInput(input: string | { type: "image"; data: string; mimeType: string }): string | any[] {
@@ -217,40 +314,83 @@ function processInput(input: string | { type: "image"; data: string; mimeType: s
 // Interface for token structure
 interface TokenStructure {
   [key: string]: any;
-  spacing?: Record<string, number>;
-  colors?: Record<string, string | Record<string, string>>;
-  typography?: Record<string, Record<string, any>>;
-  radius?: Record<string, number>;
-  elevation?: Record<string, any>;
-  opacity?: Record<string, number>;
-  durations?: Record<string, number>;
-  zIndex?: Record<string, number>;
-  easing?: Record<string, string>;
 }
 
-// Convert nested token structure to flat DesignSchema token array
+// Merge extracted tokens with shadcn defaults
+function mergeWithDefaults(extractedTokens: TokenStructure): TokenStructure {
+  const merged: TokenStructure = {};
+  
+  // For each token category, use extracted tokens if available, otherwise use defaults
+  const tokenCategories = ['spacing', 'colors', 'typography', 'radius', 'elevation', 'opacity', 'durations', 'zIndex', 'easing'];
+  
+  tokenCategories.forEach(category => {
+    if (extractedTokens[category] && Object.keys(extractedTokens[category]).length > 0) {
+      // Use extracted tokens if they exist and are not empty
+      merged[category] = extractedTokens[category];
+    } else if (SHADCN_DEFAULTS[category as keyof typeof SHADCN_DEFAULTS]) {
+      // Use shadcn defaults as fallback
+      merged[category] = SHADCN_DEFAULTS[category as keyof typeof SHADCN_DEFAULTS];
+    }
+  });
+  
+  return merged;
+}
+
+// Convert nested token structure to flat DesignSchema token array with enhanced mapping
 function convertTokensToDesignSchema(tokens: TokenStructure): any[] {
   const designTokens: any[] = [];
   
-  // Convert spacing
+  // Convert spacing - normalize to pixel values and add semantic names
   if (tokens.spacing) {
     Object.entries(tokens.spacing).forEach(([key, value]) => {
+      // Convert rem to px if needed, ensure consistency
+      let pixelValue = value;
+      if (typeof value === "string" && value.includes("rem")) {
+        pixelValue = parseFloat(value) * 16; // Convert rem to px
+      }
+      
+      // Map common spacing patterns to semantic names
+      const semanticMapping: Record<string, string> = {
+        'form': 'form-padding',
+        'padding': 'form-padding', 
+        'gap': 'form-gap',
+        'element': 'form-elementSpacing',
+        'elementSpacing': 'form-elementSpacing'
+      };
+      
+      const semanticName = semanticMapping[key] || key;
+      
       designTokens.push({
-        name: `spacing-${key}`,
-        value: value,
+        name: `spacing-${semanticName}`,
+        value: pixelValue,
         type: "spacing",
         category: "spacing"
       });
     });
   }
   
-  // Convert colors
+  // Convert colors - ensure proper semantic naming for createTokenStories mapping
   if (tokens.colors) {
     Object.entries(tokens.colors).forEach(([key, value]) => {
       if (typeof value === "string") {
+        // Map colors to semantic names that align with CSS variables
+        const colorSemanticMapping: Record<string, string> = {
+          'brand': 'primary',
+          'brandAccent': 'primary',
+          'surface': 'background',
+          'surfaceAlt': 'background-card',
+          'textPrimary': 'text-primary',
+          'textSecondary': 'text-secondary',
+          'textInverse': 'text-muted',
+          'white': 'background',
+          'danger': 'destructive'
+        };
+        
+        const semanticName = colorSemanticMapping[key] || key;
+        
         designTokens.push({
-          name: `color-${key}`,
-          value: value,
+          name: `color-${semanticName}`,
+          value: value, // Keep original hex value, CSS generation will convert to HSL
           type: "color",
           category: "colors"
         });
@@ -268,14 +408,33 @@ function convertTokensToDesignSchema(tokens: TokenStructure): any[] {
     });
   }
   
-  // Convert typography
+  // Convert typography - ensure rem values and proper semantic naming
   if (tokens.typography) {
     Object.entries(tokens.typography).forEach(([category, values]) => {
       if (values && typeof values === "object") {
         Object.entries(values).forEach(([key, value]) => {
+          let processedValue = value;
+          
+          // Convert px to rem for font sizes
+          if (category === "sizes" && typeof value === "string" && value.includes("px")) {
+            const pxValue = parseFloat(value);
+            processedValue = `${pxValue / 16}rem`; // Convert px to rem
+          }
+          
+          // Ensure proper semantic naming for typography
+          const typographySemanticMapping: Record<string, string> = {
+            'heading': '2xl',
+            'subheading': 'base', 
+            'body': 'base',
+            'small': 'xs',
+            'regular': 'normal'
+          };
+          
+          const semanticName = typographySemanticMapping[key] || key;
+          
           designTokens.push({
-            name: `typography-${category}-${key}`,
-            value: value,
+            name: `typography-${category}-${semanticName}`,
+            value: processedValue,
             type: "typography",
             category: "typography"
           });
@@ -284,8 +443,42 @@ function convertTokensToDesignSchema(tokens: TokenStructure): any[] {
     });
   }
   
+  // Convert radius - ensure proper rem/px values
+  if (tokens.radius) {
+    Object.entries(tokens.radius).forEach(([key, value]) => {
+      let processedValue = value;
+      
+      // Convert to rem if it's a pixel value
+      if (typeof value === "number") {
+        processedValue = `${value / 16}rem`;
+      } else if (typeof value === "string" && value.includes("px")) {
+        const pxValue = parseFloat(value);
+        processedValue = `${pxValue / 16}rem`;
+      }
+      
+      designTokens.push({
+        name: `radius-${key}`,
+        value: processedValue,
+        type: "radius",
+        category: "radius"
+      });
+    });
+  }
+  
+  // Convert elevation - ensure proper shadow format
+  if (tokens.elevation) {
+    Object.entries(tokens.elevation).forEach(([key, value]) => {
+      designTokens.push({
+        name: `elevation-${key}`,
+        value: value,
+        type: "elevation",
+        category: "elevation"
+      });
+    });
+  }
+  
   // Convert other token types
-  const otherTokenTypes = ["radius", "elevation", "opacity", "durations", "zIndex", "easing"] as const;
+  const otherTokenTypes = ["opacity", "durations", "zIndex", "easing"] as const;
   otherTokenTypes.forEach(tokenType => {
     if (tokens[tokenType]) {
       Object.entries(tokens[tokenType]).forEach(([key, value]) => {
@@ -312,103 +505,13 @@ interface ShadowValue {
 }
 
 // Generate Tailwind config from tokens
-function generateTailwindConfig(tokens: TokenStructure): string {
-  const config = {
-    theme: {
-      extend: {
-        colors: {} as Record<string, any>,
-        spacing: {} as Record<string, string>,
-        borderRadius: {} as Record<string, string>,
-        fontSize: {} as Record<string, string>,
-        fontWeight: {} as Record<string, string>,
-        lineHeight: {} as Record<string, string>,
-        boxShadow: {} as Record<string, string>,
-        opacity: {} as Record<string, number>,
-        transitionDuration: {} as Record<string, string>,
-        zIndex: {} as Record<string, number>,
-        transitionTimingFunction: {} as Record<string, string>
-      }
-    }
-  };
-  
-  // Map spacing
-  if (tokens.spacing) {
-    Object.entries(tokens.spacing).forEach(([key, value]) => {
-      config.theme.extend.spacing[key] = `${value}px`;
-    });
-  }
-  
-  // Map colors
-  config.theme.extend.colors = tokens.colors || {};
-  
-  // Map border radius
-  if (tokens.radius) {
-    Object.entries(tokens.radius).forEach(([key, value]) => {
-      config.theme.extend.borderRadius[key] = value === 9999 ? "9999px" : `${value}px`;
-    });
-  }
-  
-  // Map typography
-  if (tokens.typography) {
-    if (tokens.typography.sizes) {
-      Object.entries(tokens.typography.sizes).forEach(([key, value]) => {
-        config.theme.extend.fontSize[key] = `${value}px`;
-      });
-    }
-    
-    if (tokens.typography.weights) {
-      config.theme.extend.fontWeight = tokens.typography.weights;
-    }
-    
-    if (tokens.typography.lineHeights) {
-      Object.entries(tokens.typography.lineHeights).forEach(([key, value]) => {
-        config.theme.extend.lineHeight[key] = `${value}px`;
-      });
-    }
-  }
-  
-  // Map elevation to box shadows
-  if (tokens.elevation) {
-    Object.entries(tokens.elevation).forEach(([key, value]) => {
-      if (typeof value === "object" && value !== null) {
-        const shadow = value as ShadowValue;
-        if (shadow.shadowColor === "transparent") {
-          config.theme.extend.boxShadow[key] = "none";
-        } else if (shadow.shadowColor) {
-          config.theme.extend.boxShadow[key] = 
-            `${shadow.shadowOffset?.width || 0}px ${shadow.shadowOffset?.height || 0}px ${shadow.shadowRadius || 0}px ${shadow.shadowColor}`;
-        }
-      }
-    });
-  }
-  
-  // Map other properties
-  if (tokens.opacity) {
-    config.theme.extend.opacity = tokens.opacity;
-  }
-  if (tokens.durations) {
-    Object.entries(tokens.durations).forEach(([key, value]) => {
-      config.theme.extend.transitionDuration[key] = `${value}ms`;
-    });
-  }
-  if (tokens.zIndex) {
-    config.theme.extend.zIndex = tokens.zIndex;
-  }
-  if (tokens.easing) {
-    config.theme.extend.transitionTimingFunction = tokens.easing;
-  }
-  
-  return `/** @type {import('tailwindcss').Config} */
-module.exports = ${JSON.stringify(config, null, 2)};`;
-}
-
 // Generate CSS variables in shadcn/ui format
 function generateCSSVariables(tokens: TokenStructure): string {
   let css = `:root {\n`;
   
   // Add core shadcn/ui color variables
   if (tokens.colors) {
-    // Map core colors to shadcn/ui naming convention
+    // Enhanced color mapping to shadcn/ui naming convention with createTokenStories alignment
     const colorMapping: Record<string, string> = {
       // Core semantic colors
       'surface': '--background',
@@ -417,20 +520,29 @@ function generateCSSVariables(tokens: TokenStructure): string {
       'textInverse': '--card-foreground',
       'brand': '--primary',
       'brandAccent': '--primary-foreground',
-      'textSecondary': '--secondary',
+      'textSecondary': '--muted-foreground',
       'muted': '--muted',
       'danger': '--destructive',
-      'white': '--popover',
+      'white': '--background',
       
-      // Fallback mappings for common names
-      'background': '--background',
+      // Enhanced mappings for design.json output alignment
       'primary': '--primary',
+      'background': '--background',
+      'background-page': '--background',
+      'background-card': '--card',
+      'background-input': '--input',
+      'text-primary': '--foreground',
+      'text-secondary': '--muted-foreground',
+      'text-muted': '--muted-foreground',
+      'border-input': '--border',
       'secondary': '--secondary',
       'accent': '--accent',
       'destructive': '--destructive',
       'border': '--border',
       'input': '--input',
-      'ring': '--ring'
+      'ring': '--ring',
+      'card': '--card',
+      'popover': '--popover'
     };
     
     // Generate base color variables
@@ -499,13 +611,15 @@ function generateCSSVariables(tokens: TokenStructure): string {
   ];
   
   alwaysInclude.forEach(varDef => {
-    css += `  ${varDef}\n`;
+    if (!css.includes(varDef)) {
+      css += `  ${varDef}\n`;
+    }
   });
   
   // Add border radius (shadcn/ui uses --radius as base)
   if (tokens.radius) {
-    const radiusBase = tokens.radius.md || tokens.radius.default || 6;
-    css += `  --radius: ${radiusBase}px;\n`;
+    const radiusBase = tokens.radius.md || tokens.radius.default || "0.5rem";
+    css += `  --radius: ${radiusBase};\n`;
   } else {
     css += `  --radius: 0.5rem;\n`;
   }
@@ -555,7 +669,7 @@ function generateDarkModeCSS(): string {
   return css;
 }
 
-// Update existing index.css file with new tokens
+// Update index.css file with new tokens
 function updateIndexCSS(tokens: TokenStructure, indexCssPath: string): void {
   let content = '';
   
@@ -564,7 +678,7 @@ function updateIndexCSS(tokens: TokenStructure, indexCssPath: string): void {
     content = readFileSync(indexCssPath, 'utf-8');
   } else {
     // Create basic structure if file doesn't exist
-    content = '@import "tailwindcss";\n@import "tw-animate-css";\n\n@custom-variant dark (&:is(.dark *));\n\n';
+    content = '@import "tailwindcss";\n@source "../.storybook/stories/**/*.{ts,tsx,js,jsx,mdx}";\n@import "tw-animate-css";\n\n@custom-variant dark (&:is(.dark *));\n\n';
   }
   
   // Generate new CSS variables
@@ -650,7 +764,7 @@ function getContrastColor(hex: string): string {
 export const parseDesignAndGenerateTokensTool: Tool = {
   definition: {
     name: "parseDesignAndGenerateTokens",
-    description: "Parse design input and generate both structured Design JSON and complete token system (Tailwind config + CSS variables). Use this tool to analyze design descriptions, mockups, or component files and generate design tokens.",
+    description: "Parse design input and generate both structured Design JSON and complete token system (Tailwind config + CSS variables). Intelligently extracts design tokens from input and uses shadcn/ui defaults as fallbacks.",
     inputSchema: zodToJsonSchema(inputSchema)
   },
   
@@ -674,7 +788,7 @@ export const parseDesignAndGenerateTokensTool: Tool = {
       
       // Validate and extract parameters
       const validatedInput = inputSchema.parse(parsedInput);
-      const { input: designInput, outputDir, includeCSS, includeTailwind } = validatedInput;
+      const { input: designInput, outputDir, includeCSS } = validatedInput;
       
       console.log("Design input to process:", designInput);
       
@@ -723,8 +837,11 @@ export const parseDesignAndGenerateTokensTool: Tool = {
         throw new Error(`Failed to parse LLM response as JSON: ${errorMessage}\n\nResponse: ${response.substring(0, 500)}...`);
       }
       
-      // Step 3: Convert to DesignSchema format
-      const designTokens = convertTokensToDesignSchema(analysisResult.tokens);
+      // Step 3: Merge extracted tokens with shadcn defaults
+      const finalTokens = mergeWithDefaults(analysisResult.tokens || {});
+      
+      // Step 4: Convert to DesignSchema format
+      const designTokens = convertTokensToDesignSchema(finalTokens);
       
       const designData = {
         id: `design-${Date.now()}`,
@@ -743,38 +860,49 @@ export const parseDesignAndGenerateTokensTool: Tool = {
         }
       };
       
-      // Step 4: Validate against DesignSchema
+      // Step 5: Validate against DesignSchema
       const validatedDesign = DesignSchema.parse(designData);
       
-      // Step 5: Generate output files
+      // Step 6: Generate output files
       const outputFiles: string[] = [];
       
-      // Write design.json
+      // Write design.json to the root of .supercomponents
       const designJsonPath = join(outputDir, "design.json");
       writeFileSync(designJsonPath, JSON.stringify(validatedDesign, null, 2));
       outputFiles.push(designJsonPath);
       
-      // Generate and write Tailwind config
-      if (includeTailwind) {
-        const tailwindConfig = generateTailwindConfig(analysisResult.tokens);
-        const tailwindPath = join(outputDir, "tailwind.config.js");
-        writeFileSync(tailwindPath, tailwindConfig);
-        outputFiles.push(tailwindPath);
-      }
+      // Note: Tailwind v4 doesn't use config files - all styling is done via CSS variables in index.css
       
-      // Update the main index.css file with new tokens instead of creating separate file
+      // Update the main index.css file with new tokens
       if (includeCSS) {
         const indexCssPath = join(outputDir, "src/index.css");
-        updateIndexCSS(analysisResult.tokens, indexCssPath);
+        updateIndexCSS(finalTokens, indexCssPath);
         outputFiles.push(indexCssPath);
+      }
+      
+      // Generate summary of what was extracted vs what used defaults
+      const extractedCategories = Object.keys(analysisResult.tokens || {}).filter(k => 
+        analysisResult.tokens[k] && Object.keys(analysisResult.tokens[k]).length > 0
+      );
+      const defaultCategories = Object.keys(finalTokens).filter(k => 
+        !extractedCategories.includes(k)
+      );
+      
+      let summary = `✅ Generated design system with ${designTokens.length} tokens`;
+      if (extractedCategories.length > 0) {
+        summary += `\n\n🎨 Extracted from design: ${extractedCategories.join(', ')}`;
+      }
+      if (defaultCategories.length > 0) {
+        summary += `\n📋 Used shadcn/ui defaults: ${defaultCategories.join(', ')}`;
       }
       
       return {
         success: true,
         design: validatedDesign,
-        tokens: analysisResult.tokens,
+        tokens: finalTokens,
+        extractedTokens: analysisResult.tokens,
         files: outputFiles,
-        message: `✅ Generated design system with ${designTokens.length} tokens and updated ${outputFiles.length} files:\n${outputFiles.map(f => `  - ${f}`).join('\n')}\n\n💡 Your Storybook should now display the color and shadow tokens correctly!\n\n🔄 Next steps:\n  - Restart Storybook to see the updated design tokens\n  - Use 'createTokenStories' to generate additional token stories\n  - Use 'analyzeComponents' to analyze existing components`
+        message: `${summary}\n\nUpdated ${outputFiles.length} files:\n${outputFiles.map(f => `  - ${f}`).join('\n')}\n\n💡 Your Storybook should now display the design tokens correctly!\n\n🔄 Next steps:\n  - Restart Storybook to see the updated design tokens\n  - Use 'createTokenStories' to generate additional token stories\n  - Use 'analyzeComponents' to analyze existing components\n  - Use 'generateInstruction' to create implementation guidance`
       };
       
     } catch (error) {
