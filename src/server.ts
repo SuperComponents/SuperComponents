@@ -37,7 +37,6 @@ async function createServer(): Promise<Server> {
     const { parseDesignAndGenerateTokensTool } = await smartRequire('./tools/parseDesignAndGenerateTokens.ts');
     const { initializeProjectTool } = await smartRequire('./tools/initializeProject.ts');
     const { createTokenStoriesTool } = await smartRequire('./tools/createTokenStories.ts');
-    const { createTokenStoriesFixedTool } = await smartRequire('./tools/createTokenStoriesFixed.ts');
     const { analyzeComponentsTool } = await smartRequire('./tools/analyzeComponents.ts');
     const { generateInstructionTool } = await smartRequire('./tools/generateInstruction.ts');
     const { testTool } = await smartRequire('./tools/testTool.ts');
@@ -47,7 +46,6 @@ async function createServer(): Promise<Server> {
       parseDesignAndGenerateTokensTool,
       initializeProjectTool,
       createTokenStoriesTool,
-      createTokenStoriesFixedTool,
       analyzeComponentsTool,
       generateInstructionTool,
       testTool,
@@ -114,11 +112,6 @@ async function createServer(): Promise<Server> {
           inputSchema: tools.createTokenStoriesTool.definition.inputSchema,
         },
         {
-          name: tools.createTokenStoriesFixedTool.definition.name,
-          description: tools.createTokenStoriesFixedTool.definition.description,
-          inputSchema: tools.createTokenStoriesFixedTool.definition.inputSchema,
-        },
-        {
           name: tools.analyzeComponentsTool.definition.name,
           description: tools.analyzeComponentsTool.definition.description,
           inputSchema: tools.analyzeComponentsTool.definition.inputSchema,
@@ -175,10 +168,6 @@ async function createServer(): Promise<Server> {
         
         case tools.createTokenStoriesTool.definition.name:
           result = await tools.createTokenStoriesTool.handler(args);
-          break;
-        
-        case tools.createTokenStoriesFixedTool.definition.name:
-          result = await tools.createTokenStoriesFixedTool.handler(args);
           break;
         
         case tools.analyzeComponentsTool.definition.name:
