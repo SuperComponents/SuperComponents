@@ -39,7 +39,6 @@ async function createServer(): Promise<Server> {
     const { createTokenStoriesTool } = await smartRequire('./tools/createTokenStories.ts');
     const { analyzeComponentsTool } = await smartRequire('./tools/analyzeComponents.ts');
     const { generateInstructionTool } = await smartRequire('./tools/generateInstruction.ts');
-    const { testTool } = await smartRequire('./tools/testTool.ts');
     const { devCacheManagerTool } = await smartRequire('./tools/devCacheManager.ts');
     
     return {
@@ -48,7 +47,6 @@ async function createServer(): Promise<Server> {
       createTokenStoriesTool,
       analyzeComponentsTool,
       generateInstructionTool,
-      testTool,
       devCacheManagerTool,
     };
   };
@@ -122,11 +120,6 @@ async function createServer(): Promise<Server> {
           inputSchema: tools.generateInstructionTool.definition.inputSchema,
         },
         {
-          name: tools.testTool.definition.name,
-          description: tools.testTool.definition.description,
-          inputSchema: tools.testTool.definition.inputSchema,
-        },
-        {
           name: tools.devCacheManagerTool.definition.name,
           description: tools.devCacheManagerTool.definition.description,
           inputSchema: tools.devCacheManagerTool.definition.inputSchema,
@@ -176,10 +169,6 @@ async function createServer(): Promise<Server> {
         
         case tools.generateInstructionTool.definition.name:
           result = await tools.generateInstructionTool.handler(args);
-          break;
-        
-        case tools.testTool.definition.name:
-          result = await tools.testTool.handler(args);
           break;
         
         case tools.devCacheManagerTool.definition.name:

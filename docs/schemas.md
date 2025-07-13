@@ -469,10 +469,10 @@ function validateComponentForm(formData: FormData) {
 ```typescript
 import { DesignSchema } from '../src/schemas';
 
-export const parseDesignTool = {
+export const parseDesignAndGenerateTokensTool = {
   definition: {
-    name: 'parseDesign',
-    description: 'Parse design from markdown',
+    name: 'parseDesignAndGenerateTokens',
+    description: 'Parse design from markdown and generate tokens',
     inputSchema: {
       type: 'object',
       properties: {

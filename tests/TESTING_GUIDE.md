@@ -59,7 +59,7 @@ The server should start and display:
   "mcpServers": {
     "supercomponents": {
       "command": "node",
-      "args": ["build/server.js"],
+      "args": ["dist/server.js"],
       "cwd": ".",
       "env": {
         "NODE_ENV": "production",
@@ -78,7 +78,7 @@ The server should start and display:
 
 Use the following connection details:
 - **Transport**: stdio
-- **Command**: `node build/server.js`
+- **Command**: `node dist/server.js`
 - **Working Directory**: Project root
 - **Environment Variables**: API keys as shown above
 
